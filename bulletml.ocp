@@ -1,4 +1,4 @@
-begin program "bulletml_test"
-      files = [ "bulletml.ml" "parser.ml"]
-      requires = ["xml-light"]
+begin program "bulletml_tests"
+      files = [ "bulletml.ml" "parser.ml" "tests.ml"]
+      requires = ["alcotest" "xml-light"]
 end

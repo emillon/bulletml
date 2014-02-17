@@ -15,6 +15,6 @@ let read_stdin () =
     end;
     Buffer.contents b
 
-let _ =
+let parse_stdin () =
     let s = read_stdin () in
     parse_string s

@@ -2,3 +2,5 @@
 *.cmi
 ocp-build.*
 _obuild
+_tests
+oUnit-anon.cache
