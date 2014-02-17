@@ -1,0 +1,4 @@
+*.cmo
+*.cmi
+ocp-build.*
+_obuild
