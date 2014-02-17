@@ -1,0 +1,4 @@
+begin program "bulletml_test"
+      files = [ "bulletml.ml" "parser.ml"]
+      requires = ["xml-light"]
+end
