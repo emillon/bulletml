@@ -1,0 +1,10 @@
+<bullet label="downAccel">
+<direction>270</direction>
+<speed>2</speed>
+<action>
+<accel>
+ <vertical>3</vertical>
+ <term>120</term>
+</accel>
+</action>
+</bullet>
