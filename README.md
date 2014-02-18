@@ -1,4 +1,4 @@
-λx. colored nonsense
+λx. colored nonsense [![Build Status](https://secure.travis-ci.org/emillon/bulletml.png)](http://travis-ci.org/emillon/bulletml)
 ====================
 
 Well, more of a parser + printer.
