@@ -26,7 +26,14 @@ let rec parse_fire nodes :fire =
                     assert (!dir = None);
                     dir := Some (DirAbs s)
                 end
-        | _ -> assert false
+        | Xml.Element ("speed", [], [Xml.PCData s]) ->
+                begin
+                    assert (!speed = None);
+                    let sp = int_of_string s in
+                    speed := Some sp
+                end
+        | Xml.Element (s, _, _) -> failwith ("parse_fire: " ^ s)
+        | Xml.PCData _ -> failwith "parse_fire: PCData"
     ) nodes;
     let bul = match !bullet with
       | Some b -> b

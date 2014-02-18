@@ -12,6 +12,8 @@ let testspecs =
         ; Fire (None, Some (DirAbs "330+$rand*25"), None, Indirect "downAccel")
         ; Vanish
         ])
+    ; ("03.xml", `Fire
+        (None, Some (DirAbs "270"), Some 2, Indirect "rocket"))
     ]
 
 let tests () =
@@ -31,6 +33,13 @@ let tests () =
                                 let a = Parser.parse_action ns in
                                 OUnit.assert_equal a aspec
                         | _ -> OUnit.assert_failure "not an action"
+                      end
+              | `Fire fspec ->
+                      begin match x with
+                        | Xml.Element ("fire", [], ns) ->
+                                let f = Parser.parse_fire ns in
+                                OUnit.assert_equal f fspec
+                        | _ -> OUnit.assert_failure "not a fire"
                       end
         in
         (n, `Quick, run_test)
