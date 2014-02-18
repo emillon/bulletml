@@ -25,5 +25,5 @@ opam init
 eval `opam config env`
 opam install ocp-build
 opam install ${OPAM_DEPENDS}
-make
+ocp-build -init
 make check
