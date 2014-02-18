@@ -1,21 +1,22 @@
 let testspecs =
   let open Bulletml in
+  let bulletDefault = Bullet (None, None, []) in
   [ ("01.xml", `Bullet (
-       Bullet (Some (DirDefault (Num 270.)), Some (Num 2.), [
+       Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
            Direct [Accel (None, Some (Num 3.), Num 120.)]
          ]
          )))
   ; ("02.xml", `Action
-       [ ChangeSpeed (Num 0., Num 60.)
+       [ ChangeSpeed (SpdAbs (Num 0.), Num 60.)
        ; Wait (Num 60.)
-       ; Fire (None, None, None, Direct (Bullet (None, None, [])))
+       ; Fire (None, None, None, Direct bulletDefault)
        ; Fire (None, Some (DirAbs (
            Op (Add, Num 330., Op (Mul, Rand, Num 25.))
          )), None, Indirect "downAccel")
        ; Vanish
        ])
   ; ("03.xml", `Fire
-       (None, Some (DirAbs (Num 270.)), Some (Num 2.), Indirect "rocket"))
+       (None, Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect "rocket"))
   ; ("04.xml", `Action
        [ Repeat (Num 100., Direct [
             Fire (None, Some (DirAbs (
@@ -24,6 +25,61 @@ let testspecs =
           ; Wait (Num 6.)
           ])
        ])
+  ; ("[Dodonpachi]_hibachi.xml"), `Bulletml (
+      BulletML (NoDir,
+                [ EAction
+                    [ Fire
+                        ( None
+                        , Some (DirAim (Op (Add, (Num (-50.)), Op (Mul, Rand, Num 20.))))
+                        , Some (SpdAbs (Op (Add, Num 1., Rank)))
+                        , Direct bulletDefault
+                        )
+                    ; Repeat
+                        ( Op (Add, Num 15., Op (Mul, Op (Mul, Num 16., Rank), Rank))
+                        , Direct
+                            [ Fire
+                                ( None
+                                , Some (DirSeq (Op (Sub, Num 24., Op (Mul, Rank, Num 12.))))
+                                , Some (SpdSeq (Num 0.))
+                                , Direct bulletDefault
+                                )
+                            ])
+                    ]
+                ; EAction
+                    [ ChangeDirection (DirAbs (Num 90.), Num 1.)
+                    ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
+                    ; Repeat
+                        ( Num 25.
+                        , Direct
+                            [ ActionRef "allWay"
+                            ; Wait (Num 3.)
+                            ])
+                    ]
+
+                ; EAction
+                    [ ChangeDirection (DirAbs (Num (-90.)), Num 1.)
+                    ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
+                    ; Repeat
+                        ( Num 25.
+                        , Direct
+                            [ ActionRef "allWay"
+                            ; Wait (Num 3.)
+                            ])
+                    ]
+
+                ; EAction
+                    [ Repeat
+                        ( Num 2.
+                        , Direct
+                            [ ActionRef "right"
+                            ; ActionRef "left"
+                            ; ActionRef "left"
+                            ; ActionRef "right"
+                            ])
+                    ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                    ; Wait (Num 1.)
+                    ]
+                ]))
   ]
 
 let tests () =
@@ -51,6 +107,9 @@ let tests () =
             OUnit.assert_equal f fspec
           | _ -> OUnit.assert_failure "not a fire"
         end
+      | `Bulletml bspec ->
+        let b = Parser.parse_xml x in
+        OUnit.assert_equal ~printer:Printer.print_bulletml b bspec
     in
     (n, `Quick, run_test)
   in

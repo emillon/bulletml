@@ -12,11 +12,15 @@ type expr =
   | Rand
   | Rank
 
-type speed = expr
+type speed =
+  | SpdAbs of expr
+  | SpdRel of expr
+  | SpdSeq of expr
 
 type direction =
   | DirAbs of expr
-  | DirDefault of expr
+  | DirSeq of expr
+  | DirAim of expr
 
 type 'a id = string
 
@@ -28,13 +32,13 @@ type subaction =
   | Repeat of expr * action ind
   | Fire of fire
   | FireRef
-  | ChangeSpeed of expr * expr
-  | ChangeDirection
+  | ChangeSpeed of speed * expr
+  | ChangeDirection of direction * expr
   | Accel of expr option * expr option * expr
   | Wait of expr
   | Vanish
   | Action
-  | ActionRef
+  | ActionRef of action id
 
 and action = subaction list
 
@@ -42,7 +46,10 @@ and bullet = Bullet of direction option * speed option * action ind list
 
 and fire = string option * direction option * speed option * bullet ind
 
-type hv = NoDir | Horizontal | Vertical
+type hv =
+  | NoDir
+  | Horizontal
+  | Vertical
 
 type elem =
   | EBullet of bullet
