@@ -14,7 +14,7 @@ type subaction =
   | FireRef
   | ChangeSpeed
   | ChangeDirection
-  | Accel
+  | Accel of int option * int option * int
   | Wait
   | Vanish
   | Action
@@ -22,7 +22,7 @@ type subaction =
 
 and action = subaction list
 
-and bullet = Bullet of string * direction option * action ind list
+and bullet = Bullet of direction option * speed option * action ind list
 
 and fire = string option * direction option * speed option * bullet ind
 
