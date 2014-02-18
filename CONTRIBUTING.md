@@ -1,0 +1,4 @@
+  - 2 spaces for indentation
+  - no hard tabs, ever
+  - `ocp-indent -i *.ml` should leave the code as is
+  - travis is always right
