@@ -11,7 +11,7 @@ type 'a ind =
   | Indirect of 'a id
 
 type subaction =
-  | Repeat
+  | Repeat of int * action ind
   | Fire of fire
   | FireRef
   | ChangeSpeed of int * int

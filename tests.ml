@@ -14,6 +14,12 @@ let testspecs =
        ])
   ; ("03.xml", `Fire
        (None, Some (DirAbs "270"), Some 2, Indirect "rocket"))
+  ; ("04.xml", `Action
+       [ Repeat (100, Direct [
+            Fire (None, Some (DirAbs "220+$rand*100"), None, Indirect "backBurst")
+          ; Wait 6
+          ])
+       ])
   ]
 
 let tests () =

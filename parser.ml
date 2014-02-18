@@ -65,9 +65,17 @@ and parse_action nodes :action =
         Fire f
       | Xml.Element ("vanish", [], []) ->
         Vanish
+      | Xml.Element ("repeat", [],
+                     [ Xml.Element ("times", _, [Xml.PCData s_times])
+                     ; Xml.Element ("action", [], ns)
+                     ]) ->
+        let times = int_of_string s_times in
+        let act = parse_action ns in
+        Repeat (times, Direct act)
       | Xml.Element (name, _, _) ->
         failwith ("parse_action: " ^ name)
-      | _ -> assert false
+      | Xml.PCData _ ->
+        failwith "parse_action: PCData"
     ) nodes
 
 and parse_bullet nodes :bullet =

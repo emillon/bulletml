@@ -1,0 +1,12 @@
+<action>
+<repeat>
+<times>100</times>
+<action>
+ <fire>
+  <direction type="absolute">220+$rand*100</direction>
+  <bulletRef label="backBurst"/>
+ </fire>
+ <wait>6</wait>
+</action>
+</repeat>
+</action>
