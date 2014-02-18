@@ -91,8 +91,12 @@ let tests () =
       print_endline str;
       match s with
       | `Bullet bspec ->
-        let b = Parser.parse_bullet x in
-        OUnit.assert_equal b bspec
+        begin match x with
+          | Xml.Element ("bullet", _, ns) ->
+            let b = Parser.parse_bullet ns in
+            OUnit.assert_equal b bspec
+          | _ -> OUnit.assert_failure "not a bullet"
+        end
       | `Action aspec ->
         begin match x with
           | Xml.Element ("action", [], ns) ->

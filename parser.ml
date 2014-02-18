@@ -177,10 +177,6 @@ let parse_xml = function
     BulletML (NoDir, elems)
   | _ -> assert false
 
-let parse_bullet = function
-  | Xml.Element ("bullet", _, ns) -> parse_bullet ns
-  | _ -> assert false
-
 let read_stdin () =
   let b = Buffer.create 0 in
   begin
