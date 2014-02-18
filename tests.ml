@@ -1,23 +1,27 @@
 let testspecs =
   let open Bulletml in
   [ ("01.xml", `Bullet (
-       Bullet (Some (DirDefault 270), Some 2, [
-           Direct [Accel (None, Some 3, 120)]
+       Bullet (Some (DirDefault (Num 270.)), Some (Num 2.), [
+           Direct [Accel (None, Some (Num 3.), Num 120.)]
          ]
          )))
   ; ("02.xml", `Action
-       [ ChangeSpeed (0, 60)
-       ; Wait 60
+       [ ChangeSpeed (Num 0., Num 60.)
+       ; Wait (Num 60.)
        ; Fire (None, None, None, Direct (Bullet (None, None, [])))
-       ; Fire (None, Some (DirAbs "330+$rand*25"), None, Indirect "downAccel")
+       ; Fire (None, Some (DirAbs (
+           Op (Add, Num 330., Op (Mul, Rand, Num 25.))
+         )), None, Indirect "downAccel")
        ; Vanish
        ])
   ; ("03.xml", `Fire
-       (None, Some (DirAbs "270"), Some 2, Indirect "rocket"))
+       (None, Some (DirAbs (Num 270.)), Some (Num 2.), Indirect "rocket"))
   ; ("04.xml", `Action
-       [ Repeat (100, Direct [
-            Fire (None, Some (DirAbs "220+$rand*100"), None, Indirect "backBurst")
-          ; Wait 6
+       [ Repeat (Num 100., Direct [
+            Fire (None, Some (DirAbs (
+                Op (Add, Num 220., Op (Mul, Rand, Num 100.))
+              )), None, Indirect "backBurst")
+          ; Wait (Num 6.)
           ])
        ])
   ]

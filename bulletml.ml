@@ -1,8 +1,22 @@
-type speed = int
+type op =
+  | Add
+  | Sub
+  | Mul
+  | Div
+  | Mod
+
+type expr =
+  | Num of float
+  | Op of op * expr * expr
+  | Param of int
+  | Rand
+  | Rank
+
+type speed = expr
 
 type direction =
-  | DirAbs of string
-  | DirDefault of int
+  | DirAbs of expr
+  | DirDefault of expr
 
 type 'a id = string
 
@@ -11,13 +25,13 @@ type 'a ind =
   | Indirect of 'a id
 
 type subaction =
-  | Repeat of int * action ind
+  | Repeat of expr * action ind
   | Fire of fire
   | FireRef
-  | ChangeSpeed of int * int
+  | ChangeSpeed of expr * expr
   | ChangeDirection
-  | Accel of int option * int option * int
-  | Wait of int
+  | Accel of expr option * expr option * expr
+  | Wait of expr
   | Vanish
   | Action
   | ActionRef

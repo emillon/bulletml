@@ -4,6 +4,37 @@ let parse_string s =
   let x = Xml.parse_string s in
   print_endline (Xml.to_string_fmt x)
 
+let parse_expr s :expr =
+  let open MParser in
+  let app op x y = Op (op, x, y) in
+  let infix sym f assoc = Infix (Tokens.skip_symbol sym >> return (app f), assoc) in
+  let operators:(('a, 's) operator list) list =
+    [ [ infix "*" Mul Assoc_left
+      ; infix "/" Div Assoc_left
+      ; infix "%" Mod Assoc_left
+      ]
+    ; [ infix "+" Add Assoc_left
+      ; infix "-" Sub Assoc_left
+      ]] in
+  let num =
+    Tokens.decimal >>= fun n ->
+    return (Num (float n))
+  in
+  let rand =
+    string "$rand" >>
+    return Rand
+  in
+  let rec term s =
+    choice [ Tokens.parens expr
+           ; num
+           ; rand
+           ] s
+  and expr s = MParser.expression operators term s in
+  match parse_string expr s () with
+  | Success x -> x
+  | Failed (msg, _) ->
+    failwith ("Parse error: " ^ msg)
+
 let rec parse_fire nodes :fire =
   let name = ref None in
   let dir = ref None in
@@ -24,12 +55,13 @@ let rec parse_fire nodes :fire =
       | Xml.Element ("direction", [("type", "absolute")], [Xml.PCData s]) ->
         begin
           assert (!dir = None);
-          dir := Some (DirAbs s)
+          let az = parse_expr s in
+          dir := Some (DirAbs az)
         end
       | Xml.Element ("speed", [], [Xml.PCData s]) ->
         begin
           assert (!speed = None);
-          let sp = int_of_string s in
+          let sp = parse_expr s in
           speed := Some sp
         end
       | Xml.Element (s, _, _) -> failwith ("parse_fire: " ^ s)
@@ -47,18 +79,18 @@ and parse_action nodes :action =
                      [ Xml.Element ("vertical", _, [Xml.PCData s_vert])
                      ; Xml.Element ("term", _,     [Xml.PCData s_term])
                      ]) ->
-        let vert = int_of_string s_vert in
-        let term = int_of_string s_term in
+        let vert = parse_expr s_vert in
+        let term = parse_expr s_term in
         Accel (None, Some vert, term)
       | Xml.Element ("changeSpeed", _,
                      [ Xml.Element ("speed", _, [Xml.PCData s_speed])
                      ; Xml.Element ("term",  _, [Xml.PCData s_term])
                      ]) ->
-        let speed = int_of_string s_speed in
-        let term = int_of_string s_term in
+        let speed = parse_expr s_speed in
+        let term = parse_expr s_term in
         ChangeSpeed (speed, term)
       | Xml.Element ("wait", _, [Xml.PCData s]) ->
-        let t = int_of_string s in
+        let t = parse_expr s in
         Wait t
       | Xml.Element ("fire", _, ns) ->
         let f = parse_fire ns in
@@ -69,7 +101,7 @@ and parse_action nodes :action =
                      [ Xml.Element ("times", _, [Xml.PCData s_times])
                      ; Xml.Element ("action", [], ns)
                      ]) ->
-        let times = int_of_string s_times in
+        let times = parse_expr s_times in
         let act = parse_action ns in
         Repeat (times, Direct act)
       | Xml.Element (name, _, _) ->
@@ -86,12 +118,12 @@ and parse_bullet nodes :bullet =
       | Xml.Element ("direction", [], [Xml.PCData s]) ->
         begin
           assert (!dir = None);
-          dir := Some (DirDefault (int_of_string s))
+          dir := Some (DirDefault (parse_expr s))
         end
       | Xml.Element ("speed", _, [Xml.PCData s]) ->
         begin
           assert (!speed = None);
-          speed := Some (int_of_string s)
+          speed := Some (parse_expr s)
         end
       | Xml.Element ("action", _, ns) ->
         let a = parse_action ns in
