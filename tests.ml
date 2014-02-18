@@ -1,10 +1,17 @@
 let testspecs =
     let open Bulletml in
     [ ("01.xml", `Bullet (
-        Bullet (Some 270, Some 2, [
+        Bullet (Some (DirDefault 270), Some 2, [
             Direct [Accel (None, Some 3, 120)]
             ]
         )))
+    ; ("02.xml", `Action
+        [ ChangeSpeed (0, 60)
+        ; Wait 60
+        ; Fire (None, None, None, Direct (Bullet (None, None, [])))
+        ; Fire (None, Some (DirAbs "330+$rand*25"), None, Indirect "downAccel")
+        ; Vanish
+        ])
     ]
 
 let tests () =
@@ -18,6 +25,13 @@ let tests () =
               | `Bullet bspec ->
                     let b = Parser.parse_bullet x in
                     OUnit.assert_equal b bspec
+              | `Action aspec ->
+                      begin match x with
+                        | Xml.Element ("action", [], ns) ->
+                                let a = Parser.parse_action ns in
+                                OUnit.assert_equal a aspec
+                        | _ -> OUnit.assert_failure "not an action"
+                      end
         in
         (n, `Quick, run_test)
     in

@@ -1,0 +1,13 @@
+<action>
+<changeSpeed>
+ <speed>0</speed>
+ <term>60</term>
+</changeSpeed>
+<wait>60</wait>
+<fire><bullet/></fire>
+<fire>
+ <direction type="absolute">330+$rand*25</direction>
+ <bulletRef label="downAccel"/>
+</fire>
+<vanish/>
+</action>

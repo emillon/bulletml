@@ -1,6 +1,8 @@
 type speed = int
 
-type direction = int
+type direction =
+  | DirAbs of string
+  | DirDefault of int
 
 type 'a id = string
 
@@ -12,10 +14,10 @@ type subaction =
   | Repeat
   | Fire of fire
   | FireRef
-  | ChangeSpeed
+  | ChangeSpeed of int * int
   | ChangeDirection
   | Accel of int option * int option * int
-  | Wait
+  | Wait of int
   | Vanish
   | Action
   | ActionRef
