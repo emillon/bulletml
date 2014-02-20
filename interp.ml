@@ -1,3 +1,5 @@
+open Bulletml
+
 let from_deg x =
   let pi = acos (-1.) in
   2. *. pi *. x /. 360.
@@ -8,14 +10,37 @@ let (+:) (xa, ya) (xb, yb) =
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
 
-type state = { frame : int }
+let rec eval e =
+  let ev_op = function
+    | Add -> ( +. )
+    | Mul -> ( *. )
+    | _ -> assert false
+  in
+  match e with
+  | Num f -> f
+  | Op (op, x, y) -> ev_op op (eval x) (eval y)
+  | Rand -> Random.float 1.0
+  | _ -> assert false
 
-let initial_state =
+let read_prog (BulletML (hv, ts)) =
+  List.map (function
+      | EAction (l, a) -> (l, a)
+      | _ -> assert false
+    ) ts
+
+type state =
+  { frame : int
+  ; action_env : (action id * action) list
+  }
+
+let initial_state ae =
   { frame = 0
+  ; action_env = ae
   }
 
 let next_state s =
   { frame = s.frame + 1
+  ; action_env = s.action_env
   }
 
 let draw_frame (window:OcsfmlGraphics.render_window) state =
@@ -44,8 +69,8 @@ let _ =
   let window = new render_window mode "BulletML" in
   window#set_framerate_limit 60;
   window#set_vertical_sync_enabled true;
-  let state = ref initial_state in
-  let nframe = ref 0 in
+  let aenv = read_prog bml in
+  let state = ref (initial_state aenv) in
   while true; do
     if window#is_open
     then begin
@@ -55,5 +80,4 @@ let _ =
       window#display;
       state := next_state s
     end;
-    incr nframe
   done
