@@ -25,5 +25,10 @@ opam init
 eval `opam config env`
 opam install ocp-build
 opam install ${OPAM_DEPENDS}
+
+opam install ocp-indent
+ocp-indent -i *.ml
+[ -z "$(git diff)" ]
+
 ocp-build -init
 make check
