@@ -22,6 +22,30 @@ let rec eval e =
   | Rand -> Random.float 1.0
   | _ -> assert false
 
+let eval_ind e = function
+  | Direct x -> x
+  | Indirect n -> List.assoc n e
+
+type continuation =
+  | KPass
+  | KSeq of subaction * continuation
+
+let kseq_of_act a =
+  List.fold_right (fun sa k -> KSeq (sa, k)) a KPass
+
+let rec replicate n l =
+  match n with
+  | _ when n < 0 -> assert false
+  | 0 -> []
+  | _ -> replicate (n-1) l @ l
+
+let build_cont aenv = function
+  | Repeat (e_n, ai) ->
+    let a = eval_ind aenv ai in
+    let f_n = eval e_n in
+    let n = int_of_float f_n in
+    kseq_of_act (replicate n a)
+
 let read_prog (BulletML (hv, ts)) =
   List.map (function
       | EAction (l, a) -> (l, a)
@@ -31,16 +55,23 @@ let read_prog (BulletML (hv, ts)) =
 type state =
   { frame : int
   ; action_env : (action id * action) list
+  ; cont : continuation
   }
 
-let initial_state ae =
+let initial_state ae k =
   { frame = 0
   ; action_env = ae
+  ; cont = k
   }
+
+let next_cont = function
+  | KSeq (sa, k) -> k
+  | KPass -> failwith "Nothing left to do"
 
 let next_state s =
   { frame = s.frame + 1
   ; action_env = s.action_env
+  ; cont = next_cont s.cont
   }
 
 let draw_frame (window:OcsfmlGraphics.render_window) state =
@@ -70,7 +101,9 @@ let _ =
   window#set_framerate_limit 60;
   window#set_vertical_sync_enabled true;
   let aenv = read_prog bml in
-  let state = ref (initial_state aenv) in
+  let act = List.assoc patname aenv in
+  let k = kseq_of_act act in
+  let state = ref (initial_state aenv k) in
   while true; do
     if window#is_open
     then begin
