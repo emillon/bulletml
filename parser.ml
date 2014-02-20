@@ -164,10 +164,11 @@ and parse_bullet nodes :bullet =
 
 let parse_elems nodes =
   List.map (function
-      | Xml.Element ("action", _, ns) ->
+      | Xml.Element ("action", [(("label"|"LABEL"), l)], ns) ->
         let act = parse_action ns in
-        EAction act
-      | Xml.Element (s, _, _) -> failwith ("parse_elems: " ^ s)
+        EAction (l, act)
+      | Xml.Element (s, attrs, _) ->
+          failwith ("parse_elems: " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
       | Xml.PCData _ -> failwith "parse_elems: PCData"
     ) nodes
 

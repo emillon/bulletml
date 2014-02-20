@@ -53,7 +53,7 @@ type hv =
 
 type elem =
   | EBullet of bullet
-  | EAction of action
+  | EAction of string * action
   | EFire of fire
 
 type t = BulletML of hv * elem list
