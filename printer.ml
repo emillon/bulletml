@@ -73,7 +73,7 @@ and print_fire (no, diro, spdo, bi) =
 
 let print_elem = function
   | EBullet b -> "EBullet " ^ print_bullet b
-  | EAction a -> "EAction " ^ print_action a
+  | EAction (l, a) -> "EAction (" ^ l ^ ", " ^ print_action a ^ ")"
   | EFire f   -> "EFire "   ^ print_fire f
 
 let print_bulletml (BulletML (hv, elems)) =

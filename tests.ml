@@ -27,7 +27,7 @@ let testspecs =
        ])
   ; ("[Dodonpachi]_hibachi.xml"), `Bulletml (
       BulletML (NoDir,
-                [ EAction
+                [ EAction ("allWay",
                     [ Fire
                         ( None
                         , Some (DirAim (Op (Add, (Num (-50.)), Op (Mul, Rand, Num 20.))))
@@ -44,8 +44,8 @@ let testspecs =
                                 , Direct bulletDefault
                                 )
                             ])
-                    ]
-                ; EAction
+                    ])
+                ; EAction ("right",
                     [ ChangeDirection (DirAbs (Num 90.), Num 1.)
                     ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
                     ; Repeat
@@ -54,9 +54,9 @@ let testspecs =
                             [ ActionRef "allWay"
                             ; Wait (Num 3.)
                             ])
-                    ]
+                    ])
 
-                ; EAction
+                ; EAction ("left",
                     [ ChangeDirection (DirAbs (Num (-90.)), Num 1.)
                     ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
                     ; Repeat
@@ -65,9 +65,9 @@ let testspecs =
                             [ ActionRef "allWay"
                             ; Wait (Num 3.)
                             ])
-                    ]
+                    ])
 
-                ; EAction
+                ; EAction ("top",
                     [ Repeat
                         ( Num 2.
                         , Direct
@@ -78,7 +78,7 @@ let testspecs =
                             ])
                     ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
                     ; Wait (Num 1.)
-                    ]
+                    ])
                 ]))
   ]
 
