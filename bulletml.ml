@@ -30,15 +30,13 @@ type 'a ind =
 
 type subaction =
   | Repeat of expr * action ind
-  | Fire of fire
-  | FireRef
+  | Fire of fire ind
   | ChangeSpeed of speed * expr
   | ChangeDirection of direction * expr
   | Accel of expr option * expr option * expr
   | Wait of expr
   | Vanish
-  | Action
-  | ActionRef of action id
+  | Action of action ind
 
 and action = subaction list
 
