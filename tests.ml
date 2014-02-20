@@ -28,57 +28,57 @@ let testspecs =
   ; ("[Dodonpachi]_hibachi.xml"), `Bulletml (
       BulletML (NoDir,
                 [ EAction ("allWay",
-                    [ Fire
-                        ( None
-                        , Some (DirAim (Op (Add, (Num (-50.)), Op (Mul, Rand, Num 20.))))
-                        , Some (SpdAbs (Op (Add, Num 1., Rank)))
-                        , Direct bulletDefault
-                        )
-                    ; Repeat
-                        ( Op (Add, Num 15., Op (Mul, Op (Mul, Num 16., Rank), Rank))
-                        , Direct
-                            [ Fire
-                                ( None
-                                , Some (DirSeq (Op (Sub, Num 24., Op (Mul, Rank, Num 12.))))
-                                , Some (SpdSeq (Num 0.))
-                                , Direct bulletDefault
-                                )
-                            ])
-                    ])
+                           [ Fire
+                               ( None
+                               , Some (DirAim (Op (Add, (Num (-50.)), Op (Mul, Rand, Num 20.))))
+                               , Some (SpdAbs (Op (Add, Num 1., Rank)))
+                               , Direct bulletDefault
+                               )
+                           ; Repeat
+                               ( Op (Add, Num 15., Op (Mul, Op (Mul, Num 16., Rank), Rank))
+                               , Direct
+                                   [ Fire
+                                       ( None
+                                       , Some (DirSeq (Op (Sub, Num 24., Op (Mul, Rank, Num 12.))))
+                                       , Some (SpdSeq (Num 0.))
+                                       , Direct bulletDefault
+                                       )
+                                   ])
+                           ])
                 ; EAction ("right",
-                    [ ChangeDirection (DirAbs (Num 90.), Num 1.)
-                    ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
-                    ; Repeat
-                        ( Num 25.
-                        , Direct
-                            [ ActionRef "allWay"
-                            ; Wait (Num 3.)
-                            ])
-                    ])
+                           [ ChangeDirection (DirAbs (Num 90.), Num 1.)
+                           ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
+                           ; Repeat
+                               ( Num 25.
+                               , Direct
+                                   [ ActionRef "allWay"
+                                   ; Wait (Num 3.)
+                                   ])
+                           ])
 
                 ; EAction ("left",
-                    [ ChangeDirection (DirAbs (Num (-90.)), Num 1.)
-                    ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
-                    ; Repeat
-                        ( Num 25.
-                        , Direct
-                            [ ActionRef "allWay"
-                            ; Wait (Num 3.)
-                            ])
-                    ])
+                           [ ChangeDirection (DirAbs (Num (-90.)), Num 1.)
+                           ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
+                           ; Repeat
+                               ( Num 25.
+                               , Direct
+                                   [ ActionRef "allWay"
+                                   ; Wait (Num 3.)
+                                   ])
+                           ])
 
                 ; EAction ("top",
-                    [ Repeat
-                        ( Num 2.
-                        , Direct
-                            [ ActionRef "right"
-                            ; ActionRef "left"
-                            ; ActionRef "left"
-                            ; ActionRef "right"
-                            ])
-                    ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
-                    ; Wait (Num 1.)
-                    ])
+                           [ Repeat
+                               ( Num 2.
+                               , Direct
+                                   [ ActionRef "right"
+                                   ; ActionRef "left"
+                                   ; ActionRef "left"
+                                   ; ActionRef "right"
+                                   ])
+                           ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                           ; Wait (Num 1.)
+                           ])
                 ]))
   ]
 

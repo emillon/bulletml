@@ -168,7 +168,7 @@ let parse_elems nodes =
         let act = parse_action ns in
         EAction (l, act)
       | Xml.Element (s, attrs, _) ->
-          failwith ("parse_elems: " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
+        failwith ("parse_elems: " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
       | Xml.PCData _ -> failwith "parse_elems: PCData"
     ) nodes
 
