@@ -28,10 +28,15 @@ let eval_ind e = function
 
 type continuation =
   | KPass
-  | KSeq of subaction * continuation
-
-let kseq_of_act a =
-  List.fold_right (fun sa k -> KSeq (sa, k)) a KPass
+  | KAct of action * continuation
+  | KRepeatE of expr * action * continuation
+  | KRepeatN of int  * action * continuation
+  | KWaitE of expr * continuation
+  | KWaitN of int  * continuation
+  | KFire of fire * continuation
+  | KSpdE of speed * expr * continuation
+  | KDirE of direction * expr * continuation
+  | KAccelE of expr option * expr option * expr * continuation
 
 let rec replicate n l =
   match n with
@@ -39,12 +44,17 @@ let rec replicate n l =
   | 0 -> []
   | _ -> replicate (n-1) l @ l
 
-let build_cont aenv = function
+let build_cont aenv fenv next = function
   | Repeat (e_n, ai) ->
     let a = eval_ind aenv ai in
-    let f_n = eval e_n in
-    let n = int_of_float f_n in
-    kseq_of_act (replicate n a)
+    KRepeatE (e_n, a, next)
+  | Wait e_n -> KWaitE (e_n, next)
+  | Fire fi ->
+    let f = eval_ind fenv fi in
+    KFire (f, next)
+  | ChangeSpeed (s, e) -> KSpdE (s, e, next)
+  | ChangeDirection (d, e) -> KDirE (d, e, next)
+  | Accel (h, v, e) -> KAccelE (h, v, e, next)
 
 let read_prog (BulletML (hv, ts)) =
   List.map (function
@@ -64,9 +74,22 @@ let initial_state ae k =
   ; cont = k
   }
 
-let next_cont = function
-  | KSeq (sa, k) -> k
+let rec next_cont = function
+  | KAct (sa::sas, k) -> next_cont (KAct (sas, k))
+  | KAct ([], k) -> next_cont k
   | KPass -> failwith "Nothing left to do"
+  | KRepeatE (n_e, a, k) ->
+    let n = int_of_float (eval n_e) in
+    next_cont (KRepeatN (n, a, k))
+  | KRepeatN (0, a, k) -> next_cont k
+  | KRepeatN (n, a, k) ->
+    next_cont (KAct (a, KRepeatN (n - 1, a, k)))
+  | KWaitE (n_e, k) ->
+    let n = int_of_float (eval n_e) in
+    next_cont (KWaitN (n, k))
+  | KWaitN (0, k) -> next_cont k
+  | KWaitN (1, k) -> k
+  | KWaitN (n, k) -> KWaitN (n-1, k)
 
 let next_state s =
   { frame = s.frame + 1
@@ -102,7 +125,7 @@ let _ =
   window#set_vertical_sync_enabled true;
   let aenv = read_prog bml in
   let act = List.assoc patname aenv in
-  let k = kseq_of_act act in
+  let k = build_cont [] [] KPass (Action (Direct act)) in
   let state = ref (initial_state aenv k) in
   while true; do
     if window#is_open
