@@ -45,8 +45,7 @@ let rec print_action a = print_list print_subaction a
 
 and print_subaction = function
   | Repeat (e, ai) -> "Repeat (" ^ print_expr e ^ ", " ^  print_ind print_action ai^ ")"
-  | Fire f -> "Fire " ^ print_fire f
-  | FireRef -> "FireRef"
+  | Fire fi -> "Fire " ^ print_ind print_fire fi
   | ChangeSpeed (sp, e) -> "ChangeSpeed (" ^ print_spd sp ^ ", " ^ print_expr e ^ ")"
   | ChangeDirection (dir, e) -> "ChangeDirection (" ^ print_dir dir ^ ", " ^ print_expr e ^ ")"
   | Accel (eo1, eo2, e) -> "Accel (" ^ print_option print_expr eo1
@@ -55,8 +54,7 @@ and print_subaction = function
                            ^ ")"
   | Wait e -> "Wait " ^ print_expr e
   | Vanish -> "Vanish"
-  | Action -> "Action"
-  | ActionRef s -> "*"^s
+  | Action ai -> "Action" ^ print_ind print_action ai
 
 and print_bullet (Bullet (diro, spdo, acts)) =
   "Bullet (" ^ print_option print_dir diro
