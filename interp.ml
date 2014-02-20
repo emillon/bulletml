@@ -8,6 +8,12 @@ let (+:) (xa, ya) (xb, yb) =
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
 
+let interp_elem = function
+  | _ -> assert false
+
+let interpret (Bulletml.BulletML (hv, es)) =
+  List.iter interp_elem es
+
 let draw_frame (window:OcsfmlGraphics.render_window) i =
   let open OcsfmlGraphics in
   let background = new rectangle_shape () in
