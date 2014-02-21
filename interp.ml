@@ -158,6 +158,7 @@ let rec next_prog st self :obj = match self.prog with
         speed = s
       ; dir = d
       ; prog = []
+      ; children = []
       } in
     { self with prog = k ; children = o::self.children }
   | OpSpdE (sp_e, t_e)::k ->
