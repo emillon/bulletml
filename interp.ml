@@ -111,7 +111,7 @@ let initial_state ae fe k =
 let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
-let rec next_prog st = function
+let rec next_prog st ops :(state * opcode list) = match ops with
   | [] -> failwith "Nothing left to do"
   | OpRepeatE (n_e, a)::k ->
     let n = int_of_float (eval n_e) in
@@ -120,8 +120,8 @@ let rec next_prog st = function
     let n = int_of_float (eval n_e) in
     next_prog st (OpWaitN n::k)
   | OpWaitN 0::k -> next_prog st k
-  | OpWaitN 1::k -> k
-  | OpWaitN n::k -> OpWaitN (n-1)::k
+  | OpWaitN 1::k -> (st, k)
+  | OpWaitN n::k -> (st, OpWaitN (n-1)::k)
   | OpFire _::k -> next_prog st k
   | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
@@ -139,9 +139,9 @@ let rec next_prog st = function
     next_prog st (OpSpdN m::k)
   | (OpSpdN m::k | OpDirN m::k) as ck ->
     if m.frame_end >= st.frame then
-      k
+      (st, k)
     else
-      ck
+      (st, ck)
   | OpDirE (d_e, t_e)::k ->
     let dir = match d_e with
       | DirAbs e -> eval e
@@ -171,17 +171,15 @@ let rec next_prog st = function
     next_prog st (OpAccelN m::k)
   | OpAccelN m::k as ck ->
     if m.frame_end >= st.frame then
-      k
+      (st, k)
     else
-      ck
+      (st, ck)
 
 let next_state s =
-  { frame = s.frame + 1
-  ; action_env = s.action_env
-  ; fire_env = s.fire_env
-  ; prog = next_prog s s.prog
-  ; speed = s.speed
-  ; dir = s.dir
+  let (next_s, next_p) = next_prog s s.prog in
+  { next_s with
+    frame = s.frame + 1
+  ; prog = next_p
   }
 
 let draw_frame window state =
