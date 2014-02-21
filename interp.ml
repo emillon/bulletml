@@ -132,7 +132,7 @@ let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
 let rec next_prog st self :obj = match self.prog with
-  | [] -> failwith "Nothing left to do"
+  | [] -> self
   | OpRepeatE (n_e, a)::k ->
     let n = int_of_float (eval n_e) in
     next_prog st { self with prog = repeat_prog st n a k }
@@ -159,7 +159,7 @@ let rec next_prog st self :obj = match self.prog with
       ; dir = d
       ; prog = []
       } in
-    next_prog st { self with prog = k ; children = o::self.children }
+    { self with prog = k ; children = o::self.children }
   | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
       | SpdAbs e -> eval e
