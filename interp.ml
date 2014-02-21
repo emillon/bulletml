@@ -123,19 +123,19 @@ let initial_state ae fe k =
 let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
-let rec next_prog st self ops :(state * opcode list) = match ops with
+let rec next_prog st self :obj = match self.prog with
   | [] -> failwith "Nothing left to do"
   | OpRepeatE (n_e, a)::k ->
     let n = int_of_float (eval n_e) in
-    next_prog st self (repeat_prog st n a k)
+    next_prog st { self with prog = repeat_prog st n a k }
   | OpWaitE n_e::k ->
     let n = int_of_float (eval n_e) in
-    next_prog st self (OpWaitN n::k)
-  | OpWaitN 0::k -> next_prog st self k
-  | OpWaitN 1::k -> (st, k)
-  | OpWaitN n::k -> (st, OpWaitN (n-1)::k)
+    next_prog st { self with prog = OpWaitN n::k }
+  | OpWaitN 0::k -> next_prog st { self with prog = k }
+  | OpWaitN 1::k -> { self with prog = k }
+  | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
   | OpFire f::k ->
-    next_prog st self k
+    next_prog st { self with prog = k }
   | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
       | SpdAbs e -> eval e
@@ -149,12 +149,15 @@ let rec next_prog st self ops :(state * opcode list) = match ops with
       ; val_end = sp
       }
     in
-    next_prog st self (OpSpdN m::k)
+    next_prog st { self with prog = OpSpdN m::k }
   | (OpSpdN m::k | OpDirN m::k) as ck ->
-    if m.frame_end >= st.frame then
-      (st, k)
-    else
-      (st, ck)
+    let nk =
+      if m.frame_end >= st.frame then
+        k
+      else
+        ck
+    in
+    { self with prog = nk }
   | OpDirE (d_e, t_e)::k ->
     let dir = match d_e with
       | DirAbs e -> eval e
@@ -168,8 +171,8 @@ let rec next_prog st self ops :(state * opcode list) = match ops with
       ; val_end = dir
       }
     in
-    next_prog st self (OpDirN m::k)
-  | OpVanish::k -> next_prog st self k
+    next_prog st { self with prog = OpDirN m::k }
+  | OpVanish::_ -> next_prog st { self with prog = [] }
   | OpAccelE (h_e, v_e, t_e)::k ->
     let _h = eval h_e in
     let _v = eval v_e in
@@ -181,20 +184,21 @@ let rec next_prog st self ops :(state * opcode list) = match ops with
       ; val_end = ()
       }
     in
-    next_prog st self (OpAccelN m::k)
+    next_prog st { self with prog = OpAccelN m::k }
   | OpAccelN m::k as ck ->
-    if m.frame_end >= st.frame then
-      (st, k)
-    else
-      (st, ck)
+    let nk =
+      if m.frame_end >= st.frame then
+        k
+      else
+        ck
+    in
+    { self with prog = nk }
 
 let next_state s =
-  let (next_s, next_p) = next_prog s s.main s.main.prog in
-  { next_s with
+  let next_m = next_prog s s.main in
+  { s with
     frame = s.frame + 1
-  ; main = { s.main with
-             prog = next_p
-           }
+  ; main = next_m
   }
 
 let rec collect_obj p =
