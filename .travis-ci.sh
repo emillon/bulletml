@@ -10,9 +10,10 @@ case "$OCAML_VERSION,$OPAM_VERSION" in
 esac
 
 echo "yes" | sudo add-apt-repository ppa:$ppa
-echo "yes" | sudo add-apt-repository ppa:sonkun/sfml-stable
+wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu saucy-getdeb games" >> /etc/apt/sources.list.d/getdeb.list'
 sudo apt-get update -qq
-sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam libsfml-dev libboost-dev
+sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam libsfml2-dev libboost-dev
 
 export OPAMYES=1
 export OPAMVERBOSE=1
