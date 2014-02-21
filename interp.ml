@@ -47,13 +47,18 @@ type opcode =
   | OpAccelN of unit linear_map
   | OpVanish
 
+type part =
+  { prog : opcode list
+  ; speed : float
+  ; dir : float
+  ; children : part list
+  }
+
 type state =
   { frame : int
   ; action_env : (action id * action) list
   ; fire_env : (fire id * fire) list
-  ; prog : opcode list
-  ; speed : float
-  ; dir : float
+  ; main : part
   }
 
 let rec replicate n x =
@@ -103,26 +108,30 @@ let initial_state ae fe k =
   { frame = 0
   ; action_env = ae
   ; fire_env = fe
-  ; prog = k
-  ; speed = 0.0
-  ; dir = 0.0
+  ; main =
+      { prog = k
+      ; speed = 0.0
+      ; dir = 0.0
+      ; children = []
+      }
   }
 
 let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
-let rec next_prog st ops :(state * opcode list) = match ops with
+let rec next_prog st self ops :(state * opcode list) = match ops with
   | [] -> failwith "Nothing left to do"
   | OpRepeatE (n_e, a)::k ->
     let n = int_of_float (eval n_e) in
-    next_prog st (repeat_prog st n a k)
+    next_prog st self (repeat_prog st n a k)
   | OpWaitE n_e::k ->
     let n = int_of_float (eval n_e) in
-    next_prog st (OpWaitN n::k)
-  | OpWaitN 0::k -> next_prog st k
+    next_prog st self (OpWaitN n::k)
+  | OpWaitN 0::k -> next_prog st self k
   | OpWaitN 1::k -> (st, k)
   | OpWaitN n::k -> (st, OpWaitN (n-1)::k)
-  | OpFire _::k -> next_prog st k
+  | OpFire f::k ->
+    next_prog st self k
   | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
       | SpdAbs e -> eval e
@@ -132,11 +141,11 @@ let rec next_prog st ops :(state * opcode list) = match ops with
     let m =
       { frame_start = st.frame
       ; frame_end = st.frame + t
-      ; val_start = st.speed
+      ; val_start = self.speed
       ; val_end = sp
       }
     in
-    next_prog st (OpSpdN m::k)
+    next_prog st self (OpSpdN m::k)
   | (OpSpdN m::k | OpDirN m::k) as ck ->
     if m.frame_end >= st.frame then
       (st, k)
@@ -151,12 +160,12 @@ let rec next_prog st ops :(state * opcode list) = match ops with
     let m =
       { frame_start = st.frame
       ; frame_end = st.frame + t
-      ; val_start = st.dir
+      ; val_start = self.dir
       ; val_end = dir
       }
     in
-    next_prog st (OpDirN m::k)
-  | OpVanish::k -> next_prog st k
+    next_prog st self (OpDirN m::k)
+  | OpVanish::k -> next_prog st self k
   | OpAccelE (h_e, v_e, t_e)::k ->
     let _h = eval h_e in
     let _v = eval v_e in
@@ -168,7 +177,7 @@ let rec next_prog st ops :(state * opcode list) = match ops with
       ; val_end = ()
       }
     in
-    next_prog st (OpAccelN m::k)
+    next_prog st self (OpAccelN m::k)
   | OpAccelN m::k as ck ->
     if m.frame_end >= st.frame then
       (st, k)
@@ -176,10 +185,12 @@ let rec next_prog st ops :(state * opcode list) = match ops with
       (st, ck)
 
 let next_state s =
-  let (next_s, next_p) = next_prog s s.prog in
+  let (next_s, next_p) = next_prog s s.main s.main.prog in
   { next_s with
     frame = s.frame + 1
-  ; prog = next_p
+  ; main = { s.main with
+             prog = next_p
+           }
   }
 
 let draw_frame window state =
