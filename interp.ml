@@ -20,7 +20,8 @@ let rec eval e =
   | Num f -> f
   | Op (op, x, y) -> ev_op op (eval x) (eval y)
   | Rand -> Random.float 1.0
-  | _ -> assert false
+  | Param _ -> failwith "Param"
+  | Rank -> 0.5
 
 let eval_ind e = function
   | Direct x -> x
@@ -214,6 +215,8 @@ let _ =
   let state = ref (initial_state aenv fenv k) in
   while true; do
     let s = !state in
+    Printf.printf "#%d\n" s.frame;
+    flush stdout;
     clear surf;
     draw_frame surf s;
     Sdltimer.delay (1000 / 60);
