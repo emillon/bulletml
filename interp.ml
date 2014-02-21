@@ -30,19 +30,19 @@ type continuation =
   | KPass
   | KAct of action * continuation
   | KRepeatE of expr * action * continuation
-  | KRepeatN of int  * action * continuation
   | KWaitE of expr * continuation
   | KWaitN of int  * continuation
   | KFire of fire * continuation
   | KSpdE of speed * expr * continuation
   | KDirE of direction * expr * continuation
   | KAccelE of expr option * expr option * expr * continuation
+  | KVanish of continuation
 
-let rec replicate n l =
+let rec replicate n x =
   match n with
   | _ when n < 0 -> assert false
   | 0 -> []
-  | _ -> replicate (n-1) l @ l
+  | _ -> x ::  replicate (n-1) x
 
 let build_cont aenv fenv next = function
   | Repeat (e_n, ai) ->
@@ -55,6 +55,10 @@ let build_cont aenv fenv next = function
   | ChangeSpeed (s, e) -> KSpdE (s, e, next)
   | ChangeDirection (d, e) -> KDirE (d, e, next)
   | Accel (h, v, e) -> KAccelE (h, v, e, next)
+  | Vanish -> KVanish next
+  | Action ai ->
+    let a = eval_ind aenv ai in
+    KAct (a, next)
 
 let read_prog (BulletML (hv, ts)) =
   List.map (function
@@ -74,16 +78,16 @@ let initial_state ae k =
   ; cont = k
   }
 
+let repeat_cont n (act:action) next =
+  List.fold_right (fun a k -> KAct (a, k)) (replicate n act) next
+
 let rec next_cont = function
   | KAct (sa::sas, k) -> next_cont (KAct (sas, k))
   | KAct ([], k) -> next_cont k
   | KPass -> failwith "Nothing left to do"
   | KRepeatE (n_e, a, k) ->
     let n = int_of_float (eval n_e) in
-    next_cont (KRepeatN (n, a, k))
-  | KRepeatN (0, a, k) -> next_cont k
-  | KRepeatN (n, a, k) ->
-    next_cont (KAct (a, KRepeatN (n - 1, a, k)))
+    next_cont (repeat_cont n a k)
   | KWaitE (n_e, k) ->
     let n = int_of_float (eval n_e) in
     next_cont (KWaitN (n, k))
@@ -129,6 +133,6 @@ let _ =
     clear surf;
     draw_frame surf s;
     Sdltimer.delay (1000 / 60);
-    state := next_state s
+    state := next_state s;
   done;
   Sdl.quit ()
