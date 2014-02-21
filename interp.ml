@@ -150,6 +150,7 @@ let rec next_cont st = function
       }
     in
     next_cont st (KDirN (m, k))
+  | KVanish k -> next_cont st k
 
 let next_state s =
   { frame = s.frame + 1
