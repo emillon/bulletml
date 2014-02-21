@@ -39,6 +39,7 @@ type state =
   ; fire_env : (fire id * fire) list
   ; cont : continuation
   ; speed : float
+  ; dir : float
   }
 
 and continuation =
@@ -50,6 +51,7 @@ and continuation =
   | KSpdE of speed * expr * continuation
   | KSpdN of linear_map * continuation
   | KDirE of direction * expr * continuation
+  | KDirN of linear_map * continuation
   | KAccelE of expr option * expr option * expr * continuation
   | KVanish of continuation
 
@@ -97,6 +99,7 @@ let initial_state ae fe k =
   ; fire_env = fe
   ; cont = k
   ; speed = 0.0
+  ; dir = 0.0
   }
 
 let repeat_cont st n act next =
@@ -128,11 +131,25 @@ let rec next_cont st = function
       }
     in
     next_cont st (KSpdN (m, k))
-  | KSpdN (m, k) as ck ->
+  | (KSpdN (m, k) | KDirN (m, k)) as ck ->
     if m.frame_end >= st.frame then
       k
     else
       ck
+  | KDirE (d_e, t_e, k) ->
+    let dir = match d_e with
+      | DirAbs e -> eval e
+      | _ -> assert false
+    in
+    let t = int_of_float (eval t_e) in
+    let m =
+      { frame_start = st.frame
+      ; frame_end = st.frame + t
+      ; val_start = st.dir
+      ; val_end = dir
+      }
+    in
+    next_cont st (KDirN (m, k))
 
 let next_state s =
   { frame = s.frame + 1
@@ -140,6 +157,7 @@ let next_state s =
   ; fire_env = s.fire_env
   ; cont = next_cont s s.cont
   ; speed = s.speed
+  ; dir = s.dir
   }
 
 let draw_frame window state =
