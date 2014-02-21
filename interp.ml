@@ -49,11 +49,11 @@ type opcode =
   | OpAccelN of unit linear_map
   | OpVanish
 
-type part =
+type obj =
   { prog : opcode list
   ; speed : float
   ; dir : float
-  ; children : part list
+  ; children : obj list
   ; pos : position
   }
 
@@ -61,7 +61,7 @@ type state =
   { frame : int
   ; action_env : (action id * action) list
   ; fire_env : (fire id * fire) list
-  ; main : part
+  ; main : obj
   }
 
 let rec replicate n x =
@@ -197,8 +197,8 @@ let next_state s =
            }
   }
 
-let rec collect_parts p =
-  [p] @ List.flatten (List.map collect_parts p.children)
+let rec collect_obj p =
+  [p] @ List.flatten (List.map collect_obj p.children)
 
 let draw_bullet window b =
   let (px, py) = int_pos b.pos in
@@ -207,7 +207,7 @@ let draw_bullet window b =
   Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
 
 let draw_frame window state =
-  List.iter (draw_bullet window) (collect_parts state.main)
+  List.iter (draw_bullet window) (collect_obj state.main)
 
 let clear surf =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:200 ~w:200 in
