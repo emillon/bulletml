@@ -34,28 +34,27 @@ type 'a linear_map =
   ; val_end : 'a
   }
 
+type opcode =
+  | OpRepeatE of expr * action
+  | OpWaitE of expr
+  | OpWaitN of int
+  | OpFire of fire
+  | OpSpdE of speed * expr
+  | OpSpdN of float linear_map
+  | OpDirE of direction * expr
+  | OpDirN of float linear_map
+  | OpAccelE of expr * expr * expr
+  | OpAccelN of unit linear_map
+  | OpVanish
+
 type state =
   { frame : int
   ; action_env : (action id * action) list
   ; fire_env : (fire id * fire) list
-  ; cont : continuation
+  ; prog : opcode list
   ; speed : float
   ; dir : float
   }
-
-and continuation =
-  | KPass
-  | KRepeatE of expr * action * continuation
-  | KWaitE of expr * continuation
-  | KWaitN of int  * continuation
-  | KFire of fire * continuation
-  | KSpdE of speed * expr * continuation
-  | KSpdN of float linear_map * continuation
-  | KDirE of direction * expr * continuation
-  | KDirN of float linear_map * continuation
-  | KAccelE of expr * expr * expr * continuation
-  | KAccelN of unit linear_map * continuation
-  | KVanish of continuation
 
 let rec replicate n x =
   match n with
@@ -63,30 +62,30 @@ let rec replicate n x =
   | 0 -> []
   | _ -> x ::  replicate (n-1) x
 
-let rec build_cont st next = function
+let rec build_prog st next = function
   | Repeat (e_n, ai) ->
     let a = eval_ind st.action_env ai in
-    KRepeatE (e_n, a, next)
-  | Wait e_n -> KWaitE (e_n, next)
+    OpRepeatE (e_n, a) :: next
+  | Wait e_n -> OpWaitE e_n :: next
   | Fire fi ->
     let f = eval_ind st.fire_env fi in
-    KFire (f, next)
-  | ChangeSpeed (s, e) -> KSpdE (s, e, next)
-  | ChangeDirection (d, e) -> KDirE (d, e, next)
+    OpFire f :: next
+  | ChangeSpeed (s, e) -> OpSpdE (s, e) :: next
+  | ChangeDirection (d, e) -> OpDirE (d, e) :: next
   | Accel (ho, vo, e) ->
     let default = function
       | Some x -> x
       | None -> Num 0.0
     in
-    KAccelE (default ho, default vo, e, next)
-  | Vanish -> KVanish next
+    OpAccelE (default ho, default vo, e)::next
+  | Vanish -> OpVanish :: next
   | Action ai ->
     let a = eval_ind st.action_env ai in
-    seq_cont st a next
+    seq_prog st a next
 
-and seq_cont st act next =
+and seq_prog st act next =
   List.fold_right
-    (fun a k -> build_cont st k a)
+    (fun a k -> build_prog st k a)
     act
     next
 
@@ -104,27 +103,27 @@ let initial_state ae fe k =
   { frame = 0
   ; action_env = ae
   ; fire_env = fe
-  ; cont = k
+  ; prog = k
   ; speed = 0.0
   ; dir = 0.0
   }
 
-let repeat_cont st n act next =
-  seq_cont st (List.concat (replicate n act)) next
+let repeat_prog st n act next =
+  seq_prog st (List.concat (replicate n act)) next
 
-let rec next_cont st = function
-  | KPass -> failwith "Nothing left to do"
-  | KRepeatE (n_e, a, k) ->
+let rec next_prog st = function
+  | [] -> failwith "Nothing left to do"
+  | OpRepeatE (n_e, a)::k ->
     let n = int_of_float (eval n_e) in
-    next_cont st (repeat_cont st n a k)
-  | KWaitE (n_e, k) ->
+    next_prog st (repeat_prog st n a k)
+  | OpWaitE n_e::k ->
     let n = int_of_float (eval n_e) in
-    next_cont st (KWaitN (n, k))
-  | KWaitN (0, k) -> next_cont st k
-  | KWaitN (1, k) -> k
-  | KWaitN (n, k) -> KWaitN (n-1, k)
-  | KFire (_, k) -> next_cont st k
-  | KSpdE (sp_e, t_e, k) ->
+    next_prog st (OpWaitN n::k)
+  | OpWaitN 0::k -> next_prog st k
+  | OpWaitN 1::k -> k
+  | OpWaitN n::k -> OpWaitN (n-1)::k
+  | OpFire _::k -> next_prog st k
+  | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
       | SpdAbs e -> eval e
       | _ -> assert false
@@ -137,13 +136,13 @@ let rec next_cont st = function
       ; val_end = sp
       }
     in
-    next_cont st (KSpdN (m, k))
-  | (KSpdN (m, k) | KDirN (m, k)) as ck ->
+    next_prog st (OpSpdN m::k)
+  | (OpSpdN m::k | OpDirN m::k) as ck ->
     if m.frame_end >= st.frame then
       k
     else
       ck
-  | KDirE (d_e, t_e, k) ->
+  | OpDirE (d_e, t_e)::k ->
     let dir = match d_e with
       | DirAbs e -> eval e
       | _ -> assert false
@@ -156,9 +155,9 @@ let rec next_cont st = function
       ; val_end = dir
       }
     in
-    next_cont st (KDirN (m, k))
-  | KVanish k -> next_cont st k
-  | KAccelE (h_e, v_e, t_e, k) ->
+    next_prog st (OpDirN m::k)
+  | OpVanish::k -> next_prog st k
+  | OpAccelE (h_e, v_e, t_e)::k ->
     let _h = eval h_e in
     let _v = eval v_e in
     let t = eval t_e in
@@ -169,8 +168,8 @@ let rec next_cont st = function
       ; val_end = ()
       }
     in
-    next_cont st (KAccelN (m, k))
-  | KAccelN (m, k) as ck ->
+    next_prog st (OpAccelN m::k)
+  | OpAccelN m::k as ck ->
     if m.frame_end >= st.frame then
       k
     else
@@ -180,7 +179,7 @@ let next_state s =
   { frame = s.frame + 1
   ; action_env = s.action_env
   ; fire_env = s.fire_env
-  ; cont = next_cont s s.cont
+  ; prog = next_prog s s.prog
   ; speed = s.speed
   ; dir = s.dir
   }
@@ -210,8 +209,8 @@ let _ =
   let surf = Sdlvideo.set_video_mode ~w:200 ~h:200 [] in
   let (aenv, fenv) = read_prog bml in
   let act = List.assoc patname aenv in
-  let dummy_state = initial_state [] [] KPass in
-  let k = build_cont dummy_state KPass (Action (Direct act)) in
+  let dummy_state = initial_state [] [] [] in
+  let k = build_prog dummy_state [] (Action (Direct act)) in
   let state = ref (initial_state aenv fenv k) in
   while true; do
     let s = !state in
