@@ -22,7 +22,9 @@ let rec eval e =
   let ev_op = function
     | Add -> ( +. )
     | Mul -> ( *. )
-    | _ -> assert false
+    | Sub -> ( -. )
+    | Div -> ( /. )
+    | Mod -> fun x y -> float (int_of_float x mod int_of_float y)
   in
   match e with
   | Num f -> f
@@ -140,8 +142,24 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 0::k -> next_prog st { self with prog = k }
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
-  | OpFire f::k ->
-    next_prog st { self with prog = k }
+  | OpFire (None, Some dir, Some spd, Direct (Bullet (None, None, [])))::k ->
+    let d = match dir with (* FIXME *)
+      | DirAbs e -> eval e
+      | DirAim e -> eval e
+      | DirSeq e -> eval e
+    in
+    let s = match spd with (* FIXME *)
+      | SpdAbs e -> eval e
+      | SpdRel e -> eval e
+      | SpdSeq e -> eval e
+    in
+    let o =
+      { self with
+        speed = s
+      ; dir = d
+      ; prog = []
+      } in
+    next_prog st { self with prog = k ; children = o::self.children }
   | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
       | SpdAbs e -> eval e
@@ -241,7 +259,7 @@ let _ =
   in
   let x = Xml.parse_file fname in
   let bml = Parser.parse_xml x in
-  Sdl.init ~auto_clean:true [`VIDEO];
+  Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
   let surf = Sdlvideo.set_video_mode ~w:200 ~h:200 [] in
   let (aenv, fenv) = read_prog bml in
   let act = List.assoc patname aenv in
