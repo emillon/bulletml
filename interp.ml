@@ -97,43 +97,38 @@ let next_state s =
   ; cont = next_cont s.cont
   }
 
-let draw_frame (window:OcsfmlGraphics.render_window) state =
-  let open OcsfmlGraphics in
-  let background = new rectangle_shape () in
-  window#draw background;
+let draw_frame window state =
   let t = from_deg (10.0 *. float state.frame) in
   let sz = 50.0 in
   let delta = (sz *. cos t, sz *. sin t) in
   let center = (100., 100.) in
-  let position = center +: delta in
-  let texture = new texture  (`File "bullet.png") in
-  let sprite = new sprite ~texture ~position () in
-  window#draw sprite
+  let (px, py) = int_pos (center +: delta) in
+  let bullet = Sdlloader.load_image "bullet.png" in
+  let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
+  Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
+
+let clear surf =
+  let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:200 ~w:200 in
+  Sdlvideo.fill_rect ~rect surf 0xffffff00l
 
 let _ =
-  let open OcsfmlWindow in
-  let open OcsfmlGraphics in
   let (fname, patname) = match Sys.argv with
     | [| _ ; a1 ; a2 |] -> (a1, a2)
     | _ -> failwith "usage: bulletml pattern.xml name"
   in
   let x = Xml.parse_file fname in
   let bml = Parser.parse_xml x in
-  let mode = VideoMode.create ~w:200 ~h:200 () in
-  let window = new render_window mode "BulletML" in
-  window#set_framerate_limit 60;
-  window#set_vertical_sync_enabled true;
+  Sdl.init ~auto_clean:true [`VIDEO];
+  let surf = Sdlvideo.set_video_mode ~w:200 ~h:200 [] in
   let aenv = read_prog bml in
   let act = List.assoc patname aenv in
   let k = build_cont [] [] KPass (Action (Direct act)) in
   let state = ref (initial_state aenv k) in
   while true; do
-    if window#is_open
-    then begin
-      let s = !state in
-      window#clear ();
-      draw_frame window s;
-      window#display;
-      state := next_state s
-    end;
-  done
+    let s = !state in
+    clear surf;
+    draw_frame surf s;
+    Sdltimer.delay (1000 / 60);
+    state := next_state s
+  done;
+  Sdl.quit ()

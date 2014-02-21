@@ -5,5 +5,5 @@ end
 
 begin program "bulletml"
       files = ["bulletml.ml" "printer" "parser.ml" "interp.ml"]
-      requires = ["mparser" "xml-light" "ocsfml" "ocsfml.graphics"]
+      requires = ["mparser" "xml-light" "sdl.sdlimage" "sdl"]
 end
