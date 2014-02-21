@@ -26,19 +26,29 @@ let eval_ind e = function
   | Direct x -> x
   | Indirect n -> List.assoc n e
 
-type speedtype =
-  | SpTypeAbs
-  | SpTypeRel
-  | SpTypeSeq
+type linear_map =
+  { frame_start : int
+  ; frame_end : int
+  ; val_start : float
+  ; val_end : float
+  }
 
-type continuation =
+type state =
+  { frame : int
+  ; action_env : (action id * action) list
+  ; fire_env : (fire id * fire) list
+  ; cont : continuation
+  ; speed : float
+  }
+
+and continuation =
   | KPass
   | KRepeatE of expr * action * continuation
   | KWaitE of expr * continuation
   | KWaitN of int  * continuation
   | KFire of fire * continuation
   | KSpdE of speed * expr * continuation
-  | KSpdN of speedtype * float * int * continuation
+  | KSpdN of linear_map * continuation
   | KDirE of direction * expr * continuation
   | KAccelE of expr option * expr option * expr * continuation
   | KVanish of continuation
@@ -49,25 +59,25 @@ let rec replicate n x =
   | 0 -> []
   | _ -> x ::  replicate (n-1) x
 
-let rec build_cont aenv fenv next = function
+let rec build_cont st next = function
   | Repeat (e_n, ai) ->
-    let a = eval_ind aenv ai in
+    let a = eval_ind st.action_env ai in
     KRepeatE (e_n, a, next)
   | Wait e_n -> KWaitE (e_n, next)
   | Fire fi ->
-    let f = eval_ind fenv fi in
+    let f = eval_ind st.fire_env fi in
     KFire (f, next)
   | ChangeSpeed (s, e) -> KSpdE (s, e, next)
   | ChangeDirection (d, e) -> KDirE (d, e, next)
   | Accel (h, v, e) -> KAccelE (h, v, e, next)
   | Vanish -> KVanish next
   | Action ai ->
-    let a = eval_ind aenv ai in
-    seq_cont aenv fenv a next
+    let a = eval_ind st.action_env ai in
+    seq_cont st a next
 
-and seq_cont aenv fenv act next =
+and seq_cont st act next =
   List.fold_right
-    (fun a k -> build_cont aenv fenv k a)
+    (fun a k -> build_cont st k a)
     act
     next
 
@@ -81,49 +91,55 @@ let read_prog (BulletML (hv, ts)) =
   let fe = [] in
   (ae, fe)
 
-type state =
-  { frame : int
-  ; action_env : (action id * action) list
-  ; fire_env : (fire id * fire) list
-  ; cont : continuation
-  }
-
 let initial_state ae fe k =
   { frame = 0
   ; action_env = ae
   ; fire_env = fe
   ; cont = k
+  ; speed = 0.0
   }
 
-let repeat_cont aenv fenv n act next =
-  seq_cont aenv fenv (List.concat (replicate n act)) next
+let repeat_cont st n act next =
+  seq_cont st (List.concat (replicate n act)) next
 
-let rec next_cont aenv fenv = function
+let rec next_cont st = function
   | KPass -> failwith "Nothing left to do"
   | KRepeatE (n_e, a, k) ->
     let n = int_of_float (eval n_e) in
-    next_cont aenv fenv (repeat_cont aenv fenv n a k)
+    next_cont st (repeat_cont st n a k)
   | KWaitE (n_e, k) ->
     let n = int_of_float (eval n_e) in
-    next_cont aenv fenv (KWaitN (n, k))
-  | KWaitN (0, k) -> next_cont aenv fenv k
+    next_cont st (KWaitN (n, k))
+  | KWaitN (0, k) -> next_cont st k
   | KWaitN (1, k) -> k
   | KWaitN (n, k) -> KWaitN (n-1, k)
-  | KFire (_, k) -> next_cont aenv fenv k
+  | KFire (_, k) -> next_cont st k
   | KSpdE (sp_e, t_e, k) ->
-    let (sptype, sp) = match sp_e with
-      | SpdAbs e -> (SpTypeAbs, eval e)
-      | SpdRel e -> (SpTypeRel, eval e)
-      | SpdSeq e -> (SpTypeSeq, eval e)
+    let sp = match sp_e with
+      | SpdAbs e -> eval e
+      | _ -> assert false
     in
     let t = int_of_float (eval t_e) in
-    next_cont aenv fenv (KSpdN (sptype, sp, t, k))
+    let m =
+      { frame_start = st.frame
+      ; frame_end = st.frame + t
+      ; val_start = st.speed
+      ; val_end = sp
+      }
+    in
+    next_cont st (KSpdN (m, k))
+  | KSpdN (m, k) as ck ->
+    if m.frame_end >= st.frame then
+      k
+    else
+      ck
 
 let next_state s =
   { frame = s.frame + 1
   ; action_env = s.action_env
   ; fire_env = s.fire_env
-  ; cont = next_cont s.action_env s.fire_env s.cont
+  ; cont = next_cont s s.cont
+  ; speed = s.speed
   }
 
 let draw_frame window state =
@@ -151,7 +167,8 @@ let _ =
   let surf = Sdlvideo.set_video_mode ~w:200 ~h:200 [] in
   let (aenv, fenv) = read_prog bml in
   let act = List.assoc patname aenv in
-  let k = build_cont [] [] KPass (Action (Direct act)) in
+  let dummy_state = initial_state [] [] KPass in
+  let k = build_cont dummy_state KPass (Action (Direct act)) in
   let state = ref (initial_state aenv fenv k) in
   while true; do
     let s = !state in
