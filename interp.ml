@@ -26,11 +26,11 @@ let eval_ind e = function
   | Direct x -> x
   | Indirect n -> List.assoc n e
 
-type linear_map =
+type 'a linear_map =
   { frame_start : int
   ; frame_end : int
-  ; val_start : float
-  ; val_end : float
+  ; val_start : 'a
+  ; val_end : 'a
   }
 
 type state =
@@ -49,10 +49,11 @@ and continuation =
   | KWaitN of int  * continuation
   | KFire of fire * continuation
   | KSpdE of speed * expr * continuation
-  | KSpdN of linear_map * continuation
+  | KSpdN of float linear_map * continuation
   | KDirE of direction * expr * continuation
-  | KDirN of linear_map * continuation
-  | KAccelE of expr option * expr option * expr * continuation
+  | KDirN of float linear_map * continuation
+  | KAccelE of expr * expr * expr * continuation
+  | KAccelN of unit linear_map * continuation
   | KVanish of continuation
 
 let rec replicate n x =
@@ -71,7 +72,12 @@ let rec build_cont st next = function
     KFire (f, next)
   | ChangeSpeed (s, e) -> KSpdE (s, e, next)
   | ChangeDirection (d, e) -> KDirE (d, e, next)
-  | Accel (h, v, e) -> KAccelE (h, v, e, next)
+  | Accel (ho, vo, e) ->
+    let default = function
+      | Some x -> x
+      | None -> Num 0.0
+    in
+    KAccelE (default ho, default vo, e, next)
   | Vanish -> KVanish next
   | Action ai ->
     let a = eval_ind st.action_env ai in
@@ -151,6 +157,23 @@ let rec next_cont st = function
     in
     next_cont st (KDirN (m, k))
   | KVanish k -> next_cont st k
+  | KAccelE (h_e, v_e, t_e, k) ->
+    let _h = eval h_e in
+    let _v = eval v_e in
+    let t = eval t_e in
+    let m =
+      { frame_start = st.frame
+      ; frame_end = st.frame + int_of_float t
+      ; val_start = ()
+      ; val_end = ()
+      }
+    in
+    next_cont st (KAccelN (m, k))
+  | KAccelN (m, k) as ck ->
+    if m.frame_end >= st.frame then
+      k
+    else
+      ck
 
 let next_state s =
   { frame = s.frame + 1
