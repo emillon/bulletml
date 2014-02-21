@@ -9,6 +9,12 @@ type position = (float * float)
 let (+:) (xa, ya) (xb, yb) =
   (xa +. xb, ya +. yb)
 
+let ( *% ) (x, y) l =
+  (x *. l, y *. l)
+
+let unit_vec dir =
+  (sin dir, cos dir)
+
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
 
@@ -194,8 +200,19 @@ let rec next_prog st self :obj = match self.prog with
     in
     { self with prog = nk }
 
+let animate_physics o =
+  { o with pos = (o.pos +: unit_vec o.dir *% o.speed) }
+
+let rec animate st o =
+  let new_children =
+    List.map (animate st) o.children in
+  let o1 = { o with children = new_children } in
+  let o2 = next_prog st o1 in
+  let o3 = animate_physics o2 in
+  o3
+
 let next_state s =
-  let next_m = next_prog s s.main in
+  let next_m = animate s s.main in
   { s with
     frame = s.frame + 1
   ; main = next_m
