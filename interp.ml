@@ -28,7 +28,6 @@ let eval_ind e = function
 
 type continuation =
   | KPass
-  | KAct of action * continuation
   | KRepeatE of expr * action * continuation
   | KWaitE of expr * continuation
   | KWaitN of int  * continuation
@@ -44,7 +43,7 @@ let rec replicate n x =
   | 0 -> []
   | _ -> x ::  replicate (n-1) x
 
-let build_cont aenv fenv next = function
+let rec build_cont aenv fenv next = function
   | Repeat (e_n, ai) ->
     let a = eval_ind aenv ai in
     KRepeatE (e_n, a, next)
@@ -58,47 +57,58 @@ let build_cont aenv fenv next = function
   | Vanish -> KVanish next
   | Action ai ->
     let a = eval_ind aenv ai in
-    KAct (a, next)
+    seq_cont aenv fenv a next
+
+and seq_cont aenv fenv act next =
+  List.fold_right
+    (fun a k -> build_cont aenv fenv k a)
+    act
+    next
 
 let read_prog (BulletML (hv, ts)) =
-  List.map (function
-      | EAction (l, a) -> (l, a)
-      | _ -> assert false
-    ) ts
+  let ae =
+    List.map (function
+        | EAction (l, a) -> (l, a)
+        | _ -> assert false
+      ) ts
+  in
+  let fe = [] in
+  (ae, fe)
 
 type state =
   { frame : int
   ; action_env : (action id * action) list
+  ; fire_env : (fire id * fire) list
   ; cont : continuation
   }
 
-let initial_state ae k =
+let initial_state ae fe k =
   { frame = 0
   ; action_env = ae
+  ; fire_env = fe
   ; cont = k
   }
 
-let repeat_cont n (act:action) next =
-  List.fold_right (fun a k -> KAct (a, k)) (replicate n act) next
+let repeat_cont aenv fenv n act next =
+  seq_cont aenv fenv (List.concat (replicate n act)) next
 
-let rec next_cont = function
-  | KAct (sa::sas, k) -> next_cont (KAct (sas, k))
-  | KAct ([], k) -> next_cont k
+let rec next_cont aenv fenv = function
   | KPass -> failwith "Nothing left to do"
   | KRepeatE (n_e, a, k) ->
     let n = int_of_float (eval n_e) in
-    next_cont (repeat_cont n a k)
+    next_cont aenv fenv (repeat_cont aenv fenv n a k)
   | KWaitE (n_e, k) ->
     let n = int_of_float (eval n_e) in
-    next_cont (KWaitN (n, k))
-  | KWaitN (0, k) -> next_cont k
+    next_cont aenv fenv (KWaitN (n, k))
+  | KWaitN (0, k) -> next_cont aenv fenv k
   | KWaitN (1, k) -> k
   | KWaitN (n, k) -> KWaitN (n-1, k)
 
 let next_state s =
   { frame = s.frame + 1
   ; action_env = s.action_env
-  ; cont = next_cont s.cont
+  ; fire_env = s.fire_env
+  ; cont = next_cont s.action_env s.fire_env s.cont
   }
 
 let draw_frame window state =
@@ -124,10 +134,10 @@ let _ =
   let bml = Parser.parse_xml x in
   Sdl.init ~auto_clean:true [`VIDEO];
   let surf = Sdlvideo.set_video_mode ~w:200 ~h:200 [] in
-  let aenv = read_prog bml in
+  let (aenv, fenv) = read_prog bml in
   let act = List.assoc patname aenv in
   let k = build_cont [] [] KPass (Action (Direct act)) in
-  let state = ref (initial_state aenv k) in
+  let state = ref (initial_state aenv fenv k) in
   while true; do
     let s = !state in
     clear surf;
