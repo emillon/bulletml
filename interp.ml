@@ -4,6 +4,8 @@ let from_deg x =
   let pi = acos (-1.) in
   2. *. pi *. x /. 360.
 
+type position = (float * float)
+
 let (+:) (xa, ya) (xb, yb) =
   (xa +. xb, ya +. yb)
 
@@ -52,6 +54,7 @@ type part =
   ; speed : float
   ; dir : float
   ; children : part list
+  ; pos : position
   }
 
 type state =
@@ -113,6 +116,7 @@ let initial_state ae fe k =
       ; speed = 0.0
       ; dir = 0.0
       ; children = []
+      ; pos = (100.0, 100.0)
       }
   }
 
@@ -193,19 +197,21 @@ let next_state s =
            }
   }
 
-let draw_frame window state =
-  let t = from_deg (10.0 *. float state.frame) in
-  let sz = 50.0 in
-  let delta = (sz *. cos t, sz *. sin t) in
-  let center = (100., 100.) in
-  let (px, py) = int_pos (center +: delta) in
-  let bullet = Sdlloader.load_image "bullet.png" in
+let rec collect_parts p =
+  [p] @ List.flatten (List.map collect_parts p.children)
+
+let draw_bullet window b =
+  let (px, py) = int_pos b.pos in
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
+  let bullet = Sdlloader.load_image "bullet.png" in
   Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
+
+let draw_frame window state =
+  List.iter (draw_bullet window) (collect_parts state.main)
 
 let clear surf =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:200 ~w:200 in
-  Sdlvideo.fill_rect ~rect surf 0xffffff00l
+  Sdlvideo.fill_rect ~rect surf 0x00ffffffl
 
 let _ =
   let (fname, patname) = match Sys.argv with
@@ -227,6 +233,7 @@ let _ =
     flush stdout;
     clear surf;
     draw_frame surf s;
+    Sdlvideo.flip surf;
     Sdltimer.delay (1000 / 60);
     state := next_state s;
   done;
