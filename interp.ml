@@ -26,6 +26,11 @@ let eval_ind e = function
   | Direct x -> x
   | Indirect n -> List.assoc n e
 
+type speedtype =
+  | SpTypeAbs
+  | SpTypeRel
+  | SpTypeSeq
+
 type continuation =
   | KPass
   | KRepeatE of expr * action * continuation
@@ -33,6 +38,7 @@ type continuation =
   | KWaitN of int  * continuation
   | KFire of fire * continuation
   | KSpdE of speed * expr * continuation
+  | KSpdN of speedtype * float * int * continuation
   | KDirE of direction * expr * continuation
   | KAccelE of expr option * expr option * expr * continuation
   | KVanish of continuation
@@ -103,6 +109,15 @@ let rec next_cont aenv fenv = function
   | KWaitN (0, k) -> next_cont aenv fenv k
   | KWaitN (1, k) -> k
   | KWaitN (n, k) -> KWaitN (n-1, k)
+  | KFire (_, k) -> next_cont aenv fenv k
+  | KSpdE (sp_e, t_e, k) ->
+    let (sptype, sp) = match sp_e with
+      | SpdAbs e -> (SpTypeAbs, eval e)
+      | SpdRel e -> (SpTypeRel, eval e)
+      | SpdSeq e -> (SpTypeSeq, eval e)
+    in
+    let t = int_of_float (eval t_e) in
+    next_cont aenv fenv (KSpdN (sptype, sp, t, k))
 
 let next_state s =
   { frame = s.frame + 1
