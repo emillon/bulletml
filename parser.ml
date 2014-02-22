@@ -26,10 +26,21 @@ let parse_expr s :expr =
     Tokens.decimal >>= fun n ->
     return (Num (mknum sign n))
   in
+  let mknum_float sign n = match sign with
+    | Some '-' -> (-. n)
+    | None -> (n)
+    | _ -> failwith "error in float"
+  in
+  let float_num =
+    option (char '-') >>= fun sign ->
+    Tokens.float >>= fun n ->
+    return (Num (mknum_float sign ( n)))
+  in
   let rand = string "$rand" >> return Rand in
   let rank = string "$rank" >> return Rank in
   let rec term s =
     choice [ Tokens.parens expr
+           ; attempt float_num
            ; num
            ; rand
            ; rank
@@ -68,7 +79,7 @@ let rec parse_fire nodes :fire =
           let b = parse_bullet ns in
           bullet := Some (Direct b)
         end
-      | Xml.Element ("bulletRef", ["label", s], []) ->
+      | Xml.Element ("bulletRef", [("label" | "LABEL"), s], []) ->
         begin
           assert (!bullet = None);
           bullet := Some (Indirect s)
@@ -85,7 +96,8 @@ let rec parse_fire nodes :fire =
           let sp = parse_expr s in
           speed := Some (interp_speed sp attrs)
         end
-      | Xml.Element (s, _, _) -> failwith ("parse_fire: " ^ s)
+      | Xml.Element (s, attrs, _) ->
+        failwith ("parse_fire: " ^ s ^ " (attrs: "^print_attrs attrs^")")
       | Xml.PCData _ -> failwith "parse_fire: PCData"
     ) nodes;
   let bul = match !bullet with
@@ -116,7 +128,7 @@ and parse_action nodes :action =
       | Xml.Element ("fire", _, ns) ->
         let f = parse_fire ns in
         Fire (Direct f)
-      | Xml.Element ("vanish", [], []) ->
+      | Xml.Element ("vanish", [], _) ->
         Vanish
       | Xml.Element ("repeat", [],
                      [ Xml.Element ("times", _, [Xml.PCData s_times])
@@ -167,15 +179,24 @@ let parse_elems nodes =
       | Xml.Element ("action", [(("label"|"LABEL"), l)], ns) ->
         let act = parse_action ns in
         EAction (l, act)
+      | Xml.Element ("bullet", [(("label"|"LABEL"), l)], ns) ->
+        let b = parse_bullet ns in
+        EBullet (l, b)
       | Xml.Element (s, attrs, _) ->
         failwith ("parse_elems: " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
       | Xml.PCData _ -> failwith "parse_elems: PCData"
     ) nodes
 
 let parse_xml = function
-  | Xml.Element ("bulletml", _, ns) ->
+  | Xml.Element ("bulletml", attrs, ns) ->
     let elems = parse_elems ns in
-    BulletML (NoDir, elems)
+    let dir = begin match attrs with
+      | [] -> NoDir
+      | [("XMLNS", _);("TYPE", "none")] -> NoDir
+      | [("XMLNS", _);("TYPE", "vertical")] -> Vertical
+      | _ -> failwith ("parse_xml: attrs = " ^ print_attrs attrs ^ ")")
+    end in
+    BulletML (dir, elems)
   | _ -> assert false
 
 let read_stdin () =

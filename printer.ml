@@ -70,7 +70,7 @@ and print_fire (no, diro, spdo, bi) =
   ^ ")"
 
 let print_elem = function
-  | EBullet b -> "EBullet " ^ print_bullet b
+  | EBullet (l, b) -> "EBullet (" ^ l ^ ", " ^ print_bullet b ^ ")"
   | EAction (l, a) -> "EAction (" ^ l ^ ", " ^ print_action a ^ ")"
   | EFire f   -> "EFire "   ^ print_fire f
 

@@ -1,6 +1,11 @@
+
 let testspecs =
   let open Bulletml in
   let bulletDefault = Bullet (None, None, []) in
+  let ( +@ ) = fun x y -> Op (Add, x, y) in
+  let ( -@ ) = fun x y -> Op (Sub, x, y) in
+  let ( *@ ) = fun x y -> Op (Mul, x, y) in
+  let ( /@ ) = fun x y -> Op (Div, x, y) in
   [ ("01.xml", `Bullet (
        Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
            Direct [Accel (None, Some (Num 3.), Num 120.)]
@@ -11,7 +16,7 @@ let testspecs =
        ; Wait (Num 60.)
        ; Fire (Direct (None, None, None, Direct bulletDefault))
        ; Fire (Direct (None, Some (DirAbs (
-           Op (Add, Num 330., Op (Mul, Rand, Num 25.))
+           Num 330. +@ Rand *@ Num 25.
          )), None, Indirect "downAccel"))
        ; Vanish
        ])
@@ -20,12 +25,12 @@ let testspecs =
   ; ("04.xml", `Action
        [ Repeat (Num 100., Direct [
             Fire (Direct (None, Some (DirAbs (
-                Op (Add, Num 220., Op (Mul, Rand, Num 100.))
+                Num 220. +@ Rand *@ Num 100.
               )), None, Indirect "backBurst"))
           ; Wait (Num 6.)
           ])
        ])
-  ; ("[Dodonpachi]_hibachi.xml"), `Bulletml (
+  ; ("[Dodonpachi]_hibachi.xml"), `Bulletml ( (* {{{ *)
       BulletML (NoDir,
                 [ EAction ("allWay",
                            [ Fire
@@ -84,6 +89,42 @@ let testspecs =
                            ; Wait (Num 1.)
                            ])
                 ]))
+  (* }}} *)
+  ; ("[MDA]_circular_sun.xml", `Bulletml ( (* {{{ *)
+      BulletML (Vertical,
+                [ EAction ("top",
+                           [ ChangeSpeed (SpdAbs (Num 0.75), Num 1.)
+                           ; ChangeDirection (DirAbs (Num 90.), Num 1.)
+                           ; Wait (Num 1.)
+                           ; ChangeDirection (DirSeq (Num 0.7), Num 514.)
+                           ; Wait (Num 2.)
+                           ; Repeat (Num 32., (Direct
+                                                 [ Action (Indirect "shoot")
+                                                 ; Wait (Num 16.)
+                                                 ]))
+                           ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                           ; Wait (Num 120.)
+                           ])
+                ; EAction ("shoot",
+                           [ Repeat (Num 1. +@ Num 63. *@ Rank, Direct
+                                       [ Fire (Direct
+                                                 ( None
+                                                 , Some (DirSeq (Num 360. /@ (Num 1. +@ Num 63. *@ Rank)))
+                                                 , Some (SpdAbs (Num 1.28 +@ Num 0.08 *@ Rand))
+                                                 , Indirect "curve"
+                                                 ))])
+                           ])
+                ; EBullet ("curve",
+                           Bullet (None, None, [ Direct
+                                                   [ ChangeDirection (DirSeq (Num 1.25 -@ Num 1.6 *@ Rand), Num 360.)
+                                                   ; Wait (Num 360.)
+                                                   ; Vanish
+                                                   ]
+                                               ]))
+                ])
+    )
+    )
+  (* }}} *)
   ]
 
 let tests () =

@@ -50,7 +50,7 @@ type hv =
   | Vertical
 
 type elem =
-  | EBullet of bullet
+  | EBullet of string * bullet
   | EAction of string * action
   | EFire of fire
 
