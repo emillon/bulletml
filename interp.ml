@@ -1,5 +1,8 @@
 open Bulletml
 
+let screen_w = 640
+let screen_h = 480
+
 let from_deg x =
   let pi = acos (-1.) in
   2. *. pi *. x /. 360.
@@ -136,13 +139,13 @@ let initial_state ae be fe k =
       ; speed = 0.0
       ; dir = 0.0
       ; children = []
-      ; pos = (100.0, 100.0)
+      ; pos = (float screen_w /. 2., float screen_h *. 0.3)
       ; prev_dir = 0.0
       }
   }
 
 let dir_to_ship obj =
-  let ship_pos = (100.0, 190.0) in
+  let ship_pos = (float screen_w /. 2., float screen_h *.0.9) in
   let (vx, vy) = (ship_pos -: obj.pos) in
   atan2 vy vx
 
@@ -277,7 +280,7 @@ let draw_frame window state =
   List.iter (draw_bullet window) (collect_obj state.main)
 
 let clear surf =
-  let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:200 ~w:200 in
+  let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
   Sdlvideo.fill_rect ~rect surf 0x00ffffffl
 
 let _ =
@@ -288,7 +291,7 @@ let _ =
   let x = Xml.parse_file fname in
   let bml = Parser.parse_xml x in
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
-  let surf = Sdlvideo.set_video_mode ~w:200 ~h:200 [] in
+  let surf = Sdlvideo.set_video_mode ~w:screen_w ~h:screen_h [] in
   let (aenv, benv, fenv) = read_prog bml in
   let act = List.assoc patname aenv in
   let dummy_state = initial_state [] [] [] [] in
