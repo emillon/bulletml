@@ -315,6 +315,11 @@ let _ =
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
   let surf = Sdlvideo.set_video_mode ~w:screen_w ~h:screen_h [] in
   let (aenv, benv, fenv) = read_prog bml in
+  let print_env e = String.concat ", " (List.map fst e) in
+  Printf.printf "a: %s\nb: %s\nf: %s\n"
+    (print_env aenv)
+    (print_env benv)
+    (print_env fenv);
   let act = List.assoc patname aenv in
   let dummy_state = initial_state [] [] [] [] in
   let k = build_prog dummy_state [] (Action (Direct act)) in
