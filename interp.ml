@@ -72,6 +72,7 @@ type obj =
 type state =
   { frame : int
   ; action_env : (action id * action) list
+  ; bullet_env : (bullet id * bullet) list
   ; fire_env : (fire id * fire) list
   ; main : obj
   }
@@ -115,18 +116,20 @@ and seq_prog st act next =
     next
 
 let read_prog (BulletML (hv, ts)) =
-  let ae =
-    List.map (function
-        | EAction (l, a) -> (l, a)
-        | _ -> assert false
-      ) ts
-  in
-  let fe = [] in
-  (ae, fe)
+  let ae = ref [] in
+  let be = ref [] in
+  let fe = ref [] in
+  List.iter (function
+      | EAction (l, a) -> ae := (l, a)::!ae
+      | EBullet (l, b) -> be := (l, b)::!be
+      | _ -> assert false
+    ) ts;
+  (!ae, !be, !fe)
 
-let initial_state ae fe k =
+let initial_state ae be fe k =
   { frame = 0
   ; action_env = ae
+  ; bullet_env = be
   ; fire_env = fe
   ; main =
       { prog = k
@@ -149,6 +152,22 @@ let dir_to_prev obj =
 let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
+let eval_dir self = function
+  | DirAbs e -> eval e
+  | DirAim e -> eval e +. dir_to_ship self
+  | DirSeq e -> eval e +. dir_to_prev self
+
+let make_bullet st self spd dir = function
+  | Bullet (None, None, ais) ->
+    let sas: action = List.map (fun ai -> Action ai) ais in
+    let ops: opcode list = seq_prog st sas [] in
+    { self with
+      speed = spd
+    ; dir = dir
+    ; prog = ops
+    ; children = []
+    }
+
 let rec next_prog st self :obj = match self.prog with
   | [] -> self
   | OpRepeatE (n_e, a)::k ->
@@ -160,24 +179,15 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 0::k -> next_prog st { self with prog = k }
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
-  | OpFire (None, Some dir, Some spd, Direct (Bullet (None, None, [])))::k ->
-    let d = match dir with
-      | DirAbs e -> eval e
-      | DirAim e -> eval e +. dir_to_ship self
-      | DirSeq e -> eval e +. dir_to_prev self
-    in
+  | OpFire (None, Some dir, Some spd, bi)::k ->
+    let d = eval_dir self dir in
     let s = match spd with (* FIXME *)
       | SpdAbs e -> eval e
       | SpdRel e -> eval e
       | SpdSeq e -> eval e
     in
-    let o =
-      { self with
-        speed = s
-      ; dir = d
-      ; prog = []
-      ; children = []
-      } in
+    let bullet = eval_ind st.bullet_env bi in
+    let o = make_bullet st self s d bullet in
     { self with prog = k ; children = o::self.children }
   | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
@@ -204,10 +214,7 @@ let rec next_prog st self :obj = match self.prog with
     else
       { self with dir = interp_map st m }
   | OpDirE (d_e, t_e)::k ->
-    let dir = match d_e with
-      | DirAbs e -> eval e
-      | _ -> assert false
-    in
+    let dir = eval_dir self d_e in
     let t = int_of_float (eval t_e) in
     let m =
       { frame_start = st.frame
@@ -282,11 +289,11 @@ let _ =
   let bml = Parser.parse_xml x in
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
   let surf = Sdlvideo.set_video_mode ~w:200 ~h:200 [] in
-  let (aenv, fenv) = read_prog bml in
+  let (aenv, benv, fenv) = read_prog bml in
   let act = List.assoc patname aenv in
-  let dummy_state = initial_state [] [] [] in
+  let dummy_state = initial_state [] [] [] [] in
   let k = build_prog dummy_state [] (Action (Direct act)) in
-  let state = ref (initial_state aenv fenv k) in
+  let state = ref (initial_state aenv benv fenv k) in
   while true; do
     let s = !state in
     flush stdout;
