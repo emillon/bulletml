@@ -204,12 +204,12 @@ let rec next_prog st self :obj = match self.prog with
     in
     next_prog st { self with prog = OpSpdN m::k }
   | OpSpdN m::k ->
-    if m.frame_end >= st.frame then
+    if st.frame > m.frame_end then
       { self with prog = k }
     else
       { self with speed = interp_map st m }
   | OpDirN m::k ->
-    if m.frame_end >= st.frame then
+    if st.frame > m.frame_end then
       { self with prog = k }
     else
       { self with dir = interp_map st m }
@@ -239,7 +239,7 @@ let rec next_prog st self :obj = match self.prog with
     next_prog st { self with prog = OpAccelN m::k }
   | OpAccelN m::k as ck ->
     let nk =
-      if m.frame_end >= st.frame then
+      if st.frame > m.frame_end then
         k
       else
         ck
