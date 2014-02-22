@@ -70,6 +70,7 @@ type obj =
   ; children : obj list
   ; pos : position
   ; prev_dir : float
+  ; vanished : bool
   }
 
 type state =
@@ -141,6 +142,7 @@ let initial_state ae be fe k =
       ; children = []
       ; pos = (float screen_w /. 2., float screen_h *. 0.3)
       ; prev_dir = 0.0
+      ; vanished = false
       }
   }
 
@@ -227,7 +229,7 @@ let rec next_prog st self :obj = match self.prog with
       }
     in
     next_prog st { self with prog = OpDirN m::k }
-  | OpVanish::_ -> next_prog st { self with prog = [] }
+  | OpVanish::_ -> next_prog st { self with prog = [] ; vanished = true }
   | OpAccelE (h_e, v_e, t_e)::k ->
     let _h = eval h_e in
     let _v = eval v_e in
@@ -277,7 +279,12 @@ let draw_bullet window b =
   Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
 
 let draw_frame window state =
-  List.iter (draw_bullet window) (collect_obj state.main)
+  let objs =
+    List.filter
+      (fun o -> not o.vanished)
+      (collect_obj state.main)
+  in
+  List.iter (draw_bullet window) objs
 
 let clear surf =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
