@@ -14,17 +14,17 @@ let testspecs =
   ; ("02.xml", `Action
        [ ChangeSpeed (SpdAbs (Num 0.), Num 60.)
        ; Wait (Num 60.)
-       ; Fire (Direct (None, None, None, Direct bulletDefault))
-       ; Fire (Direct (None, Some (DirAbs (
+       ; Fire (Direct (None, None, Direct bulletDefault))
+       ; Fire (Direct (Some (DirAbs (
            Num 330. +@ Rand *@ Num 25.
          )), None, Indirect "downAccel"))
        ; Vanish
        ])
   ; ("03.xml", `Fire
-       (None, Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect "rocket"))
+       (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect "rocket"))
   ; ("04.xml", `Action
        [ Repeat (Num 100., Direct [
-            Fire (Direct (None, Some (DirAbs (
+            Fire (Direct (Some (DirAbs (
                 Num 220. +@ Rand *@ Num 100.
               )), None, Indirect "backBurst"))
           ; Wait (Num 6.)
@@ -35,8 +35,7 @@ let testspecs =
                 [ EAction ("allWay",
                            [ Fire
                                ( Direct
-                                   ( None
-                                   , Some (DirAim (Op (Add, (Num (-50.)), Op (Mul, Rand, Num 20.))))
+                                   ( Some (DirAim (Op (Add, (Num (-50.)), Op (Mul, Rand, Num 20.))))
                                    , Some (SpdAbs (Op (Add, Num 1., Rank)))
                                    , Direct bulletDefault
                                    )
@@ -46,8 +45,7 @@ let testspecs =
                                , Direct
                                    [ Fire
                                        ( Direct
-                                           ( None
-                                           , Some (DirSeq (Op (Sub, Num 24., Op (Mul, Rank, Num 12.))))
+                                           ( Some (DirSeq (Op (Sub, Num 24., Op (Mul, Rank, Num 12.))))
                                            , Some (SpdSeq (Num 0.))
                                            , Direct bulletDefault
                                            )
@@ -108,8 +106,7 @@ let testspecs =
                 ; EAction ("shoot",
                            [ Repeat (Num 1. +@ Num 63. *@ Rank, Direct
                                        [ Fire (Direct
-                                                 ( None
-                                                 , Some (DirSeq (Num 360. /@ (Num 1. +@ Num 63. *@ Rank)))
+                                                 ( Some (DirSeq (Num 360. /@ (Num 1. +@ Num 63. *@ Rank)))
                                                  , Some (SpdAbs (Num 1.28 +@ Num 0.08 *@ Rand))
                                                  , Indirect "curve"
                                                  ))])
@@ -128,7 +125,7 @@ let testspecs =
   ; ("[1943]_rolling_fire.xml", `Bulletml ( (* {{{ *)
       BulletML (Vertical,
                 [ EAction ("top",
-                           [ Fire (Direct (None, None, None, Indirect "roll"))
+                           [ Fire (Direct (None, None, Indirect "roll"))
                            ])
                 ; EBullet ("roll",
                            Bullet (None , None, [ Direct

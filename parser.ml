@@ -69,7 +69,6 @@ let interp_speed x = function
   | a -> failwith ("interp_speed: " ^ print_attrs a)
 
 let rec parse_fire nodes :fire =
-  let name = ref None in
   let dir = ref None in
   let speed = ref None in
   let bullet = ref None in
@@ -105,7 +104,7 @@ let rec parse_fire nodes :fire =
     | Some b -> b
     | None -> assert false
   in
-  (!name, !dir, !speed, bul)
+  (!dir, !speed, bul)
 
 and parse_action nodes :action =
   List.map (function

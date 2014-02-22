@@ -126,7 +126,7 @@ let read_prog (BulletML (hv, ts)) =
   List.iter (function
       | EAction (l, a) -> ae := (l, a)::!ae
       | EBullet (l, b) -> be := (l, b)::!be
-      | _ -> assert false
+      | EFire (l, f) -> fe := (l, f)::!fe
     ) ts;
   (!ae, !be, !fe)
 
@@ -184,7 +184,7 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 0::k -> next_prog st { self with prog = k }
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
-  | OpFire (None, Some dir, Some spd, bi)::k ->
+  | OpFire (Some dir, Some spd, bi)::k ->
     let d = eval_dir self dir in
     let s = match spd with
       | SpdAbs e -> eval e

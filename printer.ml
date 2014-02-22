@@ -63,9 +63,8 @@ and print_bullet (Bullet (diro, spdo, acts)) =
   ^ ", " ^ print_list (print_ind print_action) acts
   ^ ")"
 
-and print_fire (no, diro, spdo, bi) =
-  "(" ^ print_option (fun x -> x) no
-  ^ ", " ^ print_option print_dir diro
+and print_fire (diro, spdo, bi) =
+  "(" ^ print_option print_dir diro
   ^ ", " ^ print_option print_spd spdo
   ^ ", " ^ print_ind print_bullet bi
   ^ ")"
@@ -73,7 +72,7 @@ and print_fire (no, diro, spdo, bi) =
 let print_elem = function
   | EBullet (l, b) -> "EBullet (" ^ l ^ ", " ^ print_bullet b ^ ")"
   | EAction (l, a) -> "EAction (" ^ l ^ ", " ^ print_action a ^ ")"
-  | EFire f   -> "EFire "   ^ print_fire f
+  | EFire (l, f)   -> "EFire (" ^ l ^ ", " ^ print_fire f ^ ")"
 
 let print_bulletml (BulletML (hv, elems)) =
   "BulletML (" ^ print_hv hv ^ ", " ^ print_list print_elem elems ^ ")"

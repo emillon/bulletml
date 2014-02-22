@@ -43,7 +43,7 @@ and action = subaction list
 
 and bullet = Bullet of direction option * speed option * action ind list
 
-and fire = string option * direction option * speed option * bullet ind
+and fire = direction option * speed option * bullet ind
 
 type hv =
   | NoDir
@@ -53,6 +53,6 @@ type hv =
 type elem =
   | EBullet of string * bullet
   | EAction of string * action
-  | EFire of fire
+  | EFire of string * fire
 
 type t = BulletML of hv * elem list
