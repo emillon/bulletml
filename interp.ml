@@ -76,6 +76,11 @@ type state =
   ; main : obj
   }
 
+let interp_map st m =
+  let frames_done = float (st.frame - m.frame_start) in
+  let frames_total = float (m.frame_end - m.frame_start) in
+  m.val_start +. frames_done *. (m.val_end -. m.val_start) /. frames_total
+
 let rec replicate n x =
   match n with
   | _ when n < 0 -> assert false
@@ -188,14 +193,16 @@ let rec next_prog st self :obj = match self.prog with
       }
     in
     next_prog st { self with prog = OpSpdN m::k }
-  | (OpSpdN m::k | OpDirN m::k) as ck ->
-    let nk =
-      if m.frame_end >= st.frame then
-        k
-      else
-        ck
-    in
-    { self with prog = nk }
+  | OpSpdN m::k ->
+    if m.frame_end >= st.frame then
+      { self with prog = k }
+    else
+      { self with speed = interp_map st m }
+  | OpDirN m::k ->
+    if m.frame_end >= st.frame then
+      { self with prog = k }
+    else
+      { self with dir = interp_map st m }
   | OpDirE (d_e, t_e)::k ->
     let dir = match d_e with
       | DirAbs e -> eval e
