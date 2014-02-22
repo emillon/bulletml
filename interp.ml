@@ -39,10 +39,59 @@ let rec eval = function
   | Param _ -> failwith "Param"
   | Rank -> 0.5
 
-let eval_ind e = function
-  | Direct x -> x
-  | Indirect (n, _params) ->
-    List.assoc n e
+let rec subst_expr p = function
+  | (Num _ | Rand | Rank) as e -> e
+  | Op (op, x, y) -> Op (op, subst_expr p x, subst_expr p y)
+  | Param n -> List.assoc n p
+
+let subst_dir p = function
+  | DirAbs e -> DirAbs (subst_expr p e)
+  | DirSeq e -> DirSeq (subst_expr p e)
+  | DirAim e -> DirAim (subst_expr p e)
+  | DirRel e -> DirRel (subst_expr p e)
+
+let subst_spd p = function
+  | SpdAbs e -> SpdAbs (subst_expr p e)
+  | SpdRel e -> SpdRel (subst_expr p e)
+  | SpdSeq e -> SpdSeq (subst_expr p e)
+
+let subst_ind subst_elem p = function
+  | Direct x -> Direct (subst_elem p x)
+  | Indirect (s, args) -> Indirect (s, List.map (subst_expr p) args)
+
+let subst_opt subst_elem p = function
+  | Some x -> Some (subst_elem p x)
+  | None -> None
+
+let rec subst_action p =
+  List.map (subst_subaction p)
+
+and subst_subaction p = function
+  | Repeat (e, ai) -> Repeat (subst_expr p e, subst_ind subst_action p ai)
+  | Fire fi -> Fire (subst_ind subst_fire p fi)
+  | ChangeSpeed (spd, e) -> ChangeSpeed (subst_spd p spd, subst_expr p e)
+  | ChangeDirection (dir, e) -> ChangeDirection (subst_dir p dir, subst_expr p e)
+  | Accel (eo1, eo2, e3) ->
+    Accel (
+      subst_opt subst_expr p eo1,
+      subst_opt subst_expr p eo1,
+      subst_expr p e3)
+  | Wait e -> Wait (subst_expr p e)
+  | Vanish -> Vanish
+  | Action ai -> Action (subst_ind subst_action p ai)
+
+and subst_fire p (diro, spdo, bi) =
+  ( subst_opt subst_dir p diro
+  , subst_opt subst_spd p spdo
+  , subst_ind subst_bullet p bi
+  )
+
+and subst_bullet p (Bullet (diro, spdo, ais)) =
+  Bullet (
+    subst_opt subst_dir p diro,
+    subst_opt subst_spd p spdo,
+    List.map (subst_ind subst_action p) ais
+  )
 
 type 'a linear_map =
   { frame_start : int
@@ -82,6 +131,24 @@ type state =
   ; main : obj
   }
 
+let number_params l =
+  let i = ref 0 in
+  List.map (fun p ->
+      incr i;
+      (!i, p)
+    ) l
+
+let ind_call getenv sub st = function
+  | Direct x -> x
+  | Indirect (n, params) ->
+    let a = List.assoc n (getenv st) in
+    let p = number_params params in
+    sub p a
+
+let eval_ai = ind_call (fun st -> st.action_env) (subst_action)
+let eval_bi = ind_call (fun st -> st.bullet_env) (subst_bullet)
+let eval_fi = ind_call (fun st -> st.fire_env) (subst_fire)
+
 let interp_map st m =
   let frames_done = float (st.frame - m.frame_start) in
   let frames_total = float (m.frame_end - m.frame_start) in
@@ -95,11 +162,11 @@ let rec replicate n x =
 
 let rec build_prog st next = function
   | Repeat (e_n, ai) ->
-    let a = eval_ind st.action_env ai in
+    let a = eval_ai st ai in
     OpRepeatE (e_n, a) :: next
   | Wait e_n -> OpWaitE e_n :: next
   | Fire fi ->
-    let f = eval_ind st.fire_env fi in
+    let f = eval_fi st fi in
     OpFire f :: next
   | ChangeSpeed (s, e) -> OpSpdE (s, e) :: next
   | ChangeDirection (d, e) -> OpDirE (d, e) :: next
@@ -111,7 +178,7 @@ let rec build_prog st next = function
     OpAccelE (default ho, default vo, e)::next
   | Vanish -> OpVanish :: next
   | Action ai ->
-    let a = eval_ind st.action_env ai in
+    let a = eval_ai st ai in
     seq_prog st a next
 
 and seq_prog st act next =
@@ -189,7 +256,7 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
   | OpFire (dir_f, spd_f, bi)::k ->
-    let Bullet (dir_b, spd_b, ais) = eval_ind st.bullet_env bi in
+    let Bullet (dir_b, spd_b, ais) = eval_bi st bi in
     let dir = oneof dir_b dir_f (DirAbs (Num self.dir)) in
     let spd = oneof spd_b spd_f (SpdAbs (Num self.speed)) in
     let d = eval_dir self dir in
