@@ -161,6 +161,12 @@ let eval_dir self = function
   | DirAbs e -> eval e
   | DirAim e -> eval e +. dir_to_ship self
   | DirSeq e -> eval e +. dir_to_prev self
+  | DirRel e -> eval e +. self.dir
+
+let eval_speed self = function
+  | SpdAbs e -> eval e
+  | SpdRel e -> eval e +. self.speed
+  | SpdSeq e -> eval e (* FIXME *)
 
 let make_bullet st self spd dir = function
   | Bullet (None, None, ais) ->
@@ -184,12 +190,15 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 0::k -> next_prog st { self with prog = k }
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
-  | OpFire (Some dir, Some spd, bi)::k ->
-    let d = eval_dir self dir in
-    let s = match spd with
-      | SpdAbs e -> eval e
-      | SpdRel e -> eval e +. self.speed
-      | SpdSeq e -> eval e (* FIXME *)
+  | OpFire (dir_o, spd_o, bi)::k ->
+    let d =
+      match dir_o with
+      | Some dir -> eval_dir self dir
+      | None -> self.dir
+    in
+    let s = match spd_o with
+      | Some spd -> eval_speed self spd
+      | None -> self.speed
     in
     let bullet = eval_ind st.bullet_env bi in
     let o = make_bullet st self s d bullet in
