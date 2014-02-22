@@ -204,7 +204,11 @@ let rec next_prog st self :obj = match self.prog with
       ; children = []
       }
     in
-    { self with prog = k ; children = o::self.children }
+    let pd = match dir with
+      | DirSeq _ -> d
+      | _ -> self.prev_dir
+    in
+    { self with prog = k ; children = o::self.children ; prev_dir = pd }
   | OpSpdE (sp_e, t_e)::k ->
     let sp = match sp_e with
       | SpdAbs e -> eval e
@@ -268,7 +272,7 @@ let animate_physics o =
 let rec animate st o =
   let new_children =
     List.map (animate st) o.children in
-  let o1 = { o with children = new_children ; prev_dir = o.dir } in
+  let o1 = { o with children = new_children } in
   let o2 = next_prog st o1 in
   let o3 = animate_physics o2 in
   o3
