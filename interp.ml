@@ -362,6 +362,7 @@ let clear surf =
 let _ =
   let (fname, patname) = match Sys.argv with
     | [| _ ; a1 ; a2 |] -> (a1, a2)
+    | [| _ ; a1 |] -> (a1, "top")
     | _ -> failwith "usage: bulletml pattern.xml name"
   in
   let x = Xml.parse_file fname in
