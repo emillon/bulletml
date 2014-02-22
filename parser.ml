@@ -38,12 +38,18 @@ let parse_expr s :expr =
   in
   let rand = string "$rand" >> return Rand in
   let rank = string "$rank" >> return Rank in
+  let param =
+    char '$' >>
+    Tokens.decimal >>= fun n ->
+    return (Param n)
+  in
   let rec term s =
     choice [ Tokens.parens expr
            ; attempt float_num
            ; num
            ; rand
            ; rank
+           ; param
            ] s
   and expr s = MParser.expression operators term s in
   match parse_string expr s () with
@@ -128,6 +134,8 @@ and parse_action nodes :action =
       | Xml.Element ("fire", _, ns) ->
         let f = parse_fire ns in
         Fire (Direct f)
+      | Xml.Element ("fireRef", [("LABEL", l)], _) ->
+        Fire (Indirect l)
       | Xml.Element ("vanish", [], _) ->
         Vanish
       | Xml.Element ("repeat", [],
@@ -182,6 +190,9 @@ let parse_elems nodes =
       | Xml.Element ("bullet", [(("label"|"LABEL"), l)], ns) ->
         let b = parse_bullet ns in
         EBullet (l, b)
+      | Xml.Element ("fire", [(("label"|"LABEL"), l)], ns) ->
+        let f = parse_fire ns in
+        EFire (l, f)
       | Xml.Element (s, attrs, _) ->
         failwith ("parse_elems: " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
       | Xml.PCData _ -> failwith "parse_elems: PCData"

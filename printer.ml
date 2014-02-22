@@ -8,8 +8,8 @@ let print_option prn = function
   | None -> "None"
 
 let print_ind prn = function
-  | Direct x -> prn x
-  | Indirect n -> "*"^n
+  | Direct x -> "Direct (" ^ prn x ^ ")"
+  | Indirect n -> "Indirect ("^n ^ ")"
 
 let print_hv = function
   | NoDir      -> "NoDir"
@@ -25,11 +25,11 @@ let rec print_expr =
     | Mod -> " % "
   in
   function
-  | Num f -> string_of_float f
+  | Num f -> "Num " ^ string_of_float f
   | Op (op, x, y) -> "(" ^ print_expr x ^ p_op op ^ print_expr y ^ ")"
   | Param n -> "$" ^ string_of_int n
-  | Rand -> "$rand"
-  | Rank -> "$rank"
+  | Rand -> "Rand"
+  | Rank -> "Rank"
 
 let print_dir = function
   | DirAbs e -> "DirAbs (" ^ print_expr e ^ ")"
@@ -46,16 +46,16 @@ let rec print_action a = print_list print_subaction a
 
 and print_subaction = function
   | Repeat (e, ai) -> "Repeat (" ^ print_expr e ^ ", " ^  print_ind print_action ai^ ")"
-  | Fire fi -> "Fire " ^ print_ind print_fire fi
+  | Fire fi -> "Fire (" ^ print_ind print_fire fi ^ ")"
   | ChangeSpeed (sp, e) -> "ChangeSpeed (" ^ print_spd sp ^ ", " ^ print_expr e ^ ")"
   | ChangeDirection (dir, e) -> "ChangeDirection (" ^ print_dir dir ^ ", " ^ print_expr e ^ ")"
   | Accel (eo1, eo2, e) -> "Accel (" ^ print_option print_expr eo1
                            ^ ", " ^ print_option print_expr eo2
                            ^ ", " ^ print_expr e
                            ^ ")"
-  | Wait e -> "Wait " ^ print_expr e
+  | Wait e -> "Wait (" ^ print_expr e ^ ")"
   | Vanish -> "Vanish"
-  | Action ai -> "Action" ^ print_ind print_action ai
+  | Action ai -> "Action (" ^ print_ind print_action ai ^ ")"
 
 and print_bullet (Bullet (diro, spdo, acts)) =
   "Bullet (" ^ print_option print_dir diro
