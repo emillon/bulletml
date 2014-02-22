@@ -25,17 +25,16 @@ let unit_vec dir =
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
 
-let rec eval e =
-  let ev_op = function
-    | Add -> ( +. )
-    | Mul -> ( *. )
-    | Sub -> ( -. )
-    | Div -> ( /. )
-    | Mod -> fun x y -> float (int_of_float x mod int_of_float y)
-  in
-  match e with
+let eval_op = function
+  | Add -> ( +. )
+  | Mul -> ( *. )
+  | Sub -> ( -. )
+  | Div -> ( /. )
+  | Mod -> fun x y -> float (int_of_float x mod int_of_float y)
+
+let rec eval = function
   | Num f -> f
-  | Op (op, x, y) -> ev_op op (eval x) (eval y)
+  | Op (op, x, y) -> eval_op op (eval x) (eval y)
   | Rand -> Random.float 1.0
   | Param _ -> failwith "Param"
   | Rank -> 0.5
