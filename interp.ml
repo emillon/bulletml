@@ -289,7 +289,6 @@ let _ =
   let state = ref (initial_state aenv fenv k) in
   while true; do
     let s = !state in
-    Printf.printf "#%d\n" s.frame;
     flush stdout;
     Sdlevent.pump ();
     begin
