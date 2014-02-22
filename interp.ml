@@ -330,7 +330,7 @@ let _ =
     begin
       match Sdlevent.poll () with
       | Some ( Sdlevent.MOUSEBUTTONDOWN _
-             | Sdlevent.KEYDOWN { keysym = Sdlkey.KEY_q } ) -> raise Exit
+             | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_q } ) -> raise Exit
       | _ -> ()
     end;
     clear surf;
