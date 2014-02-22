@@ -169,6 +169,14 @@ let eval_speed self = function
   | SpdRel e -> eval e +. self.speed
   | SpdSeq e -> eval e (* FIXME *)
 
+let oneof x y z =
+  match x with
+  | Some r -> r
+  | None ->
+    match y with
+    | Some r -> r
+    | None -> z
+
 let rec next_prog st self :obj = match self.prog with
   | [] -> self
   | OpRepeatE (n_e, a)::k ->
@@ -180,23 +188,12 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 0::k -> next_prog st { self with prog = k }
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
-  | OpFire (dir_o, spd_o, bi)::k ->
+  | OpFire (dir_f, spd_f, bi)::k ->
     let Bullet (dir_b, spd_b, ais) = eval_ind st.bullet_env bi in
-    let d =
-      match dir_b with
-      | Some dir -> eval_dir self dir
-      | None ->
-        match dir_o with
-        | Some dir -> eval_dir self dir
-        | None -> self.dir
-    in
-    let s = match spd_b with
-      | Some s -> eval_speed self s
-      | None ->
-        match spd_o with
-        | Some spd -> eval_speed self spd
-        | None -> self.speed
-    in
+    let dir = oneof dir_b dir_f (DirAbs (Num self.dir)) in
+    let spd = oneof spd_b spd_f (SpdAbs (Num self.speed)) in
+    let d = eval_dir self dir in
+    let s = eval_speed self spd in
     let sas: action = List.map (fun ai -> Action ai) ais in
     let ops: opcode list = seq_prog st sas [] in
     let o =
