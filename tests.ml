@@ -117,7 +117,7 @@ let tests () =
         end
       | `Bulletml bspec ->
         let b = Parser.parse_xml x in
-        OUnit.assert_equal ~printer:Printer.print_bulletml b bspec
+        OUnit.assert_equal ~printer:Printer.print_bulletml bspec b
     in
     (n, `Quick, run_test)
   in
