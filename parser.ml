@@ -115,7 +115,7 @@ and parse_action nodes :action =
         Wait t
       | Xml.Element ("fire", _, ns) ->
         let f = parse_fire ns in
-        Fire f
+        Fire (Direct f)
       | Xml.Element ("vanish", [], []) ->
         Vanish
       | Xml.Element ("repeat", [],
@@ -133,7 +133,7 @@ and parse_action nodes :action =
         let term = parse_expr s_term in
         ChangeDirection (dir, term)
       | Xml.Element ("actionRef", [(("label"|"LABEL"), s)], []) ->
-        ActionRef s
+        Action (Indirect s)
       | Xml.Element (name, attrs, _) ->
         failwith ("parse_action: " ^ name ^ " (attrs: "^print_attrs attrs^")")
       | Xml.PCData _ ->
@@ -164,10 +164,11 @@ and parse_bullet nodes :bullet =
 
 let parse_elems nodes =
   List.map (function
-      | Xml.Element ("action", _, ns) ->
+      | Xml.Element ("action", [(("label"|"LABEL"), l)], ns) ->
         let act = parse_action ns in
-        EAction act
-      | Xml.Element (s, _, _) -> failwith ("parse_elems: " ^ s)
+        EAction (l, act)
+      | Xml.Element (s, attrs, _) ->
+        failwith ("parse_elems: " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
       | Xml.PCData _ -> failwith "parse_elems: PCData"
     ) nodes
 

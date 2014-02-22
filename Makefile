@@ -1,9 +1,8 @@
+.PHONY: build check
 TESTEXEC=_obuild/bulletml_tests/bulletml_tests.asm
 
-$(TESTEXEC):
+build:
 	ocp-build
 
-.PHONY: check
-
-check: $(TESTEXEC)
-	./$<
+check: build
+	./$(TESTEXEC)
