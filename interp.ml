@@ -186,10 +186,10 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
   | OpFire (None, Some dir, Some spd, bi)::k ->
     let d = eval_dir self dir in
-    let s = match spd with (* FIXME *)
+    let s = match spd with
       | SpdAbs e -> eval e
-      | SpdRel e -> eval e
-      | SpdSeq e -> eval e
+      | SpdRel e -> eval e +. self.speed
+      | SpdSeq e -> eval e (* FIXME *)
     in
     let bullet = eval_ind st.bullet_env bi in
     let o = make_bullet st self s d bullet in
