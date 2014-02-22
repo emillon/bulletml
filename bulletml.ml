@@ -21,6 +21,7 @@ type direction =
   | DirAbs of expr
   | DirSeq of expr
   | DirAim of expr
+  | DirRel of expr
 
 type 'a id = string
 

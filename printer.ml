@@ -35,6 +35,7 @@ let print_dir = function
   | DirAbs e -> "DirAbs (" ^ print_expr e ^ ")"
   | DirSeq e -> "DirSeq (" ^ print_expr e ^ ")"
   | DirAim e -> "DirAim (" ^ print_expr e ^ ")"
+  | DirRel e -> "DirRel (" ^ print_expr e ^ ")"
 
 let print_spd = function
   | SpdAbs e -> "SpdAbs (" ^ print_expr e ^ ")"

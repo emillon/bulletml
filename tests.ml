@@ -125,6 +125,24 @@ let testspecs =
     )
     )
   (* }}} *)
+  ; ("[1943]_rolling_fire.xml", `Bulletml ( (* {{{ *)
+      BulletML (Vertical,
+                [ EAction ("top",
+                           [ Fire (Direct (None, None, None, Indirect "roll"))
+                           ])
+                ; EBullet ("roll",
+                           Bullet (None , None, [ Direct
+                                                    [ Wait (Num 40. +@ Rand *@ Num 20.)
+                                                    ; ChangeDirection (DirRel (Num (-90.)), Num 4.)
+                                                    ; ChangeSpeed (SpdAbs (Num 3.), Num 4.)
+                                                    ; Wait (Num 4.)
+                                                    ; ChangeDirection (DirSeq (Num 15.), Num 9999.)
+                                                    ; Wait (Num 80. +@ Rand *@ Num 40.)
+                                                    ; Vanish
+                                                    ]]))
+                ]
+               )))
+  (* }}} *)
   ]
 
 let tests () =

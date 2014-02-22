@@ -57,6 +57,7 @@ let print_attrs attrs =
 let interp_dir x = function
   | [(("type"|"TYPE"), "absolute")] -> DirAbs x
   | [(("type"|"TYPE"), "sequence")] -> DirSeq x
+  | [(("type"|"TYPE"), "relative")] -> DirRel x
   | [(("type"|"TYPE"), "aim")]
   | [] -> DirAim x
   | a -> failwith ("interp_dir: " ^ print_attrs a)
