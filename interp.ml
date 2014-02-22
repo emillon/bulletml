@@ -321,7 +321,7 @@ let _ =
     (print_env benv)
     (print_env fenv);
   let act = List.assoc patname aenv in
-  let dummy_state = initial_state [] [] [] [] in
+  let dummy_state = initial_state aenv benv fenv [] in
   let k = build_prog dummy_state [] (Action (Direct act)) in
   let state = ref (initial_state aenv benv fenv k) in
   while true; do
