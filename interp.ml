@@ -284,6 +284,13 @@ let _ =
     let s = !state in
     Printf.printf "#%d\n" s.frame;
     flush stdout;
+    Sdlevent.pump ();
+    begin
+      match Sdlevent.poll () with
+      | Some ( Sdlevent.MOUSEBUTTONDOWN _
+             | Sdlevent.KEYDOWN { keysym = Sdlkey.KEY_q } ) -> raise Exit
+      | _ -> ()
+    end;
     clear surf;
     draw_frame surf s;
     Sdlvideo.flip surf;
