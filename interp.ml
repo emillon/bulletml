@@ -354,19 +354,6 @@ let next_state s =
 let rec collect_obj p =
   [p] @ List.flatten (List.map collect_obj p.children)
 
-let draw_bullet window b =
-  let (px, py) = int_pos b.pos in
-  let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
-  let bullet = Sdlloader.load_image "bullet.png" in
-  Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
-
-let draw_frame window state =
-  let objs =
-    List.filter
-      (fun o -> not o.vanished)
-      (collect_obj state.main)
-  in
-  List.iter (draw_bullet window) objs
 
 let clear surf =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
@@ -391,6 +378,20 @@ let _ =
   let dummy_state = initial_state aenv benv fenv [] in
   let k = build_prog dummy_state [] (Action (Direct act)) in
   let state = ref (initial_state aenv benv fenv k) in
+  let bullet = Sdlloader.load_image "bullet.png" in
+  let draw_bullet window b =
+    let (px, py) = int_pos b.pos in
+    let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
+    Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
+  in
+  let draw_frame window state =
+    let objs =
+      List.filter
+        (fun o -> not o.vanished)
+        (collect_obj state.main)
+    in
+    List.iter (draw_bullet window) objs
+  in
   while true; do
     let s = !state in
     flush stdout;
