@@ -41,7 +41,8 @@ let rec eval = function
 
 let eval_ind e = function
   | Direct x -> x
-  | Indirect n -> List.assoc n e
+  | Indirect (n, _params) ->
+    List.assoc n e
 
 type 'a linear_map =
   { frame_start : int

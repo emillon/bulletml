@@ -27,7 +27,7 @@ type 'a id = string
 
 type 'a ind =
   | Direct of 'a
-  | Indirect of 'a id
+  | Indirect of 'a id * expr list
 
 type subaction =
   | Repeat of expr * action ind

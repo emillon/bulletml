@@ -74,6 +74,12 @@ let interp_speed x = function
   | [] -> SpdAbs x
   | a -> failwith ("interp_speed: " ^ print_attrs a)
 
+let parse_params = List.map (function
+    | Xml.Element ("param", [], [Xml.PCData s]) ->
+      parse_expr s
+    | _ -> failwith "parse_params"
+  )
+
 let rec parse_fire nodes :fire =
   let dir = ref None in
   let speed = ref None in
@@ -85,10 +91,11 @@ let rec parse_fire nodes :fire =
           let b = parse_bullet ns in
           bullet := Some (Direct b)
         end
-      | Xml.Element ("bulletRef", [("label" | "LABEL"), s], []) ->
+      | Xml.Element ("bulletRef", [("label" | "LABEL"), s], ns) ->
         begin
           assert (!bullet = None);
-          bullet := Some (Indirect s)
+          let params = parse_params ns in
+          bullet := Some (Indirect (s, params))
         end
       | Xml.Element ("direction", attrs, [Xml.PCData s]) ->
         begin
@@ -134,8 +141,9 @@ and parse_action nodes :action =
       | Xml.Element ("fire", _, ns) ->
         let f = parse_fire ns in
         Fire (Direct f)
-      | Xml.Element ("fireRef", [("LABEL", l)], _) ->
-        Fire (Indirect l)
+      | Xml.Element ("fireRef", [("LABEL", l)], ns) ->
+        let params = parse_params ns in
+        Fire (Indirect (l, params))
       | Xml.Element ("vanish", [], _) ->
         Vanish
       | Xml.Element ("repeat", [],
@@ -152,8 +160,9 @@ and parse_action nodes :action =
         let dir = interp_dir (parse_expr s_dir) attrs in
         let term = parse_expr s_term in
         ChangeDirection (dir, term)
-      | Xml.Element ("actionRef", [(("label"|"LABEL"), s)], []) ->
-        Action (Indirect s)
+      | Xml.Element ("actionRef", [(("label"|"LABEL"), s)], ns) ->
+        let params = parse_params ns in
+        Action (Indirect (s, params))
       | Xml.Element (name, attrs, _) ->
         failwith ("parse_action: " ^ name ^ " (attrs: "^print_attrs attrs^")")
       | Xml.PCData _ ->

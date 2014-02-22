@@ -7,16 +7,16 @@ let print_option prn = function
   | Some x -> "Some ("^prn x^")"
   | None -> "None"
 
-let print_ind prn = function
-  | Direct x -> "Direct (" ^ prn x ^ ")"
-  | Indirect n -> "Indirect ("^n ^ ")"
-
 let print_hv = function
   | NoDir      -> "NoDir"
   | Horizontal -> "Horizontal"
   | Vertical   -> "Vertical"
 
-let rec print_expr =
+let rec print_ind prn = function
+  | Direct x -> "Direct (" ^ prn x ^ ")"
+  | Indirect (n, args) -> "Indirect (" ^ n ^ ", " ^ print_list print_expr args ^ ")"
+
+and print_expr =
   let p_op = function
     | Add -> " + "
     | Sub -> " - "

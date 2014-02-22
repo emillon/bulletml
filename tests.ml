@@ -17,16 +17,16 @@ let testspecs =
        ; Fire (Direct (None, None, Direct bulletDefault))
        ; Fire (Direct (Some (DirAbs (
            Num 330. +@ Rand *@ Num 25.
-         )), None, Indirect "downAccel"))
+         )), None, Indirect ("downAccel", [])))
        ; Vanish
        ])
   ; ("03.xml", `Fire
-       (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect "rocket"))
+       (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect ("rocket", [])))
   ; ("04.xml", `Action
        [ Repeat (Num 100., Direct [
             Fire (Direct (Some (DirAbs (
                 Num 220. +@ Rand *@ Num 100.
-              )), None, Indirect "backBurst"))
+              )), None, Indirect ("backBurst", [])))
           ; Wait (Num 6.)
           ])
        ])
@@ -58,7 +58,7 @@ let testspecs =
                            ; Repeat
                                ( Num 25.
                                , Direct
-                                   [ Action (Indirect "allWay")
+                                   [ Action (Indirect ("allWay", []))
                                    ; Wait (Num 3.)
                                    ])
                            ])
@@ -69,7 +69,7 @@ let testspecs =
                            ; Repeat
                                ( Num 25.
                                , Direct
-                                   [ Action (Indirect "allWay")
+                                   [ Action (Indirect ("allWay", []))
                                    ; Wait (Num 3.)
                                    ])
                            ])
@@ -78,10 +78,10 @@ let testspecs =
                            [ Repeat
                                ( Num 2.
                                , Direct
-                                   [ Action (Indirect "right")
-                                   ; Action (Indirect "left")
-                                   ; Action (Indirect "left")
-                                   ; Action (Indirect "right")
+                                   [ Action (Indirect ("right", []))
+                                   ; Action (Indirect ("left", []))
+                                   ; Action (Indirect ("left", []))
+                                   ; Action (Indirect ("right", []))
                                    ])
                            ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
                            ; Wait (Num 1.)
@@ -97,7 +97,7 @@ let testspecs =
                            ; ChangeDirection (DirSeq (Num 0.7), Num 514.)
                            ; Wait (Num 2.)
                            ; Repeat (Num 32., (Direct
-                                                 [ Action (Indirect "shoot")
+                                                 [ Action (Indirect ("shoot", []))
                                                  ; Wait (Num 16.)
                                                  ]))
                            ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
@@ -108,7 +108,7 @@ let testspecs =
                                        [ Fire (Direct
                                                  ( Some (DirSeq (Num 360. /@ (Num 1. +@ Num 63. *@ Rank)))
                                                  , Some (SpdAbs (Num 1.28 +@ Num 0.08 *@ Rand))
-                                                 , Indirect "curve"
+                                                 , Indirect ("curve", [])
                                                  ))])
                            ])
                 ; EBullet ("curve",
@@ -125,7 +125,7 @@ let testspecs =
   ; ("[1943]_rolling_fire.xml", `Bulletml ( (* {{{ *)
       BulletML (Vertical,
                 [ EAction ("top",
-                           [ Fire (Direct (None, None, Indirect "roll"))
+                           [ Fire (Direct (None, None, Indirect ("roll", [])))
                            ])
                 ; EBullet ("roll",
                            Bullet (None , None, [ Direct
@@ -151,12 +151,12 @@ let testspecs =
                                    [ Fire (Direct (( Some (DirSeq ((Num (-11.) -@ Rand *@ Num 2.)))
                                                    , Some (SpdAbs (Num 1.5))
                                                    , Direct bulletDefault)))
-                                   ; Action (Indirect "add3")
+                                   ; Action (Indirect ("add3", []))
                                    ; Repeat (Num 4., Direct (
                                        [ Fire (Direct (( Some (DirSeq (Num 0.))
                                                        , Some (SpdSeq ((Num 0.1 +@ (Rank *@ Num 0.2))))
                                                        , Direct bulletDefault)))
-                                       ; Action (Indirect "add3")
+                                       ; Action (Indirect ("add3", []))
                                        ]))
                                    ; Wait ((Num 336. /@ (Num 10. +@ Rank *@ Num 18.)))]))
                                ; Vanish
@@ -176,7 +176,7 @@ let testspecs =
                                  [ Fire (Direct (( Some (DirSeq (((Num 8. -@ Rank *@ Num 4.) *@ Param 1)))
                                                  , Some (SpdAbs (Num 1.2))
                                                  , Direct bulletDefault)))
-                                 ; Action (Indirect "add3")
+                                 ; Action (Indirect ("add3", []))
                                  ; Wait (((Num 8. -@ Rank *@ Num 4.) +@ Rand))
                                  ]))
                              ; Vanish
@@ -185,17 +185,17 @@ let testspecs =
                          ( None
                          , None
                          , Direct (Bullet (None, None, [Direct (
-                             [ Fire (Indirect "slowColorChange")
+                             [ Fire (Indirect ("slowColorChange", [Param 1]))
                              ; Vanish
                              ])]))))
                 ; EAction ("top",
-                           [ Fire (Direct ((Some (DirAbs (Num (-85.))), None, Indirect "fast")))
+                           [ Fire (Direct ((Some (DirAbs (Num (-85.))), None, Indirect ("fast", []))))
                            ; Wait (Num 1.)
-                           ; Fire (Direct ((Some (DirAbs (Num 85.)), None, Indirect "fast")))
+                           ; Fire (Direct ((Some (DirAbs (Num 85.)), None, Indirect ("fast", []))))
                            ; Wait (Num 1.)
-                           ; Fire (Indirect "slow")
+                           ; Fire (Indirect ("slow", [Num (1.)]))
                            ; Wait (Num 1.)
-                           ; Fire (Indirect "slow")
+                           ; Fire (Indirect ("slow", [Num (-1.)]))
                            ; Wait (Num 430.)
                            ])
                 ])
