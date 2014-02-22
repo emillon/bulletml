@@ -1,3 +1,5 @@
+comp = ["-g"]
+
 begin program "bulletml_tests"
       files = ["bulletml.ml" "printer" "parser.ml" "tests.ml"]
       requires = ["mparser" "alcotest" "xml-light"]
