@@ -1,7 +1,7 @@
 open Bulletml
 
-let screen_w = 640
-let screen_h = 480
+let screen_w = 800
+let screen_h = 600
 
 let from_deg x =
   let pi = acos (-1.) in
@@ -20,7 +20,7 @@ let ( *% ) (x, y) l =
 
 let unit_vec dir =
   let dir_rad = from_deg dir in
-  (sin dir_rad, cos dir_rad)
+  (sin dir_rad, cos dir_rad) *% 0.4
 
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
@@ -405,7 +405,6 @@ let _ =
     clear surf;
     draw_frame surf s;
     Sdlvideo.flip surf;
-    Sdltimer.delay (1000 / 60);
     state := next_state s;
   done;
   Sdl.quit ()
