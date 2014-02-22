@@ -9,6 +9,9 @@ type position = (float * float)
 let (+:) (xa, ya) (xb, yb) =
   (xa +. xb, ya +. yb)
 
+let (-:) (xa, ya) (xb, yb) =
+  (xa -. xb, ya -. yb)
+
 let ( *% ) (x, y) l =
   (x *. l, y *. l)
 
@@ -63,6 +66,7 @@ type obj =
   ; dir : float
   ; children : obj list
   ; pos : position
+  ; prev_dir : float
   }
 
 type state =
@@ -125,8 +129,17 @@ let initial_state ae fe k =
       ; dir = 0.0
       ; children = []
       ; pos = (100.0, 100.0)
+      ; prev_dir = 0.0
       }
   }
+
+let dir_to_ship obj =
+  let ship_pos = (100.0, 190.0) in
+  let (vx, vy) = (ship_pos -: obj.pos) in
+  atan2 vy vx
+
+let dir_to_prev obj =
+  obj.prev_dir
 
 let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
@@ -143,10 +156,10 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
   | OpFire (None, Some dir, Some spd, Direct (Bullet (None, None, [])))::k ->
-    let d = match dir with (* FIXME *)
+    let d = match dir with
       | DirAbs e -> eval e
-      | DirAim e -> eval e
-      | DirSeq e -> eval e
+      | DirAim e -> eval e +. dir_to_ship self
+      | DirSeq e -> eval e +. dir_to_prev self
     in
     let s = match spd with (* FIXME *)
       | SpdAbs e -> eval e
@@ -225,7 +238,7 @@ let animate_physics o =
 let rec animate st o =
   let new_children =
     List.map (animate st) o.children in
-  let o1 = { o with children = new_children } in
+  let o1 = { o with children = new_children ; prev_dir = o.dir } in
   let o2 = next_prog st o1 in
   let o3 = animate_physics o2 in
   o3
