@@ -333,12 +333,30 @@ let rec next_prog st self :obj = match self.prog with
     in
     { self with prog = nk }
 
+(**
+ * Detect if a bullet should be deleted.
+ *
+ * It's unclear what to do about orphan bullets:
+ *  - Sometimes oob bullets continue to spawn bullets that will get in bounds.
+ *  - Sometimes oob bullets should be pruned, but their children need to live
+ *
+ * To be conservative, a children = [] works.
+ * At worst, the parent bullet will get deleted next frame.
+ **)
+let prunable o =
+  let is_oob (x, y) =
+    x < 0.0 || y < 0.0 || x >= float screen_w || y >= float screen_w
+  in
+  o.children = [] && (o.vanished || is_oob o.pos)
+
 let animate_physics o =
   { o with pos = (o.pos +: unit_vec o.dir *% o.speed) }
 
 let rec animate st o =
   let new_children =
-    List.map (animate st) o.children in
+    List.map (animate st)
+      ( List.filter (fun o -> not (prunable o)) o.children)
+  in
   let o1 = { o with children = new_children } in
   let o2 = next_prog st o1 in
   let o3 = animate_physics o2 in
