@@ -138,9 +138,7 @@ let rec parse_fire nodes :fire =
           let sp = parse_expr s in
           speed := Some (interp_speed sp attrs)
         end
-      | Xml.Element (s, attrs, _) ->
-        failwith ("parse_fire: " ^ s ^ " (attrs: "^print_attrs attrs^")")
-      | Xml.PCData _ -> failwith "parse_fire: PCData"
+      | x -> fail_parse "parse_fire" x
     ) nodes;
   let bul = match !bullet with
     | Some b -> b
@@ -241,10 +239,11 @@ let parse_xml = function
     let elems = parse_elems ns in
     let dir = begin match attrs with
       | [] -> NoDir
+      | [("TYPE", "none")] -> NoDir
       | [("XMLNS", _);("TYPE", "none")] -> NoDir
       | [("XMLNS", _);("TYPE", "vertical")] -> Vertical
       | [("XMLNS", _);("TYPE", "horizontal")] -> Horizontal
-      | _ -> failwith ("parse_xml: attrs = " ^ print_attrs attrs ^ ")")
+      | x -> failwith ("parse_xml: attrs = " ^ print_attrs attrs ^ ")")
     end in
     BulletML (dir, elems)
   | _ -> assert false
