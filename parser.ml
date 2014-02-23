@@ -228,6 +228,7 @@ let parse_xml = function
       | [] -> NoDir
       | [("XMLNS", _);("TYPE", "none")] -> NoDir
       | [("XMLNS", _);("TYPE", "vertical")] -> Vertical
+      | [("XMLNS", _);("TYPE", "horizontal")] -> Horizontal
       | _ -> failwith ("parse_xml: attrs = " ^ print_attrs attrs ^ ")")
     end in
     BulletML (dir, elems)
