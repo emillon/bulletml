@@ -47,13 +47,14 @@ let parse_expr s :expr =
     return (Param n)
   in
   let rec term s =
-    choice [ Tokens.parens expr
-           ; attempt float_num
-           ; num
-           ; rand
-           ; rank
-           ; param
-           ] s
+    (spaces >> choice
+       [ Tokens.parens expr
+       ; attempt float_num
+       ; num
+       ; rand
+       ; rank
+       ; param
+       ]) s
   and expr s = MParser.expression operators term s in
   match parse_string expr s () with
   | Success x -> x
