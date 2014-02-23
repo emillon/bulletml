@@ -60,6 +60,11 @@ let parse_expr s :expr =
 let print_attrs attrs =
   Printer.print_list (fun (x, y) -> x^"="^y) attrs
 
+let fail_parse msg = function
+  | Xml.Element (s, attrs, _) ->
+    failwith (msg ^ ": " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
+  | Xml.PCData _ -> failwith (msg ^ ": PCData")
+
 let interp_dir x = function
   | [(("type"|"TYPE"), "absolute")] -> DirAbs x
   | [(("type"|"TYPE"), "sequence")] -> DirSeq x
@@ -154,6 +159,13 @@ and parse_action nodes :action =
         let times = parse_expr s_times in
         let act = parse_action ns in
         Repeat (times, Direct act)
+      | Xml.Element ("repeat", [],
+                     [ Xml.Element ("times", _, [Xml.PCData s_times])
+                     ; Xml.Element ("actionRef", [("LABEL", l)], ns)
+                     ]) ->
+        let times = parse_expr s_times in
+        let p = parse_params ns in
+        Repeat (times, Indirect (l, p))
       | Xml.Element ("changeDirection", [],
                      [Xml.Element ("direction", attrs, [Xml.PCData s_dir])
                      ;Xml.Element ("term", [], [Xml.PCData s_term])
@@ -164,10 +176,7 @@ and parse_action nodes :action =
       | Xml.Element ("actionRef", [(("label"|"LABEL"), s)], ns) ->
         let params = parse_params ns in
         Action (Indirect (s, params))
-      | Xml.Element (name, attrs, _) ->
-        failwith ("parse_action: " ^ name ^ " (attrs: "^print_attrs attrs^")")
-      | Xml.PCData _ ->
-        failwith "parse_action: PCData"
+      | x -> fail_parse "parse_action" x
     ) nodes
 
 and parse_bullet nodes :bullet =
@@ -188,7 +197,10 @@ and parse_bullet nodes :bullet =
       | Xml.Element ("action", _, ns) ->
         let a = parse_action ns in
         acts := (Direct a) :: !acts
-      | _ -> assert false
+      | Xml.Element ("actionRef", [("LABEL", l)], ns) ->
+        let p = parse_params ns in
+        acts := (Indirect (l, p)) :: !acts
+      | x -> fail_parse "parse_bullet" x
     ) nodes;
   Bullet (!dir, !speed, List.rev !acts)
 
@@ -203,9 +215,7 @@ let parse_elems nodes =
       | Xml.Element ("fire", [(("label"|"LABEL"), l)], ns) ->
         let f = parse_fire ns in
         EFire (l, f)
-      | Xml.Element (s, attrs, _) ->
-        failwith ("parse_elems: " ^ s ^ " (attrs: " ^ print_attrs attrs ^ ")")
-      | Xml.PCData _ -> failwith "parse_elems: PCData"
+      | x -> fail_parse "parse_elems" x
     ) nodes
 
 let parse_xml = function
