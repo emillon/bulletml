@@ -39,8 +39,8 @@ let parse_expr s :expr =
     Tokens.float >>= fun n ->
     return (Num (mknum_float sign ( n)))
   in
-  let rand = string "$rand" >> return Rand in
-  let rank = string "$rank" >> return Rank in
+  let rand = string "$rand" >> spaces >> return Rand in
+  let rank = string "$rank" >> spaces >> return Rank in
   let param =
     char '$' >>
     Tokens.decimal >>= fun n ->
@@ -55,7 +55,7 @@ let parse_expr s :expr =
        ; rank
        ; param
        ]) s
-  and expr s = MParser.expression operators term s in
+  and expr s = (spaces >> MParser.expression operators term) s in
   match parse_string expr s () with
   | Success x -> x
   | Failed (msg, _) ->
