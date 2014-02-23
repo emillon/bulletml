@@ -8,14 +8,17 @@ let parse_expr s :expr =
   let open MParser in
   let app op x y = Op (op, x, y) in
   let infix sym f assoc = Infix  (Tokens.skip_symbol sym >> return (app f), assoc) in
+  let prefix sym f      = Prefix (Tokens.skip_symbol sym >> return f) in
   let operators:(('a, 's) operator list) list =
-    [ [ infix "*" Mul Assoc_left
+    [ [ prefix "-" (fun x -> Op (Sub, Num 0., x)) ]
+    ; [ infix "*" Mul Assoc_left
       ; infix "/" Div Assoc_left
       ; infix "%" Mod Assoc_left
       ]
     ; [ infix "+" Add Assoc_left
       ; infix "-" Sub Assoc_left
-      ]] in
+      ]
+    ] in
   let mknum sign n = match sign with
     | Some '-' -> float (-n)
     | None -> float n

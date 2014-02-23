@@ -6,6 +6,7 @@ let testspecs =
   let ( -@ ) = fun x y -> Op (Sub, x, y) in
   let ( *@ ) = fun x y -> Op (Mul, x, y) in
   let ( /@ ) = fun x y -> Op (Div, x, y) in
+  let ( ~@ ) = fun x   -> Num 0. -@ x in
   [ ("fragments/01.xml", `Bullet (
        Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
            Direct [Accel (None, Some (Num 3.), Num 120.)]
@@ -35,7 +36,7 @@ let testspecs =
                 [ EAction ("allWay",
                            [ Fire
                                ( Direct
-                                   ( Some (DirAim (Op (Add, (Num (-50.)), Op (Mul, Rand, Num 20.))))
+                                   ( Some (DirAim (Op (Add, ~@ (Num 50.), Op (Mul, Rand, Num 20.))))
                                    , Some (SpdAbs (Op (Add, Num 1., Rank)))
                                    , Direct bulletDefault
                                    )
@@ -64,7 +65,7 @@ let testspecs =
                            ])
 
                 ; EAction ("left",
-                           [ ChangeDirection (DirAbs (Num (-90.)), Num 1.)
+                           [ ChangeDirection (DirAbs (~@ (Num 90.)), Num 1.)
                            ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
                            ; Repeat
                                ( Num 25.
@@ -130,7 +131,8 @@ let testspecs =
                 ; EBullet ("roll",
                            Bullet (None , None, [ Direct
                                                     [ Wait (Num 40. +@ Rand *@ Num 20.)
-                                                    ; ChangeDirection (DirRel (Num (-90.)), Num 4.)
+                                                    ; ChangeDirection (DirRel
+                                                                         (~@ (Num 90.)), Num 4.)
                                                     ; ChangeSpeed (SpdAbs (Num 3.), Num 4.)
                                                     ; Wait (Num 4.)
                                                     ; ChangeDirection (DirSeq (Num 15.), Num 9999.)
@@ -148,7 +150,7 @@ let testspecs =
                                ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
                                ; Wait (Num 20.)
                                ; Repeat ((Num 10. +@ Rank *@ Num 18.), Direct (
-                                   [ Fire (Direct (( Some (DirSeq ((Num (-11.) -@ Rand *@ Num 2.)))
+                                   [ Fire (Direct (( Some (DirSeq (((~@ (Num 11.)) -@ Rand *@ Num 2.)))
                                                    , Some (SpdAbs (Num 1.5))
                                                    , Direct bulletDefault)))
                                    ; Action (Indirect ("add3", []))
@@ -189,13 +191,13 @@ let testspecs =
                              ; Vanish
                              ])]))))
                 ; EAction ("top",
-                           [ Fire (Direct ((Some (DirAbs (Num (-85.))), None, Indirect ("fast", []))))
+                           [ Fire (Direct ((Some (DirAbs (~@ (Num 85.))), None, Indirect ("fast", []))))
                            ; Wait (Num 1.)
                            ; Fire (Direct ((Some (DirAbs (Num 85.)), None, Indirect ("fast", []))))
                            ; Wait (Num 1.)
                            ; Fire (Indirect ("slow", [Num (1.)]))
                            ; Wait (Num 1.)
-                           ; Fire (Indirect ("slow", [Num (-1.)]))
+                           ; Fire (Indirect ("slow", [~@ (Num 1.)]))
                            ; Wait (Num 430.)
                            ])
                 ])
