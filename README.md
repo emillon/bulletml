@@ -35,6 +35,12 @@ Contributors are welcome ! But please don't forget to follow the
 
 Feel free to report issues [on github](https://github.com/emillon/bulletml/issues).
 
+### Legal stuff
+
+This can be redistributed under the BSD-2 clause license (see LICENSE).
+
+(but you can totally buy me a beer if you think it's worth it)
+
 ### Links
 
   - [Official site](http://www.asahi-net.or.jp/~cs8k-cyu/bulletml/index_e.html)
