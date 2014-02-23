@@ -241,10 +241,12 @@ let tests () =
   List.map mk_test testspecs
 
 let parse_tests () =
+  let files_a = (Sys.readdir "examples") in
+  Array.sort String.compare files_a;
   let files =
     List.filter
       ((<>) "fragments")
-      (Array.to_list (Sys.readdir "examples"))
+      (Array.to_list files_a)
   in
   List.map (fun n ->
       let f () =
