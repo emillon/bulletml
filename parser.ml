@@ -90,6 +90,25 @@ let parse_params = List.map (function
     | _ -> failwith "parse_params"
   )
 
+let parse_accel ns =
+  let h = ref None in
+  let v = ref None in
+  let t = ref None in
+  List.iter (function
+      | Xml.Element ("horizontal", _, [Xml.PCData s]) ->
+        h := Some (parse_expr s)
+      | Xml.Element ("vertical", _, [Xml.PCData s]) ->
+        v := Some (parse_expr s)
+      | Xml.Element ("term", _, [Xml.PCData s]) ->
+        t := Some (parse_expr s)
+      | x -> fail_parse "parse_accel" x
+    ) ns;
+  let term = match !t with
+    | Some tt -> tt
+    | None -> assert false
+  in
+  Accel (!h, !v, term)
+
 let rec parse_fire nodes :fire =
   let dir = ref None in
   let speed = ref None in
@@ -131,13 +150,8 @@ let rec parse_fire nodes :fire =
 
 and parse_action nodes :action =
   List.map (function
-      | Xml.Element ("accel", _,
-                     [ Xml.Element ("vertical", _, [Xml.PCData s_vert])
-                     ; Xml.Element ("term", _,     [Xml.PCData s_term])
-                     ]) ->
-        let vert = parse_expr s_vert in
-        let term = parse_expr s_term in
-        Accel (None, Some vert, term)
+      | Xml.Element ("accel", _, ns) ->
+        parse_accel ns
       | Xml.Element ("changeSpeed", [],
                      [ Xml.Element ("speed", attrs, [Xml.PCData s_speed])
                      ; Xml.Element ("term", [], [Xml.PCData s_term])
