@@ -72,6 +72,7 @@ let interp_speed x = function
   | [("TYPE", "sequence")] -> SpdSeq x
   | [("TYPE", "absolute")]
   | [] -> SpdAbs x
+  | [("TYPE", "relative")] -> SpdRel x
   | a -> failwith ("interp_speed: " ^ print_attrs a)
 
 let parse_params = List.map (function
