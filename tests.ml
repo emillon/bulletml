@@ -6,12 +6,12 @@ let testspecs =
   let ( -@ ) = fun x y -> Op (Sub, x, y) in
   let ( *@ ) = fun x y -> Op (Mul, x, y) in
   let ( /@ ) = fun x y -> Op (Div, x, y) in
-  [ ("01.xml", `Bullet (
+  [ ("fragments/01.xml", `Bullet (
        Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
            Direct [Accel (None, Some (Num 3.), Num 120.)]
          ]
          )))
-  ; ("02.xml", `Action
+  ; ("fragments/02.xml", `Action
        [ ChangeSpeed (SpdAbs (Num 0.), Num 60.)
        ; Wait (Num 60.)
        ; Fire (Direct (None, None, Direct bulletDefault))
@@ -20,9 +20,9 @@ let testspecs =
          )), None, Indirect ("downAccel", [])))
        ; Vanish
        ])
-  ; ("03.xml", `Fire
+  ; ("fragments/03.xml", `Fire
        (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect ("rocket", [])))
-  ; ("04.xml", `Action
+  ; ("fragments/04.xml", `Action
        [ Repeat (Num 100., Direct [
             Fire (Direct (Some (DirAbs (
                 Num 220. +@ Rand *@ Num 100.
@@ -240,5 +240,23 @@ let tests () =
   in
   List.map mk_test testspecs
 
+let parse_tests () =
+  let files =
+    List.filter
+      ((<>) "fragments")
+      (Array.to_list (Sys.readdir "examples"))
+  in
+  List.map (fun n ->
+      let f () =
+        let x = Xml.parse_file ("examples/" ^ n) in
+        let _b = Parser.parse_xml x in
+        ()
+      in
+      (n, `Quick, f)
+    ) files
+
 let _ =
-  Alcotest.run "BulletML" ["examples", tests ()]
+  Alcotest.run "BulletML"
+    [ ("parse", parse_tests ())
+    ; ("spec", tests ())
+    ]
