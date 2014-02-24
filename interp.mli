@@ -1,15 +1,15 @@
 open Syntax
 open Interp_types
 
-val read_prog : t -> (action env * bullet env * fire env)
+val read_prog : t -> (action table * bullet table * fire table)
 
 val initial_state
   :  (int * int)  (** Screen resolution *)
   -> position     (** Enemy pos *)
   -> position     (** Ship pos *)
-  -> action env
-  -> bullet env
-  -> fire env
+  -> action table
+  -> bullet table
+  -> fire table
   -> opcode list
   -> state
 

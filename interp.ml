@@ -103,9 +103,9 @@ let ind_call getenv sub st = function
     let p = number_params params in
     sub p a
 
-let eval_ai = ind_call (fun st -> st.action_env) (subst_action)
-let eval_bi = ind_call (fun st -> st.bullet_env) (subst_bullet)
-let eval_fi = ind_call (fun st -> st.fire_env) (subst_fire)
+let eval_ai = ind_call (fun st -> st.actions) (subst_action)
+let eval_bi = ind_call (fun st -> st.bullets) (subst_bullet)
+let eval_fi = ind_call (fun st -> st.fires) (subst_fire)
 
 let interp_map st m =
   let frames_done = float (st.frame - m.frame_start) in
@@ -166,9 +166,9 @@ let initial_state (sw, sh) pos spos ae be fe k =
   ; ship_pos = spos
   ; screen_w = sw
   ; screen_h = sh
-  ; action_env = ae
-  ; bullet_env = be
-  ; fire_env = fe
+  ; actions = ae
+  ; bullets = be
+  ; fires = fe
   ; main =
       { prog = k
       ; speed = 0.0

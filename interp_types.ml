@@ -2,7 +2,7 @@ open Syntax
 
 type position = (float * float)
 
-type 'a env = ('a id * 'a) list
+type 'a table = ('a id * 'a) list
 
 type 'a linear_map =
   { frame_start : int
@@ -40,8 +40,8 @@ type state =
   ; ship_pos : (float * float)
   ; screen_w : int
   ; screen_h : int
-  ; action_env : action env
-  ; bullet_env : bullet env
-  ; fire_env : fire env
+  ; actions : action table
+  ; bullets : bullet table
+  ; fires : fire table
   ; main : obj
   }
