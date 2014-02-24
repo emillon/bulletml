@@ -1,8 +1,5 @@
 open Syntax
 
-let screen_w = 800
-let screen_h = 600
-
 let from_deg x =
   let pi = acos (-1.) in
   2. *. pi *. x /. 360.
@@ -126,6 +123,9 @@ type obj =
 
 type state =
   { frame : int
+  ; ship_pos : (float * float)
+  ; screen_w : int
+  ; screen_h : int
   ; action_env : (action id * action) list
   ; bullet_env : (bullet id * bullet) list
   ; fire_env : (fire id * fire) list
@@ -204,8 +204,11 @@ let read_prog (BulletML (hv, ts)) =
     ) ts;
   (!ae, !be, !fe)
 
-let initial_state ae be fe k =
+let initial_state (sw, sh) pos spos ae be fe k =
   { frame = 0
+  ; ship_pos = spos
+  ; screen_w = sw
+  ; screen_h = sh
   ; action_env = ae
   ; bullet_env = be
   ; fire_env = fe
@@ -214,16 +217,15 @@ let initial_state ae be fe k =
       ; speed = 0.0
       ; dir = 0.0
       ; children = []
-      ; pos = (float screen_w /. 2., float screen_h *. 0.3)
+      ; pos = pos
       ; prev_dir = 0.0
       ; prev_speed = 0.0
       ; vanished = false
       }
   }
 
-let dir_to_ship obj =
-  let ship_pos = (float screen_w /. 2., float screen_h *.0.9) in
-  let (vx, vy) = (ship_pos -: obj.pos) in
+let dir_to_ship st obj =
+  let (vx, vy) = (st.ship_pos -: obj.pos) in
   atan2 vy vx
 
 let dir_to_prev obj =
@@ -232,9 +234,9 @@ let dir_to_prev obj =
 let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
-let eval_dir self = function
+let eval_dir st self = function
   | DirAbs e -> eval e
-  | DirAim e -> eval e +. dir_to_ship self
+  | DirAim e -> eval e +. dir_to_ship st self
   | DirSeq e -> eval e +. dir_to_prev self
   | DirRel e -> eval e +. self.dir
 
@@ -266,7 +268,7 @@ let rec next_prog st self :obj = match self.prog with
     let Bullet (dir_b, spd_b, ais) = eval_bi st bi in
     let dir = oneof dir_b dir_f (DirAbs (Num self.dir)) in
     let spd = oneof spd_b spd_f (SpdAbs (Num self.speed)) in
-    let d = eval_dir self dir in
+    let d = eval_dir st self dir in
     let s = eval_speed self spd in
     let sas: action = List.map (fun ai -> Action ai) ais in
     let ops: opcode list = seq_prog st sas [] in
@@ -314,7 +316,7 @@ let rec next_prog st self :obj = match self.prog with
     else
       { self with dir = interp_map st m }
   | OpDirE (d_e, t_e)::k ->
-    let dir = eval_dir self d_e in
+    let dir = eval_dir st self d_e in
     let t = int_of_float (eval t_e) in
     let m =
       { frame_start = st.frame
@@ -357,9 +359,9 @@ let rec next_prog st self :obj = match self.prog with
  * To be conservative, a children = [] works.
  * At worst, the parent bullet will get deleted next frame.
  **)
-let prunable o =
+let prunable st o =
   let is_oob (x, y) =
-    x < 0.0 || y < 0.0 || x >= float screen_w || y >= float screen_w
+    x < 0.0 || y < 0.0 || x >= float st.screen_w || y >= float st.screen_w
   in
   o.children = [] && (o.vanished || is_oob o.pos)
 
@@ -369,7 +371,7 @@ let animate_physics o =
 let rec animate st o =
   let new_children =
     List.map (animate st)
-      ( List.filter (fun o -> not (prunable o)) o.children)
+      ( List.filter (fun o -> not (prunable st o)) o.children)
   in
   let o1 = { o with children = new_children } in
   let o2 = next_prog st o1 in
@@ -385,59 +387,3 @@ let next_state s =
 
 let rec collect_obj p =
   [p] @ List.flatten (List.map collect_obj p.children)
-
-
-let clear surf =
-  let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
-  Sdlvideo.fill_rect ~rect surf 0x00ffffffl
-
-let _ =
-  let (fname, patname) = match Sys.argv with
-    | [| _ ; a1 ; a2 |] -> (a1, a2)
-    | [| _ ; a1 |] -> (a1, "top")
-    | _ -> failwith "usage: bulletml pattern.xml name"
-  in
-  let x = Xml.parse_file fname in
-  let bml = Parser.parse_xml x in
-  Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
-  let surf = Sdlvideo.set_video_mode ~w:screen_w ~h:screen_h [] in
-  let (aenv, benv, fenv) = read_prog bml in
-  let print_env e = String.concat ", " (List.map fst e) in
-  Printf.printf "a: %s\nb: %s\nf: %s\n"
-    (print_env aenv)
-    (print_env benv)
-    (print_env fenv);
-  let act = List.assoc patname aenv in
-  let dummy_state = initial_state aenv benv fenv [] in
-  let k = build_prog dummy_state [] (Action (Direct act)) in
-  let state = ref (initial_state aenv benv fenv k) in
-  let bullet = Sdlloader.load_image "bullet.png" in
-  let draw_bullet window b =
-    let (px, py) = int_pos b.pos in
-    let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
-    Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
-  in
-  let draw_frame window state =
-    let objs =
-      List.filter
-        (fun o -> not o.vanished)
-        (collect_obj state.main)
-    in
-    List.iter (draw_bullet window) objs
-  in
-  while true; do
-    let s = !state in
-    flush stdout;
-    Sdlevent.pump ();
-    begin
-      match Sdlevent.poll () with
-      | Some ( Sdlevent.MOUSEBUTTONDOWN _
-             | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_q } ) -> raise Exit
-      | _ -> ()
-    end;
-    clear surf;
-    draw_frame surf s;
-    Sdlvideo.flip surf;
-    state := next_state s;
-  done;
-  Sdl.quit ()

@@ -1,7 +1,7 @@
 comp = ["-g"]
 
 begin library "bulletml"
-  files = ["syntax.ml" "printer.ml" "parser.ml"]
+  files = ["syntax.ml" "printer.ml" "parser.ml" "interp.ml"]
   requires = ["mparser" "xml-light"]
 end
 
@@ -11,6 +11,6 @@ begin program "bulletml_tests"
 end
 
 begin program "bulletml_run"
-  files = ["interp.ml"]
+  files = ["run.ml"]
   requires = ["bulletml" "sdl" "sdl.sdlimage"]
 end
