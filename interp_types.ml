@@ -35,7 +35,7 @@ type obj =
   ; vanished : bool
   }
 
-type state =
+type env =
   { frame : int
   ; ship_pos : (float * float)
   ; screen_w : int

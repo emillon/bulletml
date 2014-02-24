@@ -161,7 +161,7 @@ let read_prog (BulletML (hv, ts)) =
     ) ts;
   (!ae, !be, !fe)
 
-let initial_state (sw, sh) pos spos ae be fe k =
+let build_env (sw, sh) pos spos ae be fe k =
   { frame = 0
   ; ship_pos = spos
   ; screen_w = sw

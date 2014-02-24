@@ -28,16 +28,16 @@ let main () =
     (print_env benv)
     (print_env fenv);
   let act = List.assoc patname aenv in
-  let init_s =
-    initial_state
+  let init_e =
+    build_env
       (screen_w, screen_h)
       enemy_pos
       ship_pos
       aenv benv fenv
   in
-  let dummy_state = init_s [] in
-  let k = build_prog dummy_state [] (Syntax.Action (Syntax.Direct act)) in
-  let state = ref (init_s k) in
+  let dummy_env = init_e [] in
+  let k = build_prog dummy_env [] (Syntax.Action (Syntax.Direct act)) in
+  let state = ref (init_e k) in
   let bullet = Sdlloader.load_image "bullet.png" in
   let draw_bullet window b =
     let (px, py) = int_pos b.pos in
