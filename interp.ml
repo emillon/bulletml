@@ -288,10 +288,7 @@ let rec next_prog st self :obj = match self.prog with
     ; prev_speed = ps
     }
   | OpSpdE (sp_e, t_e)::k ->
-    let sp = match sp_e with
-      | SpdAbs e -> eval e
-      | _ -> assert false
-    in
+    let sp = eval_speed self sp_e in
     let t = int_of_float (eval t_e) in
     let m =
       { frame_start = st.frame
