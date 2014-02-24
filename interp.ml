@@ -120,6 +120,7 @@ type obj =
   ; children : obj list
   ; pos : position
   ; prev_dir : float
+  ; prev_speed : float
   ; vanished : bool
   }
 
@@ -210,6 +211,7 @@ let initial_state ae be fe k =
       ; children = []
       ; pos = (float screen_w /. 2., float screen_h *. 0.3)
       ; prev_dir = 0.0
+      ; prev_speed = 0.0
       ; vanished = false
       }
   }
@@ -234,7 +236,7 @@ let eval_dir self = function
 let eval_speed self = function
   | SpdAbs e -> eval e
   | SpdRel e -> eval e +. self.speed
-  | SpdSeq e -> eval e (* FIXME *)
+  | SpdSeq e -> eval e +. self.prev_speed
 
 let oneof x y z =
   match x with
@@ -275,12 +277,18 @@ let rec next_prog st self :obj = match self.prog with
       | DirSeq _ -> d
       | _ -> self.prev_dir
     in
-    { self with prog = k ; children = o::self.children ; prev_dir = pd }
-  | OpSpdE (sp_e, t_e)::k ->
-    let sp = match sp_e with
-      | SpdAbs e -> eval e
-      | _ -> assert false
+    let ps = match spd with
+      | SpdSeq _ -> s
+      | _ -> self.prev_speed
     in
+    { self with
+      prog = k
+    ; children = o::self.children
+    ; prev_dir = pd
+    ; prev_speed = ps
+    }
+  | OpSpdE (sp_e, t_e)::k ->
+    let sp = eval_speed self sp_e in
     let t = int_of_float (eval t_e) in
     let m =
       { frame_start = st.frame
