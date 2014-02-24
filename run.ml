@@ -11,6 +11,7 @@ let clear surf =
 
 let main () =
   let open Interp in
+  let open Interp_types in
   let (fname, patname) = match Sys.argv with
     | [| _ ; a1 ; a2 |] -> (a1, a2)
     | [| _ ; a1 |] -> (a1, "top")
