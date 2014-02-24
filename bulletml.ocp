@@ -1,11 +1,16 @@
 comp = ["-g"]
 
-begin program "bulletml_tests"
-      files = ["syntax.ml" "printer" "parser.ml" "tests.ml"]
-      requires = ["mparser" "alcotest" "xml-light"]
+begin library "bulletml"
+  files = ["syntax.ml" "printer.ml" "parser.ml"]
+  requires = ["mparser" "xml-light"]
 end
 
-begin program "bulletml"
-      files = ["syntax.ml" "printer" "parser.ml" "interp.ml"]
-      requires = ["mparser" "xml-light" "sdl.sdlimage" "sdl"]
+begin program "bulletml_tests"
+  files = ["tests.ml"]
+  requires = ["bulletml" "alcotest"]
+end
+
+begin program "bulletml_run"
+  files = ["interp.ml"]
+  requires = ["bulletml" "sdl" "sdl.sdlimage"]
 end
