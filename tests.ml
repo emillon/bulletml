@@ -1,6 +1,6 @@
 
 let testspecs =
-  let open Bulletml in
+  let open Syntax in
   let bulletDefault = Bullet (None, None, []) in
   let ( +@ ) = fun x y -> Op (Add, x, y) in
   let ( -@ ) = fun x y -> Op (Sub, x, y) in

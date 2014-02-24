@@ -1,11 +1,11 @@
 comp = ["-g"]
 
 begin program "bulletml_tests"
-      files = ["bulletml.ml" "printer" "parser.ml" "tests.ml"]
+      files = ["syntax.ml" "printer" "parser.ml" "tests.ml"]
       requires = ["mparser" "alcotest" "xml-light"]
 end
 
 begin program "bulletml"
-      files = ["bulletml.ml" "printer" "parser.ml" "interp.ml"]
+      files = ["syntax.ml" "printer" "parser.ml" "interp.ml"]
       requires = ["mparser" "xml-light" "sdl.sdlimage" "sdl"]
 end

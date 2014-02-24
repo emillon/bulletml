@@ -1,4 +1,4 @@
-open Bulletml
+open Syntax
 
 let screen_w = 800
 let screen_h = 600

@@ -1,4 +1,4 @@
-open Bulletml
+open Syntax
 
 let parse_string s = 
   let x = Xml.parse_string s in
