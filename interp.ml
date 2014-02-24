@@ -110,7 +110,7 @@ type opcode =
   | OpDirE of direction * expr
   | OpDirN of float linear_map
   | OpAccelE of expr * expr * expr
-  | OpAccelN of unit linear_map
+  | OpAccelN of (float * float) linear_map
   | OpVanish
 
 type obj =
@@ -154,6 +154,11 @@ let interp_map st m =
   let frames_done = float (st.frame - m.frame_start) in
   let frames_total = float (m.frame_end - m.frame_start) in
   m.val_start +. frames_done *. (m.val_end -. m.val_start) /. frames_total
+
+let interp_map_vec st (m:(float*float) linear_map) : (float*float) =
+  let frames_done = float (st.frame - m.frame_start) in
+  let frames_total = float (m.frame_end - m.frame_start) in
+  m.val_start +: ((m.val_end -: m.val_start) *% (frames_done /. frames_total))
 
 let rec replicate n x =
   match n with
@@ -321,25 +326,26 @@ let rec next_prog st self :obj = match self.prog with
     next_prog st { self with prog = OpDirN m::k }
   | OpVanish::_ -> next_prog st { self with prog = [] ; vanished = true }
   | OpAccelE (h_e, v_e, t_e)::k ->
-    let _h = eval h_e in
-    let _v = eval v_e in
+    let h = eval h_e in
+    let v = eval v_e in
     let t = eval t_e in
+    let vec_spd = (unit_vec self.dir) *% self.speed in
     let m =
       { frame_start = st.frame
       ; frame_end = st.frame + int_of_float t
-      ; val_start = ()
-      ; val_end = ()
+      ; val_start = vec_spd
+      ; val_end = vec_spd +: (h, v)
       }
     in
     next_prog st { self with prog = OpAccelN m::k }
-  | OpAccelN m::k as ck ->
-    let nk =
-      if st.frame > m.frame_end then
-        k
-      else
-        ck
-    in
-    { self with prog = nk }
+  | OpAccelN m::k ->
+    if st.frame > m.frame_end then
+      { self with prog = k }
+    else
+      let (vx, vy) = interp_map_vec st m in
+      let ns = hypot vx vy in
+      let nd = atan2 vx vy in
+      { self with speed = ns ; dir = nd }
 
 (**
  * Detect if a bullet should be deleted.
