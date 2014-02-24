@@ -43,5 +43,4 @@ type env =
   ; actions : action table
   ; bullets : bullet table
   ; fires : fire table
-  ; main : obj
   }

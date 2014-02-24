@@ -161,24 +161,15 @@ let read_prog (BulletML (hv, ts)) =
     ) ts;
   (!ae, !be, !fe)
 
-let build_env (sw, sh) pos spos ae be fe k =
-  { frame = 0
-  ; ship_pos = spos
-  ; screen_w = sw
-  ; screen_h = sh
-  ; actions = ae
-  ; bullets = be
-  ; fires = fe
-  ; main =
-      { prog = k
-      ; speed = 0.0
-      ; dir = 0.0
-      ; children = []
-      ; pos = pos
-      ; prev_dir = 0.0
-      ; prev_speed = 0.0
-      ; vanished = false
-      }
+let initial_obj k pos =
+  { prog = k
+  ; speed = 0.0
+  ; dir = 0.0
+  ; children = []
+  ; pos = pos
+  ; prev_dir = 0.0
+  ; prev_speed = 0.0
+  ; vanished = false
   }
 
 let dir_to_ship st obj =
@@ -334,13 +325,6 @@ let rec animate st o =
   let o2 = next_prog st o1 in
   let o3 = animate_physics o2 in
   o3
-
-let next_state s =
-  let next_m = animate s s.main in
-  { s with
-    frame = s.frame + 1
-  ; main = next_m
-  }
 
 let rec collect_obj p =
   [p] @ List.flatten (List.map collect_obj p.children)

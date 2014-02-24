@@ -28,32 +28,43 @@ let main () =
     (print_env benv)
     (print_env fenv);
   let act = List.assoc patname aenv in
-  let init_e =
-    build_env
-      (screen_w, screen_h)
-      enemy_pos
-      ship_pos
-      aenv benv fenv
+  let dummy_env =
+    { frame = 0
+    ; ship_pos = ship_pos
+    ; screen_w = screen_w
+    ; screen_h = screen_h
+    ; actions = []
+    ; bullets = []
+    ; fires = []
+    }
   in
-  let dummy_env = init_e [] in
   let k = build_prog dummy_env [] (Syntax.Action (Syntax.Direct act)) in
-  let state = ref (init_e k) in
+  let state = ref (initial_obj k ship_pos) in
   let bullet = Sdlloader.load_image "bullet.png" in
   let draw_bullet window b =
     let (px, py) = int_pos b.pos in
     let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
     Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
   in
-  let draw_frame window state =
+  let draw_frame window root =
     let objs =
       List.filter
         (fun o -> not o.vanished)
-        (collect_obj state.main)
+        (collect_obj root)
     in
     List.iter (draw_bullet window) objs
   in
+  let f = ref 0 in
   while true; do
-    let s = !state in
+    let env =
+      { dummy_env with
+        frame = !f
+      ; actions = aenv
+      ; bullets = benv
+      ; fires = fenv
+      }
+    in
+    let o = !state in
     flush stdout;
     Sdlevent.pump ();
     begin
@@ -63,9 +74,10 @@ let main () =
       | _ -> ()
     end;
     clear surf;
-    draw_frame surf s;
+    draw_frame surf o;
     Sdlvideo.flip surf;
-    state := next_state s;
+    state := animate env o;
+    incr f;
   done;
   Sdl.quit ()
 
