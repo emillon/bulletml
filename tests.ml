@@ -259,8 +259,37 @@ let parse_all () =
   in
   [("Parse examples", `Quick, f)]
 
+let tests_compile () =
+  let open Bulletml.Syntax in
+  let open Bulletml.Interp_types in
+  let n = "[1943]_rolling_fire.xml" in
+  let exp = [OpFire ((None, None, Indirect ("roll", [])))] in
+  let f () =
+    let x = Xml.parse_file ("examples/" ^ n) in
+    let b = Bulletml.Parser.parse_xml x in
+    let (ae, be, fe) = Bulletml.Interp.read_prog b in
+    let top = List.assoc "top" ae in
+    let env =
+      { frame = 0
+      ; ship_pos = (100., 50.)
+      ; screen_w = 200
+      ; screen_h = 200
+      ; actions = ae
+      ; bullets = be
+      ; fires = fe
+      }
+    in
+    let got = Bulletml.Interp.build_prog env [] (Action (Direct top)) in
+    let printer ops =
+      Bulletml.Printer.print_list Bulletml.Printer.print_opcode ops
+    in
+    OUnit.assert_equal ~printer got exp;
+  in
+  [(n, `Quick, f)]
+
 let _ =
   Alcotest.run "BulletML"
     [ ("parse", parse_all ())
     ; ("spec", tests ())
+    ; ("compile", tests_compile ())
     ]

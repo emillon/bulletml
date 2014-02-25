@@ -1,4 +1,5 @@
 open Syntax
+open Interp_types
 
 let print_list prn l =
   "["^ String.concat ", " (List.map prn l) ^ "]"
@@ -76,3 +77,26 @@ let print_elem = function
 
 let print_bulletml (BulletML (hv, elems)) =
   "BulletML (" ^ print_hv hv ^ ", " ^ print_list print_elem elems ^ ")"
+
+let print_variant n params =
+  n ^ " (" ^ String.concat "," params ^ ")"
+
+let print_linear_map prn m =
+  Printf.sprintf
+    "{ frame_start = %d ; frame_end = %d ; val_start = %s ; val_end = %s }"
+    m.frame_start m.frame_end (prn m.val_start) (prn m.val_end)
+
+let print_pos (x, y) = Printf.sprintf "(%f,%f)" x y
+
+let print_opcode = function
+  | OpRepeatE (e, a) -> print_variant "OpRepeatE " [print_expr e;print_action a]
+  | OpWaitE e -> print_variant "OpWaitE" [print_expr e]
+  | OpWaitN n -> print_variant "OpWaitN" [string_of_int n]
+  | OpFire f -> print_variant "OpFire" [print_fire f]
+  | OpSpdE (s, e) -> print_variant "OpSpdE" [print_spd s;print_expr e]
+  | OpSpdN m -> print_variant "OpSpdN" [print_linear_map string_of_float m]
+  | OpDirE (d, e) -> print_variant "OpDirE" [print_expr e]
+  | OpDirN m -> print_variant "OpDirN" [print_linear_map string_of_float m]
+  | OpAccelE (e1, e2, e3) -> print_variant "OpAccelE" [print_expr e1;print_expr e2;print_expr e3]
+  | OpAccelN m -> print_variant "OpAccelN" [print_linear_map print_pos m]
+  | OpVanish -> "OpVanish"
