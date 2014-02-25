@@ -18,3 +18,25 @@ begin program "bulletml_run"
   files = ["run.ml"]
   requires = ["bulletml" "sdl" "sdl.sdlimage"]
 end
+
+begin
+  generated = true
+
+  dirname = [ "%{js_of_ocaml.syntax_SRC_DIR}%" ]
+
+  begin objects "js_of_ocaml.camlp4-syntax.objects"
+    files = [ "pa_js.ml" ]
+  end
+
+  begin syntax "js_of_ocaml.camlp4-syntax"
+    requires = [ "js_of_ocaml.camlp4-syntax.objects" "camlp4o" ]
+  end
+
+end
+
+begin program "app"
+  has_asm = false
+  files = ["jsapp.ml"]
+  syntax = "js_of_ocaml.camlp4-syntax"
+  requires = ["bulletml" "js_of_ocaml" "js_of_ocaml.camlp4-syntax"]
+end

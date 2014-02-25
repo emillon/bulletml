@@ -56,3 +56,10 @@ type elem =
   | EFire of string * fire
 
 type t = BulletML of hv * elem list
+
+let ( +@ ) = fun x y -> Op (Add, x, y)
+let ( -@ ) = fun x y -> Op (Sub, x, y)
+let ( *@ ) = fun x y -> Op (Mul, x, y)
+let ( /@ ) = fun x y -> Op (Div, x, y)
+let ( ~@ ) = fun x   -> Num 0. -@ x
+let bulletDefault = Bullet (None, None, [])
