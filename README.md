@@ -5,6 +5,7 @@ BulletML is a language designed to express bullet behaviour in a shoot'em up
 game (turn left, accelerate, spawn children, etc).
 
 ![A pattern](http://i.imgur.com/KsVnjFN.gif)
+![Another pattern](http://i.imgur.com/uZv0jSc.gif)
 
 This repository contains a set of tools to manipulate BulletML in OCaml.
 
