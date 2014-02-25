@@ -23,6 +23,7 @@ type opcode =
   | OpAccelE of expr * expr * expr
   | OpAccelN of (float * float) linear_map
   | OpVanish
+  | OpCall of string * expr list
 
 type obj =
   { prog : opcode list
