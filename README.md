@@ -6,6 +6,7 @@ game (turn left, accelerate, spawn children, etc).
 
 ![A pattern](http://i.imgur.com/KsVnjFN.gif)
 ![Another pattern](http://i.imgur.com/uZv0jSc.gif)
+![Yet another one](http://i.imgur.com/X9ogXAX.gif)
 
 This repository contains a set of tools to manipulate BulletML in OCaml.
 
