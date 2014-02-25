@@ -7,12 +7,12 @@ let testspecs =
   let ( *@ ) = fun x y -> Op (Mul, x, y) in
   let ( /@ ) = fun x y -> Op (Div, x, y) in
   let ( ~@ ) = fun x   -> Num 0. -@ x in
-  [ ("fragments/01.xml", `Bullet (
+  [ ("fragments/01.xml", `Bullet ( (*{{{*)
        Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
            Direct [Accel (None, Some (Num 3.), Num 120.)]
          ]
-         )))
-  ; ("fragments/02.xml", `Action
+         ))) (*}}}*)
+  ; ("fragments/02.xml", `Action (*{{{*)
        [ ChangeSpeed (SpdAbs (Num 0.), Num 60.)
        ; Wait (Num 60.)
        ; Fire (Direct (None, None, Direct bulletDefault))
@@ -20,17 +20,18 @@ let testspecs =
            Num 330. +@ Rand *@ Num 25.
          )), None, Indirect ("downAccel", [])))
        ; Vanish
-       ])
-  ; ("fragments/03.xml", `Fire
-       (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect ("rocket", [])))
-  ; ("fragments/04.xml", `Action
+       ]) (*}}}*)
+  ; ("fragments/03.xml", `Fire (*{{{*)
+       (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect ("rocket", []))
+    ) (*}}}*)
+  ; ("fragments/04.xml", `Action (*{{{*)
        [ Repeat (Num 100., Direct [
             Fire (Direct (Some (DirAbs (
                 Num 220. +@ Rand *@ Num 100.
               )), None, Indirect ("backBurst", [])))
           ; Wait (Num 6.)
           ])
-       ])
+       ]) (*}}}*)
   ; ("[Dodonpachi]_hibachi.xml"), `Bulletml ( (* {{{ *)
       BulletML (NoDir,
                 [ EAction ("allWay",
