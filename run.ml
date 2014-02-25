@@ -40,7 +40,7 @@ let main () =
     }
   in
   let k = build_prog dummy_env [] (Action (Direct act)) in
-  let state = ref (initial_obj k ship_pos) in
+  let state = ref (initial_obj k enemy_pos) in
   let bullet = Sdlloader.load_image "bullet.png" in
   let draw_bullet window b =
     let (px, py) = int_pos b.pos in
