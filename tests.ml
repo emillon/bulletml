@@ -243,7 +243,7 @@ let tests () =
   in
   List.map mk_test testspecs
 
-let parse_tests () =
+let parse_all () =
   let files_a = (Sys.readdir "examples") in
   Array.sort String.compare files_a;
   let files =
@@ -251,17 +251,16 @@ let parse_tests () =
       ((<>) "fragments")
       (Array.to_list files_a)
   in
-  List.map (fun n ->
-      let f () =
-        let x = Xml.parse_file ("examples/" ^ n) in
-        let _b = Bulletml.Parser.parse_xml x in
-        ()
-      in
-      (n, `Quick, f)
+  let f () = List.iter (fun n ->
+      let x = Xml.parse_file ("examples/" ^ n) in
+      let _b = Bulletml.Parser.parse_xml x in
+      ()
     ) files
+  in
+  [("Parse examples", `Quick, f)]
 
 let _ =
   Alcotest.run "BulletML"
-    [ ("parse", parse_tests ())
+    [ ("parse", parse_all ())
     ; ("spec", tests ())
     ]
