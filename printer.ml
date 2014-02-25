@@ -103,3 +103,4 @@ let print_opcode = function
   | OpAccelE (e1, e2, e3) -> print_variant "OpAccelE" [print_expr e1;print_expr e2;print_expr e3]
   | OpAccelN m -> print_variant "OpAccelN" [print_linear_map print_pos m]
   | OpVanish -> "OpVanish"
+  | OpCall (n, es) -> print_variant "OpCall" [n;print_list print_expr es]

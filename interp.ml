@@ -100,7 +100,10 @@ let ind_call getenv sub st = function
   | Direct x -> x
   | Indirect (n, params) ->
     let a = List.assoc n (getenv st) in
-    let p = number_params params in
+    let params_ev = List.map (
+        fun e -> Num (eval e)
+      ) params in
+    let p = number_params params_ev in
     sub p a
 
 let eval_ai = ind_call (fun st -> st.actions) (subst_action)
@@ -140,9 +143,10 @@ let rec build_prog st next = function
     in
     OpAccelE (default ho, default vo, e)::next
   | Vanish -> OpVanish :: next
-  | Action ai ->
-    let a = eval_ai st ai in
+  | Action (Direct a) ->
     seq_prog st a next
+  | Action (Indirect (n, exprs)) ->
+    OpCall (n, exprs)::next
 
 and seq_prog st act next =
   List.fold_right
@@ -296,6 +300,12 @@ let rec next_prog st self :obj = match self.prog with
       let ns = hypot vx vy in
       let nd = atan2 vx vy in
       { self with speed = ns ; dir = nd }
+  | OpCall (n, params)::k ->
+    let act_templ = List.assoc n st.actions in
+    let params_ev = List.map (fun e -> Num (eval e)) params in
+    let p = number_params params_ev in
+    let act = subst_action p act_templ in
+    next_prog st { self with prog = seq_prog st act k }
 
 (**
  * Detect if a bullet should be deleted.
