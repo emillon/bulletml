@@ -3,7 +3,7 @@ comp = ["-g"]
 begin library "bulletml"
   files = [
     pack Bulletml [
-      "syntax.ml" "printer.ml" "parser.ml" "interp_types.ml" "interp.ml"
+      "syntax.ml" "interp_types.ml" "printer.ml" "parser.ml" "interp.ml"
     ]
   ]
   requires = ["mparser" "xml-light"]

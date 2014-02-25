@@ -7,12 +7,12 @@ let testspecs =
   let ( *@ ) = fun x y -> Op (Mul, x, y) in
   let ( /@ ) = fun x y -> Op (Div, x, y) in
   let ( ~@ ) = fun x   -> Num 0. -@ x in
-  [ ("fragments/01.xml", `Bullet (
+  [ ("fragments/01.xml", `Bullet ( (*{{{*)
        Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
            Direct [Accel (None, Some (Num 3.), Num 120.)]
          ]
-         )))
-  ; ("fragments/02.xml", `Action
+         ))) (*}}}*)
+  ; ("fragments/02.xml", `Action (*{{{*)
        [ ChangeSpeed (SpdAbs (Num 0.), Num 60.)
        ; Wait (Num 60.)
        ; Fire (Direct (None, None, Direct bulletDefault))
@@ -20,17 +20,18 @@ let testspecs =
            Num 330. +@ Rand *@ Num 25.
          )), None, Indirect ("downAccel", [])))
        ; Vanish
-       ])
-  ; ("fragments/03.xml", `Fire
-       (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect ("rocket", [])))
-  ; ("fragments/04.xml", `Action
+       ]) (*}}}*)
+  ; ("fragments/03.xml", `Fire (*{{{*)
+       (Some (DirAbs (Num 270.)), Some (SpdAbs (Num 2.)), Indirect ("rocket", []))
+    ) (*}}}*)
+  ; ("fragments/04.xml", `Action (*{{{*)
        [ Repeat (Num 100., Direct [
             Fire (Direct (Some (DirAbs (
                 Num 220. +@ Rand *@ Num 100.
               )), None, Indirect ("backBurst", [])))
           ; Wait (Num 6.)
           ])
-       ])
+       ]) (*}}}*)
   ; ("[Dodonpachi]_hibachi.xml"), `Bulletml ( (* {{{ *)
       BulletML (NoDir,
                 [ EAction ("allWay",
@@ -242,7 +243,11 @@ let tests () =
   in
   List.map mk_test testspecs
 
-let parse_tests () =
+let parse_example n =
+  let x = Xml.parse_file ("examples/" ^ n) in
+  Bulletml.Parser.parse_xml x
+
+let for_all_examples f () =
   let files_a = (Sys.readdir "examples") in
   Array.sort String.compare files_a;
   let files =
@@ -250,17 +255,65 @@ let parse_tests () =
       ((<>) "fragments")
       (Array.to_list files_a)
   in
-  List.map (fun n ->
-      let f () =
-        let x = Xml.parse_file ("examples/" ^ n) in
-        let _b = Bulletml.Parser.parse_xml x in
-        ()
-      in
-      (n, `Quick, f)
+  List.iter (fun n ->
+      f n (parse_example n)
     ) files
+
+let compile b =
+  let open Bulletml.Syntax in
+  let open Bulletml.Interp_types in
+  let (ae, be, fe) = Bulletml.Interp.read_prog b in
+  let top =
+    try
+      List.assoc "top" ae
+    with Not_found -> List.assoc "top1" ae
+  in
+  let env =
+    { frame = 0
+    ; ship_pos = (100., 50.)
+    ; screen_w = 200
+    ; screen_h = 200
+    ; actions = ae
+    ; bullets = be
+    ; fires = fe
+    }
+  in
+  Bulletml.Interp.build_prog env [] (Action (Direct top))
+
+let compspecs =
+  let open Bulletml.Syntax in
+  let open Bulletml.Interp_types in
+  [ ("[1943]_rolling_fire.xml", [OpFire ((None, None, Indirect ("roll", [])))])
+  ]
+
+let tests_compile () =
+  let printer ops = Bulletml.Printer.print_list Bulletml.Printer.print_opcode ops in
+  let mk_test (n, spec) =
+    let f () =
+      let got =
+        compile (parse_example n)
+      in
+      OUnit.assert_equal ~printer got spec;
+    in
+    (n, `Quick, f)
+  in
+  List.map mk_test compspecs
+
+let parse_all =
+  for_all_examples (fun _n _b -> ())
+
+let compile_all =
+  for_all_examples (fun n b ->
+      try
+        let _ops = compile b in ()
+      with Not_found ->
+        OUnit.assert_failure ("Cannot compile " ^ n)
+    )
 
 let _ =
   Alcotest.run "BulletML"
-    [ ("parse", parse_tests ())
-    ; ("spec", tests ())
+    [ ("parse", [("Parse examples", `Quick, parse_all)])
+    ; ("pspec", tests ())
+    ; ("comp", [("Compile examples", `Quick, compile_all)])
+    ; ("cspec", tests_compile ())
     ]
