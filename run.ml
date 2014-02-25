@@ -10,15 +10,16 @@ let clear surf =
   Sdlvideo.fill_rect ~rect surf 0x00ffffffl
 
 let main () =
-  let open Interp in
-  let open Interp_types in
+  let open Bulletml.Syntax in
+  let open Bulletml.Interp in
+  let open Bulletml.Interp_types in
   let (fname, patname) = match Sys.argv with
     | [| _ ; a1 ; a2 |] -> (a1, a2)
     | [| _ ; a1 |] -> (a1, "top")
     | _ -> failwith "usage: bulletml pattern.xml name"
   in
   let x = Xml.parse_file fname in
-  let bml = Parser.parse_xml x in
+  let bml = Bulletml.Parser.parse_xml x in
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
   let surf = Sdlvideo.set_video_mode ~w:screen_w ~h:screen_h [] in
   let (aenv, benv, fenv) = read_prog bml in
@@ -38,7 +39,7 @@ let main () =
     ; fires = []
     }
   in
-  let k = build_prog dummy_env [] (Syntax.Action (Syntax.Direct act)) in
+  let k = build_prog dummy_env [] (Action (Direct act)) in
   let state = ref (initial_obj k ship_pos) in
   let bullet = Sdlloader.load_image "bullet.png" in
   let draw_bullet window b =

@@ -1,6 +1,6 @@
 
 let testspecs =
-  let open Syntax in
+  let open Bulletml.Syntax in
   let bulletDefault = Bullet (None, None, []) in
   let ( +@ ) = fun x y -> Op (Add, x, y) in
   let ( -@ ) = fun x y -> Op (Sub, x, y) in
@@ -216,27 +216,27 @@ let tests () =
       | `Bullet bspec ->
         begin match x with
           | Xml.Element ("bullet", _, ns) ->
-            let b = Parser.parse_bullet ns in
+            let b = Bulletml.Parser.parse_bullet ns in
             OUnit.assert_equal b bspec
           | _ -> OUnit.assert_failure "not a bullet"
         end
       | `Action aspec ->
         begin match x with
           | Xml.Element ("action", [], ns) ->
-            let a = Parser.parse_action ns in
+            let a = Bulletml.Parser.parse_action ns in
             OUnit.assert_equal a aspec
           | _ -> OUnit.assert_failure "not an action"
         end
       | `Fire fspec ->
         begin match x with
           | Xml.Element ("fire", [], ns) ->
-            let f = Parser.parse_fire ns in
+            let f = Bulletml.Parser.parse_fire ns in
             OUnit.assert_equal f fspec
           | _ -> OUnit.assert_failure "not a fire"
         end
       | `Bulletml bspec ->
-        let b = Parser.parse_xml x in
-        OUnit.assert_equal ~printer:Printer.print_bulletml bspec b
+        let b = Bulletml.Parser.parse_xml x in
+        OUnit.assert_equal ~printer:Bulletml.Printer.print_bulletml bspec b
     in
     (n, `Quick, run_test)
   in
@@ -253,7 +253,7 @@ let parse_tests () =
   List.map (fun n ->
       let f () =
         let x = Xml.parse_file ("examples/" ^ n) in
-        let _b = Parser.parse_xml x in
+        let _b = Bulletml.Parser.parse_xml x in
         ()
       in
       (n, `Quick, f)
