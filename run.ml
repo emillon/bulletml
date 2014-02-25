@@ -29,17 +29,17 @@ let main () =
     (print_env benv)
     (print_env fenv);
   let act = List.assoc patname aenv in
-  let dummy_env =
+  let global_env =
     { frame = 0
     ; ship_pos = ship_pos
     ; screen_w = screen_w
     ; screen_h = screen_h
-    ; actions = []
-    ; bullets = []
-    ; fires = []
+    ; actions = aenv
+    ; bullets = benv
+    ; fires = fenv
     }
   in
-  let k = build_prog dummy_env [] (Action (Direct act)) in
+  let k = build_prog global_env [] (Action (Direct act)) in
   let state = ref (initial_obj k enemy_pos) in
   let bullet = Sdlloader.load_image "bullet.png" in
   let draw_bullet window b =
@@ -58,11 +58,8 @@ let main () =
   let f = ref 0 in
   while true; do
     let env =
-      { dummy_env with
+      { global_env with
         frame = !f
-      ; actions = aenv
-      ; bullets = benv
-      ; fires = fenv
       }
     in
     let o = !state in
