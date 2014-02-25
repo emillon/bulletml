@@ -22,13 +22,11 @@ end
 begin
   generated = true
 
-  dirname = [ "%{js_of_ocaml.syntax_SRC_DIR}%" ]
-
   begin program "camlp4o"
-      requires = [ ]
   end
 
   begin objects "js_of_ocaml.camlp4-syntax.objects"
+    dirname = [ "%{js_of_ocaml.syntax_SRC_DIR}%" ]
     files = [ "pa_js.ml" ]
   end
 
