@@ -1,4 +1,4 @@
-open Bulletml
+open Syntax
 
 let print_list prn l =
   "["^ String.concat ", " (List.map prn l) ^ "]"
