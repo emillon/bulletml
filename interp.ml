@@ -100,7 +100,10 @@ let ind_call getenv sub st = function
   | Direct x -> x
   | Indirect (n, params) ->
     let a = List.assoc n (getenv st) in
-    let p = number_params params in
+    let params_ev = List.map (
+        fun e -> Num (eval e)
+      ) params in
+    let p = number_params params_ev in
     sub p a
 
 let eval_ai = ind_call (fun st -> st.actions) (subst_action)
