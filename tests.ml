@@ -243,7 +243,11 @@ let tests () =
   in
   List.map mk_test testspecs
 
-let parse_all () =
+let parse_example n =
+  let x = Xml.parse_file ("examples/" ^ n) in
+  Bulletml.Parser.parse_xml x
+
+let for_all_examples f () =
   let files_a = (Sys.readdir "examples") in
   Array.sort String.compare files_a;
   let files =
@@ -251,21 +255,19 @@ let parse_all () =
       ((<>) "fragments")
       (Array.to_list files_a)
   in
-  let f () = List.iter (fun n ->
-      let x = Xml.parse_file ("examples/" ^ n) in
-      let _b = Bulletml.Parser.parse_xml x in
-      ()
+  List.iter (fun n ->
+      f n (parse_example n)
     ) files
-  in
-  [("Parse examples", `Quick, f)]
 
-let compile n =
+let compile b =
   let open Bulletml.Syntax in
   let open Bulletml.Interp_types in
-  let x = Xml.parse_file ("examples/" ^ n) in
-  let b = Bulletml.Parser.parse_xml x in
   let (ae, be, fe) = Bulletml.Interp.read_prog b in
-  let top = List.assoc "top" ae in
+  let top =
+    try
+      List.assoc "top" ae
+    with Not_found -> List.assoc "top1" ae
+  in
   let env =
     { frame = 0
     ; ship_pos = (100., 50.)
@@ -288,16 +290,30 @@ let tests_compile () =
   let printer ops = Bulletml.Printer.print_list Bulletml.Printer.print_opcode ops in
   let mk_test (n, spec) =
     let f () =
-      let got = compile n in
+      let got =
+        compile (parse_example n)
+      in
       OUnit.assert_equal ~printer got spec;
     in
     (n, `Quick, f)
   in
   List.map mk_test compspecs
 
+let parse_all =
+  for_all_examples (fun _n _b -> ())
+
+let compile_all =
+  for_all_examples (fun n b ->
+      try
+        let _ops = compile b in ()
+      with Not_found ->
+        OUnit.assert_failure ("Cannot compile " ^ n)
+    )
+
 let _ =
   Alcotest.run "BulletML"
-    [ ("parse", parse_all ())
+    [ ("parse", [("Parse examples", `Quick, parse_all)])
     ; ("pspec", tests ())
+    ; ("comp", [("Compile examples", `Quick, compile_all)])
     ; ("cspec", tests_compile ())
     ]
