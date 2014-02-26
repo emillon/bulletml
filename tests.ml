@@ -1,12 +1,6 @@
 
 let testspecs =
   let open Bulletml.Syntax in
-  let bulletDefault = Bullet (None, None, []) in
-  let ( +@ ) = fun x y -> Op (Add, x, y) in
-  let ( -@ ) = fun x y -> Op (Sub, x, y) in
-  let ( *@ ) = fun x y -> Op (Mul, x, y) in
-  let ( /@ ) = fun x y -> Op (Div, x, y) in
-  let ( ~@ ) = fun x   -> Num 0. -@ x in
   [ ("fragments/01.xml", `Bullet ( (*{{{*)
        Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
            Direct [Accel (None, Some (Num 3.), Num 120.)]

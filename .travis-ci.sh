@@ -32,3 +32,4 @@ ocp-indent -i *.ml *.mli
 
 ocp-build -init
 make check
+make js
