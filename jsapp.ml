@@ -65,6 +65,41 @@ let screen_h = 300
 let enemy_pos = (200., 100.)
 let ship_pos = (200., 250.)
 
+let create_canvas () =
+  let c = Dom_html.createCanvas Dom_html.document in
+  c##width <- screen_w;
+  c##height <- screen_h;
+  c
+
+(* A clearRect would be better but it does not work *)
+let clear_canvas ctx data =
+  for i = 0 to screen_w do
+    for j = 0 to screen_h do
+      let p = 4 * (j * screen_w + i) in
+      Dom_html.pixel_set data (p+0) 255;
+      Dom_html.pixel_set data (p+1) 255;
+      Dom_html.pixel_set data (p+2) 255;
+      Dom_html.pixel_set data (p+3) 255;
+    done
+  done
+
+let draw_px ctx data i j =
+  let p = 4 * (j * screen_w + i) in
+  Dom_html.pixel_set data (p+0) 0xfa;
+  Dom_html.pixel_set data (p+1) 0x69;
+  Dom_html.pixel_set data (p+2) 0x00;
+  Dom_html.pixel_set data (p+3) 255;
+  ()
+
+let draw_bullet ctx data x y =
+  let i = int_of_float x in
+  let j = int_of_float y in
+  draw_px ctx data i j;
+  draw_px ctx data i (j+1);
+  draw_px ctx data (i+1) j;
+  draw_px ctx data (i+1) (j+1);
+  ()
+
 let _ =
   let open Bulletml.Interp in
   let open Bulletml.Interp_types in
@@ -86,13 +121,15 @@ let _ =
     }
   in
   let k = build_prog global_env [] (Action (Direct act)) in
-  let draw_frame root =
+  let canvas = create_canvas () in
+  Dom.appendChild Dom_html.document##body canvas;
+  let draw_frame ctx data root =
     let objs =
       List.filter
         (fun o -> not o.vanished)
         (collect_obj root)
     in
-    List.iter (fun o -> let (x, y) = o.pos in Jsstubs.draw_bullet x y) objs
+    List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx data x y) objs
   in
   let obj0 = initial_obj k enemy_pos in
   let open Lwt in
@@ -102,9 +139,13 @@ let _ =
         frame = frame
       }
     in
-    Jsstubs.clear_canvas ();
-    draw_frame obj;
-    Lwt_js.sleep 0.01 >>= fun () ->
+    let ctx = canvas##getContext (Dom_html._2d_) in
+    let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
+    let data = img##data in
+    clear_canvas ctx data;
+    draw_frame ctx data obj;
+    ctx##putImageData (img, 0., 0.);
+    Lwt_js.yield () >>= fun () ->
     go (frame + 1) (animate env obj);
   in
   go 1 obj0

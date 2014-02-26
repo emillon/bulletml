@@ -38,7 +38,7 @@ end
 
 begin program "app"
   has_asm = false
-  files = ["jsstubs.c" "jsstubs.mli" "jsapp.ml"]
+  files = ["jsapp.ml"]
   syntax = "js_of_ocaml.camlp4-syntax"
   requires = ["bulletml" "js_of_ocaml" "js_of_ocaml.camlp4-syntax"]
 end
