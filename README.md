@@ -14,7 +14,8 @@ It contains:
 
   - a parser, to convert a representation (`xml-light`) to an AST
   - a printer
-  - a graphic interpreter
+  - a graphic interpreter using SDL
+  - a JS app using [js_of_ocaml](http://ocsigen.org/js_of_ocaml/)
   - a test suite
 
 ### How to build
