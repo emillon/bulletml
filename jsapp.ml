@@ -1,6 +1,6 @@
 open Bulletml.Syntax
 
-let pat =
+let pat = (* {{{ *)
   BulletML (NoDir,
             [ EBullet ("fast",
                        Bullet (None, Some (SpdAbs (Num 10.)), [ Direct (
@@ -58,11 +58,53 @@ let pat =
                        ; Fire (Indirect ("slow", [~@ (Num 1.)]))
                        ; Wait (Num 430.)
                        ])
-            ])
+            ]) (* }}} *)
 
-let main () =
-  let dom = Dom_html.window##document in
-  let c = Dom_html.createCanvas dom in
-  ()
+let screen_w = 400
+let screen_h = 300
+let enemy_pos = (200., 100.)
+let ship_pos = (200., 250.)
 
-let _ = main ()
+let _ =
+  let open Bulletml.Interp in
+  let open Bulletml.Interp_types in
+  let (aenv, benv, fenv) = read_prog pat in
+  let print_env e = String.concat ", " (List.map fst e) in
+  Printf.printf "a: %s\nb: %s\nf: %s\n"
+    (print_env aenv)
+    (print_env benv)
+    (print_env fenv);
+  let act = List.assoc "top" aenv in
+  let global_env =
+    { frame = 0
+    ; ship_pos = ship_pos
+    ; screen_w = screen_w
+    ; screen_h = screen_h
+    ; actions = aenv
+    ; bullets = benv
+    ; fires = fenv
+    }
+  in
+  let k = build_prog global_env [] (Action (Direct act)) in
+  let draw_frame root =
+    let objs =
+      List.filter
+        (fun o -> not o.vanished)
+        (collect_obj root)
+    in
+    List.iter (fun o -> let (x, y) = o.pos in Jsstubs.draw_bullet x y) objs
+  in
+  let obj0 = initial_obj k enemy_pos in
+  let open Lwt in
+  let rec go frame obj =
+    let env =
+      { global_env with
+        frame = frame
+      }
+    in
+    Jsstubs.clear_canvas ();
+    draw_frame obj;
+    Lwt_js.sleep 0.01 >>= fun () ->
+    go (frame + 1) (animate env obj);
+  in
+  go 1 obj0
