@@ -30,7 +30,7 @@ Finish the installation by running `ocp-build -init`.
 
 #### After
 
-`make`. Run test suite with `make check`
+`make`. Run test suite with `make check`. Build JS app with `make js`.
 
 ### Bugs, contributing, etc
 
