@@ -97,7 +97,8 @@ let draw_bullet ctx data x y =
   draw_px ctx data i j;
   draw_px ctx data i (j+1);
   draw_px ctx data (i+1) j;
-  draw_px ctx data (i+1) (j+1);
+  draw_px ctx data i (j-1);
+  draw_px ctx data (i-1) j;
   ()
 
 let _ =
