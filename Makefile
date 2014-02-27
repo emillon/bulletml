@@ -41,7 +41,7 @@ doc :  install
 	echo $$i; \
 	echo "open Bulletml" > tmp/$$i; \
 	cat bulletml/$$i >> tmp/$$i; \
-	cd tmp && ocamlfind ocamlc -package bulletml -c $$i ;\
+	cd tmp && ocamlfind ocamlc -package bulletml -c $$i && cd .. ;\
 	done
 	mkdir -p docs
 	ocamlfind ocamldoc -thread -I tmp -html -package bulletml -d docs tmp/*.mli tmp/*.ml 
