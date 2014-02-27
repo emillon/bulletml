@@ -33,3 +33,4 @@ ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml
 ocp-build -init
 make check
 make js
+make doc
