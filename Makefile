@@ -22,11 +22,11 @@ js: build
 
 
 install: build uninstall
-	ocp-build install
+	ocp-build install bulletml
 	cp _obuild/bulletml/*.cmi `ocamlfind query bulletml`
 
 uninstall:
-	ocp-build uninstall
+	ocp-build uninstall bulletml
 	ocamlfind remove bulletml
 
 
