@@ -22,25 +22,12 @@ let main () =
   let bml = Bulletml.Parser.parse_xml x in
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
   let surf = Sdlvideo.set_video_mode ~w:screen_w ~h:screen_h [] in
-  let (aenv, benv, fenv) = read_prog bml in
-  let print_env e = String.concat ", " (List.map fst e) in
-  Printf.printf "a: %s\nb: %s\nf: %s\n"
-    (print_env aenv)
-    (print_env benv)
-    (print_env fenv);
-  let act = List.assoc patname aenv in
-  let global_env =
-    { frame = 0
-    ; ship_pos = ship_pos
-    ; screen_w = screen_w
-    ; screen_h = screen_h
-    ; actions = aenv
-    ; bullets = benv
-    ; fires = fenv
-    }
+  let (global_env, obj0, _top) =
+    prepare
+      bml enemy_pos ship_pos
+      screen_w screen_h
   in
-  let k = build_prog global_env [] (Action (Direct act)) in
-  let state = ref (initial_obj k enemy_pos) in
+  let state = ref obj0 in
   let bullet = Sdlloader.load_image "bullet.png" in
   let draw_bullet window b =
     let (px, py) = int_pos b.pos in

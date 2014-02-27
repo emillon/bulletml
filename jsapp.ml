@@ -1,6 +1,6 @@
 open Bulletml.Syntax
 
-let pat = (* {{{ *)
+let bml = (* {{{ *)
   BulletML (NoDir,
             [ EBullet ("fast",
                        Bullet (None, Some (SpdAbs (Num 10.)), [ Direct (
@@ -104,24 +104,6 @@ let draw_bullet ctx data x y =
 let _ =
   let open Bulletml.Interp in
   let open Bulletml.Interp_types in
-  let (aenv, benv, fenv) = read_prog pat in
-  let print_env e = String.concat ", " (List.map fst e) in
-  Printf.printf "a: %s\nb: %s\nf: %s\n"
-    (print_env aenv)
-    (print_env benv)
-    (print_env fenv);
-  let act = List.assoc "top" aenv in
-  let global_env =
-    { frame = 0
-    ; ship_pos = ship_pos
-    ; screen_w = screen_w
-    ; screen_h = screen_h
-    ; actions = aenv
-    ; bullets = benv
-    ; fires = fenv
-    }
-  in
-  let k = build_prog global_env [] (Action (Direct act)) in
   let canvas = create_canvas () in
   Dom.appendChild Dom_html.document##body canvas;
   let draw_frame ctx data root =
@@ -132,7 +114,11 @@ let _ =
     in
     List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx data x y) objs
   in
-  let obj0 = initial_obj k enemy_pos in
+  let (global_env, obj0, _top) =
+    prepare
+      bml enemy_pos ship_pos
+      screen_w screen_h
+  in
   let open Lwt in
   let rec go frame obj =
     let env =
