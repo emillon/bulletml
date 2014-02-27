@@ -43,51 +43,18 @@
 <p>BulletML is a language designed to express bullet behaviour in a shoot'em up
 game (turn left, accelerate, spawn children, etc).</p>
 
-<p><img src="http://i.imgur.com/KsVnjFN.gif" alt="A pattern"><img src="http://i.imgur.com/uZv0jSc.gif" alt="Another pattern"><img src="http://i.imgur.com/X9ogXAX.gif" alt="Yet another one"></p>
+<h2>Demo time!</h2>
 
-<p>This repository contains a set of tools to manipulate BulletML in OCaml.</p>
+This is OCaml code running in your browser to render a pattern in a
+<code>&lt;canvas&gt;</code> element. In case it does not work, here are a few
+animated gifs:
+<a href="http://i.imgur.com/KsVnjFN.gif">1</a>,
+<a href="http://i.imgur.com/uZv0jSc.gif">2</a>,
+<a href="http://i.imgur.com/X9ogXAX.gif">3</a>.
 
-<p>It contains:</p>
+<iframe src="demo.html" width="450" height="350"></iframe>
 
-<ul>
-<li>a parser, to convert a representation (<code>xml-light</code>) to an AST</li>
-<li>a printer</li>
-<li>a graphic interpreter using SDL</li>
-<li>a JS app using <a href="http://ocsigen.org/js_of_ocaml/">js_of_ocaml</a>
-</li>
-<li>a test suite</li>
-</ul><h3>
-<a name="how-to-build" class="anchor" href="#how-to-build"><span class="octicon octicon-link"></span></a>How to build</h3>
-
-<h4>
-<a name="prereqs" class="anchor" href="#prereqs"><span class="octicon octicon-link"></span></a>Prereqs</h4>
-
-<p>Install <a href="http://ocaml.org/">OCaml</a>, <a href="http://opam.ocamlpro.com/">opam</a>, and
-<code>libsdl-image1.2-dev</code> from your distribution.</p>
-
-<p>Then, you can run <code>opam install ocp-build mparser xml-light sdl</code>.</p>
-
-<p>Finish the installation by running <code>ocp-build -init</code>.</p>
-
-<h4>
-<a name="after" class="anchor" href="#after"><span class="octicon octicon-link"></span></a>After</h4>
-
-<p><code>make</code>. Run test suite with <code>make check</code>. Build JS app with <code>make js</code>.</p>
-
-<h3>
-<a name="bugs-contributing-etc" class="anchor" href="#bugs-contributing-etc"><span class="octicon octicon-link"></span></a>Bugs, contributing, etc</h3>
-
-<p>Contributors are welcome ! But please don't forget to follow the
-<a href="https://github.com/emillon/bulletml/blob/master/CONTRIBUTING.md">guidelines</a>.</p>
-
-<p>Feel free to report issues <a href="https://github.com/emillon/bulletml/issues">on github</a>.</p>
-
-<h3>
-<a name="legal-stuff" class="anchor" href="#legal-stuff"><span class="octicon octicon-link"></span></a>Legal stuff</h3>
-
-<p>This can be redistributed under the BSD-2 clause license (see LICENSE).</p>
-
-<p>(but you can totally buy me a beer if you think it's worth it)</p>
+<p>For more information, please see <a href="">this repository</a>.</p>
 
 <h3>
 <a name="links" class="anchor" href="#links"><span class="octicon octicon-link"></span></a>Links</h3>
