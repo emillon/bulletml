@@ -45,3 +45,18 @@ type env =
   ; bullets : bullet table
   ; fires : fire table
   }
+
+type init_params =
+  { p_ship : position
+  ; p_enemy : position
+  ; p_screen_w : int
+  ; p_screen_h : int
+  }
+
+type ('g, 'l, 'r) interpreter =
+  { make_global_ctx : unit -> 'g
+  ; make_local_ctx : 'g -> 'l
+  ; clear : 'l -> unit
+  ; draw : 'l -> obj -> unit
+  ; run_cont : 'l -> (unit -> 'r) -> 'r
+  }

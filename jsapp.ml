@@ -67,11 +67,28 @@ let screen_h = 300
 let enemy_pos = (200., 100.)
 let ship_pos = (200., 250.)
 
+let params =
+  { p_screen_w = screen_w
+  ; p_screen_h = screen_h
+  ; p_enemy = enemy_pos
+  ; p_ship = ship_pos
+  }
+
 let create_canvas () =
   let c = Dom_html.createCanvas Dom_html.document in
   c##width <- screen_w;
   c##height <- screen_h;
   c
+
+let make_global_ctx () =
+  let canvas = create_canvas () in
+  Dom.appendChild Dom_html.document##body canvas;
+  canvas
+
+let make_local_ctx canvas =
+  let ctx = canvas##getContext (Dom_html._2d_) in
+  let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
+  (ctx, img)
 
 (* A clearRect would be better but it does not work *)
 let clear (ctx, img) =
@@ -114,23 +131,17 @@ let draw (ctx, img) root =
   List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx img x y) objs;
   ctx##putImageData (img, 0., 0.)
 
+let run_cont _ k =
+  let open Lwt in
+  Lwt_js.yield () >>= k
+
 let _ =
-  let make_global () =
-    let canvas = create_canvas () in
-    Dom.appendChild Dom_html.document##body canvas;
-    canvas
-  in
-  let make_local canvas =
-    let ctx = canvas##getContext (Dom_html._2d_) in
-    let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
-    (ctx, img)
-  in
-  let combine _ k =
-    let open Lwt in
-    Lwt_js.yield () >>= k
-  in
   main_loop
-    bml enemy_pos ship_pos
-    screen_w screen_h
-    make_global make_local
-    clear draw combine
+    bml
+    params
+    { make_global_ctx
+    ; make_local_ctx
+    ; clear
+    ; draw
+    ; run_cont
+    }
