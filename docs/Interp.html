@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="next" href="Parser.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Interp" rel="Chapter" href="Interp.html">
+<link title="Parser" rel="Chapter" href="Parser.html">
+<link title="Printer" rel="Chapter" href="Printer.html">
+<link title="Interp_types" rel="Chapter" href="Interp_types.html">
+<link title="Syntax" rel="Chapter" href="Syntax.html"><title>Interp</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Parser.html" title="Parser">Next</a>
+</div>
+<h1>Module <a href="type_Interp.html">Interp</a></h1>
+
+<pre><span class="keyword">module</span> Interp: <code class="code">sig</code> <a href="Interp.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Functions to build a BulletML interpreter.<br>
+</div>
+<hr width="100%">
+<br>
+Functions to build a BulletML interpreter.<br>
+
+<pre><span id="VALbuild_prog"><span class="keyword">val</span> build_prog</span> : <code class="type">Bulletml.Interp_types.env -><br>       Bulletml.Interp_types.opcode list -><br>       Bulletml.Syntax.subaction -> Bulletml.Interp_types.opcode list</code></pre><div class="info ">
+Convert a list of <a href="Syntax.html#TYPEsubaction"><code class="code">Syntax.subaction</code></a>s into a list of <a href="Interp_types.html#TYPEopcode"><code class="code">Interp_types.opcode</code></a>s.
+   The extra list given as argument is the list to prepend to.<br>
+</div>
+
+<pre><span id="VALint_pos"><span class="keyword">val</span> int_pos</span> : <code class="type">Bulletml.Interp_types.position -> int * int</code></pre><div class="info ">
+Convert a (float) <a href="Interp_types.html#TYPEposition"><code class="code">Interp_types.position</code></a> to a pair of ints.<br>
+</div>
+
+<pre><span id="VALinitial_obj"><span class="keyword">val</span> initial_obj</span> : <code class="type">Bulletml.Interp_types.opcode list -><br>       Bulletml.Interp_types.position -> Bulletml.Interp_types.obj</code></pre><div class="info ">
+Given a program and a position, build an <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a> with default
+   values.<br>
+</div>
+
+<pre><span id="VALcollect_obj"><span class="keyword">val</span> collect_obj</span> : <code class="type">Bulletml.Interp_types.obj -> Bulletml.Interp_types.obj list</code></pre><div class="info ">
+Create the list of descendants of an <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a>, including itself.<br>
+</div>
+
+<pre><span id="VALanimate"><span class="keyword">val</span> animate</span> : <code class="type">Bulletml.Interp_types.env -><br>       Bulletml.Interp_types.obj -> Bulletml.Interp_types.obj</code></pre><div class="info ">
+Compute the next state of an <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a>:<ul>
+<li>delete out-of-bounds or vanished children</li>
+<li>recursively <a href="Interp.html#VALanimate"><code class="code">Interp.animate</code></a> its remaining children</li>
+<li>interpret its current instruction</li>
+<li>handle physics (move it according to its current direction and speed)</li>
+</ul>
+
+   The interpretation phase can interpret several <a href="Interp_types.html#TYPEopcode"><code class="code">Interp_types.opcode</code></a>s, for
+   example until a <code class="code">OpWait</code> instruction is found.<br>
+</div>
+
+<pre><span id="VALprepare"><span class="keyword">val</span> prepare</span> : <code class="type">Bulletml.Syntax.t -><br>       Bulletml.Interp_types.init_params -><br>       Bulletml.Interp_types.env * Bulletml.Interp_types.obj * string</code></pre><div class="info ">
+Compile and prepare a program for interpretation.<br>
+<b>Returns</b> an environement, an initial object and the name of the top pattern<br>
+</div>
+
+<pre><span id="VALmain_loop"><span class="keyword">val</span> main_loop</span> : <code class="type">Bulletml.Syntax.t -><br>       Bulletml.Interp_types.init_params -><br>       ('g, 'l, 'r) Bulletml.Interp_types.interpreter -> 'r</code></pre><div class="info ">
+Skeleton for a main loop. See <a href="Interp_types.html#TYPEinterpreter"><code class="code">Interp_types.interpreter</code></a>.<br>
+</div>
+</body></html>

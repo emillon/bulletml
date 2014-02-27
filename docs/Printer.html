@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Parser.html">
+<link rel="next" href="Interp_types.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Interp" rel="Chapter" href="Interp.html">
+<link title="Parser" rel="Chapter" href="Parser.html">
+<link title="Printer" rel="Chapter" href="Printer.html">
+<link title="Interp_types" rel="Chapter" href="Interp_types.html">
+<link title="Syntax" rel="Chapter" href="Syntax.html"><title>Printer</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Parser.html" title="Parser">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Interp_types.html" title="Interp_types">Next</a>
+</div>
+<h1>Module <a href="type_Printer.html">Printer</a></h1>
+
+<pre><span class="keyword">module</span> Printer: <code class="code">sig</code> <a href="Printer.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Print syntactic values.<br>
+</div>
+<hr width="100%">
+<br>
+Print syntactic values.<br>
+
+<pre><span id="TYPEprinter"><span class="keyword">type</span> <code class="type">'a</code> printer</span> = <code class="type">'a -> string</code> </pre>
+
+
+<pre><span id="VALprint_list"><span class="keyword">val</span> print_list</span> : <code class="type">'a <a href="Printer.html#TYPEprinter">printer</a> -> 'a list <a href="Printer.html#TYPEprinter">printer</a></code></pre><div class="info ">
+Print a list.
+<p>
+
+    Given a way to print an <code class="code">'a</code>, print a list of <code class="code">'a</code>.<br>
+</div>
+
+<pre><span id="VALprint_bulletml"><span class="keyword">val</span> print_bulletml</span> : <code class="type">Bulletml.Syntax.t <a href="Printer.html#TYPEprinter">printer</a></code></pre><div class="info ">
+Print a <a href="Syntax.html#TYPEt"><code class="code">Syntax.t</code></a>.<br>
+</div>
+
+<pre><span id="VALprint_opcode"><span class="keyword">val</span> print_opcode</span> : <code class="type">Bulletml.Interp_types.opcode <a href="Printer.html#TYPEprinter">printer</a></code></pre><div class="info ">
+Print an <a href="Interp_types.html#TYPEopcode"><code class="code">Interp_types.opcode</code></a>.<br>
+</div>
+</body></html>

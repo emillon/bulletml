@@ -1,0 +1,407 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Printer.html">
+<link rel="next" href="Syntax.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Interp" rel="Chapter" href="Interp.html">
+<link title="Parser" rel="Chapter" href="Parser.html">
+<link title="Printer" rel="Chapter" href="Printer.html">
+<link title="Interp_types" rel="Chapter" href="Interp_types.html">
+<link title="Syntax" rel="Chapter" href="Syntax.html"><title>Interp_types</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Printer.html" title="Printer">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Syntax.html" title="Syntax">Next</a>
+</div>
+<h1>Module <a href="type_Interp_types.html">Interp_types</a></h1>
+
+<pre><span class="keyword">module</span> Interp_types: <code class="code">sig</code> <a href="Interp_types.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Types used in <a href="Interp.html"><code class="code">Interp</code></a>.<br>
+</div>
+<hr width="100%">
+<br>
+Types used in <a href="Interp.html"><code class="code">Interp</code></a>.<br>
+
+<pre><span id="TYPEposition"><span class="keyword">type</span> <code class="type"></code>position</span> = <code class="type">float * float</code> </pre>
+<div class="info ">
+Guess what. It's <code class="code">(x, y)</code>.<br>
+</div>
+
+
+<pre><span id="TYPEtable"><span class="keyword">type</span> <code class="type">'a</code> table</span> = <code class="type">('a Bulletml.Syntax.id * 'a) list</code> </pre>
+<div class="info ">
+Environment for indirect calls (<code class="code">actionRef</code>, etc).<br>
+</div>
+
+
+<pre><code><span id="TYPElinear_map"><span class="keyword">type</span> <code class="type">'a</code> linear_map</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlinear_map.frame_start">frame_start</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlinear_map.frame_end">frame_end</span>&nbsp;: <code class="type">int</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlinear_map.val_start">val_start</span>&nbsp;: <code class="type">'a</code>;</code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTlinear_map.val_end">val_end</span>&nbsp;: <code class="type">'a</code>;</code></td>
+
+</tr></table>
+}
+
+<div class="info ">
+Description of a phenomenon that grows in a linear (well, affine) manner:
+<p>
+<ul>
+<li>at frame <code class="code">frame_start</code>, its value is <code class="code">val_start</code>.</li>
+<li>at frame <code class="code">frame_end</code>, its value is <code class="code">val_end</code>.</li>
+</ul>
+<br>
+</div>
+
+
+<pre><code><span id="TYPEopcode"><span class="keyword">type</span> <code class="type"></code>opcode</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpRepeatE"><span class="constructor">OpRepeatE</span></span> <span class="keyword">of</span> <code class="type">Bulletml.Syntax.expr * Bulletml.Syntax.action</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Repeat  times the same <a href="Syntax.html#TYPEaction"><code class="code">Syntax.action</code></a></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpWaitE"><span class="constructor">OpWaitE</span></span> <span class="keyword">of</span> <code class="type">Bulletml.Syntax.expr</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Wait  frames (unevaluated form)</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpWaitN"><span class="constructor">OpWaitN</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Wait  frames (evaluated form)</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpFire"><span class="constructor">OpFire</span></span> <span class="keyword">of</span> <code class="type">Bulletml.Syntax.fire</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Fork execution by creating a new <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpSpdE"><span class="constructor">OpSpdE</span></span> <span class="keyword">of</span> <code class="type">Bulletml.Syntax.speed * Bulletml.Syntax.expr</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Change speed (unevaluated form)</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpSpdN"><span class="constructor">OpSpdN</span></span> <span class="keyword">of</span> <code class="type">float <a href="Interp_types.html#TYPElinear_map">linear_map</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Change speed (evaluated form)</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpDirE"><span class="constructor">OpDirE</span></span> <span class="keyword">of</span> <code class="type">Bulletml.Syntax.direction * Bulletml.Syntax.expr</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Change direction (unevaluated form)</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpDirN"><span class="constructor">OpDirN</span></span> <span class="keyword">of</span> <code class="type">float <a href="Interp_types.html#TYPElinear_map">linear_map</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Change direction (evaluated form)</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpAccelE"><span class="constructor">OpAccelE</span></span> <span class="keyword">of</span> <code class="type">Bulletml.Syntax.expr * Bulletml.Syntax.expr * Bulletml.Syntax.expr</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Accelerate (unevaluated form)</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpAccelN"><span class="constructor">OpAccelN</span></span> <span class="keyword">of</span> <code class="type">(float * float) <a href="Interp_types.html#TYPElinear_map">linear_map</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Accelerate (unevaluated form): <code class="code">h, v, term</code></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpVanish"><span class="constructor">OpVanish</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Let the bullet disappear</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTopcode.OpCall"><span class="constructor">OpCall</span></span> <span class="keyword">of</span> <code class="type">string * Bulletml.Syntax.expr list</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Call an indirect action with parameters</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+<div class="info ">
+Abstract operation, specific to a particular <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a>.
+<p>
+
+   Some cases have an both an unevaluated form and an evaluated form.
+   This is because it is necessary to delay the evaluation as late as possible,
+   and having a convenient form for computations in progress.
+<p>
+
+   For example, <code class="code">OpWaitX</code>. Evaluating <code class="code">Wait (Param 1)</code> will create a <code class="code">OpWaitE
+   (Param 1)</code> (as is in the opcode list). When it is time to handle the opcode, it
+   will be replaced by <code class="code">OpWaitN 3</code> (if we are in a context where <code class="code">$1 = 3</code>). At the
+   next frame it will be <code class="code">OpWaitN 2</code>, etc.
+<p>
+
+   Some cases have a "term", it is the number of frames in which the evolution
+   will be done in the corresponding <a href="Interp_types.html#TYPElinear_map"><code class="code">Interp_types.linear_map</code></a>.<br>
+</div>
+
+
+<pre><code><span id="TYPEobj"><span class="keyword">type</span> <code class="type"></code>obj</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.prog">prog</span>&nbsp;: <code class="type"><a href="Interp_types.html#TYPEopcode">opcode</a> list</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Behaviour</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.speed">speed</span>&nbsp;: <code class="type">float</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >In pixels/frame</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.dir">dir</span>&nbsp;: <code class="type">float</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >In degrees. Top is 0, clockwise. Strange, I know</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.children">children</span>&nbsp;: <code class="type"><a href="Interp_types.html#TYPEobj">obj</a> list</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" ><a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a>s created by this one</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.pos">pos</span>&nbsp;: <code class="type"><a href="Interp_types.html#TYPEposition">position</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Where to draw it</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.prev_dir">prev_dir</span>&nbsp;: <code class="type">float</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Used for interpreting <code class="code">DirSeq e</code></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.prev_speed">prev_speed</span>&nbsp;: <code class="type">float</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Used for interpreting <code class="code">SpdSeq e</code></td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTobj.vanished">vanished</span>&nbsp;: <code class="type">bool</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >If true, don't draw this bullet</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+<div class="info ">
+A movable (and drawable) entity.<br>
+</div>
+
+
+<pre><code><span id="TYPEenv"><span class="keyword">type</span> <code class="type"></code>env</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenv.frame">frame</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Frame number. Usually starts at 1, but only deltas are significant</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenv.ship_pos">ship_pos</span>&nbsp;: <code class="type"><a href="Interp_types.html#TYPEposition">position</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Where patterns can aim</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenv.screen_w">screen_w</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Screen width in pixels</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenv.screen_h">screen_h</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Screen height in pixels</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenv.actions">actions</span>&nbsp;: <code class="type">Bulletml.Syntax.action <a href="Interp_types.html#TYPEtable">table</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Definitions of <a href="Syntax.html#TYPEaction"><code class="code">Syntax.action</code></a>s</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenv.bullets">bullets</span>&nbsp;: <code class="type">Bulletml.Syntax.bullet <a href="Interp_types.html#TYPEtable">table</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Definitions of <a href="Syntax.html#TYPEbullet"><code class="code">Syntax.bullet</code></a>s</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTenv.fires">fires</span>&nbsp;: <code class="type">Bulletml.Syntax.fire <a href="Interp_types.html#TYPEtable">table</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Definitions of <a href="Syntax.html#TYPEfire"><code class="code">Syntax.fire</code></a>s</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+<div class="info ">
+Stuff that does not change during a frame and can be referred to during
+   computations.<br>
+</div>
+
+
+<pre><code><span id="TYPEinit_params"><span class="keyword">type</span> <code class="type"></code>init_params</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinit_params.p_ship">p_ship</span>&nbsp;: <code class="type"><a href="Interp_types.html#TYPEposition">position</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Where is the ship. The one that is aimed</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinit_params.p_enemy">p_enemy</span>&nbsp;: <code class="type"><a href="Interp_types.html#TYPEposition">position</a></code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Where is the enemy. The one that shoots</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinit_params.p_screen_w">p_screen_w</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Screen width in pixels</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinit_params.p_screen_h">p_screen_h</span>&nbsp;: <code class="type">int</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Screen height in pixels</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+<div class="info ">
+Initial parameters used to build an interpreter (see <a href="Interp.html#VALprepare"><code class="code">Interp.prepare</code></a> and
+   <a href="Interp.html#VALmain_loop"><code class="code">Interp.main_loop</code></a>).<br>
+</div>
+
+
+<pre><code><span id="TYPEinterpreter"><span class="keyword">type</span> <code class="type">('g, 'l, 'r)</code> interpreter</span> = {</code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinterpreter.make_global_ctx">make_global_ctx</span>&nbsp;: <code class="type">unit -> 'g</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >(once) create the global, persistent context</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinterpreter.make_local_ctx">make_local_ctx</span>&nbsp;: <code class="type">'g -> 'l</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >(each frame) create a local context</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinterpreter.clear">clear</span>&nbsp;: <code class="type">'l -> unit</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >clear frame</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinterpreter.draw">draw</span>&nbsp;: <code class="type">'l -> <a href="Interp_types.html#TYPEobj">obj</a> -> unit</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >draw the object and its descendants</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code>&nbsp;&nbsp;</code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTinterpreter.run_cont">run_cont</span>&nbsp;: <code class="type">'l -> (unit -> 'r) -> 'r</code>;</code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >run the next frame. When in doubt, <code class="code">fun _ k -&gt; k ()</code> works</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+}
+
+<div class="info ">
+Interpreter functions, used for <a href="Interp.html#VALmain_loop"><code class="code">Interp.main_loop</code></a>.
+<p>
+
+   It is polymorphic and quite parametric, to allow for different kind of
+   interpreters.
+<p>
+<ul>
+<li><code class="code">'g</code> is the global context, something that lasts during all the game. For
+     example, a window object.</li>
+<li><code class="code">'l</code> is the local context, something created at each frame.</li>
+<li><code class="code">'r</code> is the return type. Typically <code class="code">unit</code>, but who knows, you might be
+     writing a monadic interpreter.</li>
+</ul>
+<br>
+</div>
+
+</body></html>

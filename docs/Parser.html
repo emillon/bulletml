@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Interp.html">
+<link rel="next" href="Printer.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Interp" rel="Chapter" href="Interp.html">
+<link title="Parser" rel="Chapter" href="Parser.html">
+<link title="Printer" rel="Chapter" href="Printer.html">
+<link title="Interp_types" rel="Chapter" href="Interp_types.html">
+<link title="Syntax" rel="Chapter" href="Syntax.html"><title>Parser</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Interp.html" title="Interp">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;<a class="post" href="Printer.html" title="Printer">Next</a>
+</div>
+<h1>Module <a href="type_Parser.html">Parser</a></h1>
+
+<pre><span class="keyword">module</span> Parser: <code class="code">sig</code> <a href="Parser.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Convert a XML document to a <a href="Syntax.html#TYPEt"><code class="code">Syntax.t</code></a>.<br>
+</div>
+<hr width="100%">
+<br>
+Convert a XML document to a <a href="Syntax.html#TYPEt"><code class="code">Syntax.t</code></a>.<br>
+
+<pre><span id="VALparse_xml"><span class="keyword">val</span> parse_xml</span> : <code class="type">Xml.xml -> Bulletml.Syntax.t</code></pre><div class="info ">
+Convert a whole document to a whole <a href="Syntax.html#TYPEt"><code class="code">Syntax.t</code></a>.<br>
+</div>
+
+<pre><span id="VALparse_action"><span class="keyword">val</span> parse_action</span> : <code class="type">Xml.xml list -> Bulletml.Syntax.action</code></pre><div class="info ">
+Parse only a <a href="Syntax.html#TYPEaction"><code class="code">Syntax.action</code></a>.
+<p>
+
+    The argument is a list of children of an <code class="code">&lt;action&gt;</code> element.<br>
+</div>
+
+<pre><span id="VALparse_bullet"><span class="keyword">val</span> parse_bullet</span> : <code class="type">Xml.xml list -> Bulletml.Syntax.bullet</code></pre><div class="info ">
+Parse only a <a href="Syntax.html#TYPEbullet"><code class="code">Syntax.bullet</code></a>.
+<p>
+
+    The argument is a list of children of a <code class="code">&lt;bullet&gt;</code> element.<br>
+</div>
+
+<pre><span id="VALparse_fire"><span class="keyword">val</span> parse_fire</span> : <code class="type">Xml.xml list -> Bulletml.Syntax.fire</code></pre><div class="info ">
+Parse only a <a href="Syntax.html#TYPEfire"><code class="code">Syntax.fire</code></a>.
+<p>
+
+    The argument is a list of children of a <code class="code">&lt;fire&gt;</code> element.<br>
+</div>
+</body></html>

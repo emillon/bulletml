@@ -1,0 +1,114 @@
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Interp" rel="Chapter" href="Interp.html">
+<link title="Parser" rel="Chapter" href="Parser.html">
+<link title="Printer" rel="Chapter" href="Printer.html">
+<link title="Interp_types" rel="Chapter" href="Interp_types.html">
+<link title="Syntax" rel="Chapter" href="Syntax.html"><title>Index of values</title>
+</head>
+<body>
+<div class="navbar">&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Index of values</h1>
+<table>
+<tr><td align="left"><br></td></tr>
+<tr><td><a href="Syntax.html#VAL( *@ )">( *@ )</a> [<a href="Syntax.html">Syntax</a>]</td>
+<td></td></tr>
+<tr><td><a href="Syntax.html#VAL(+@)">(+@)</a> [<a href="Syntax.html">Syntax</a>]</td>
+<td></td></tr>
+<tr><td><a href="Syntax.html#VAL(-@)">(-@)</a> [<a href="Syntax.html">Syntax</a>]</td>
+<td></td></tr>
+<tr><td><a href="Syntax.html#VAL(/@)">(/@)</a> [<a href="Syntax.html">Syntax</a>]</td>
+<td></td></tr>
+<tr><td><a href="Syntax.html#VAL(~@)">(~@)</a> [<a href="Syntax.html">Syntax</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>A</td></tr>
+<tr><td><a href="Interp.html#VALanimate">animate</a> [<a href="Interp.html">Interp</a>]</td>
+<td><div class="info">
+Compute the next state of an <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a>: delete out-of-bounds or vanished children, recursively <a href="Interp.html#VALanimate"><code class="code">Interp.animate</code></a> its remaining children, interpret its current instruction, handle physics (move it according to its current direction and speed)
+   The interpretation phase can interpret several <a href="Interp_types.html#TYPEopcode"><code class="code">Interp_types.opcode</code></a>s, for
+   example until a <code class="code">OpWait</code> instruction is found.
+</div>
+</td></tr>
+<tr><td align="left"><br>B</td></tr>
+<tr><td><a href="Interp.html#VALbuild_prog">build_prog</a> [<a href="Interp.html">Interp</a>]</td>
+<td><div class="info">
+Convert a list of <a href="Syntax.html#TYPEsubaction"><code class="code">Syntax.subaction</code></a>s into a list of <a href="Interp_types.html#TYPEopcode"><code class="code">Interp_types.opcode</code></a>s.
+</div>
+</td></tr>
+<tr><td><a href="Syntax.html#VALbulletDefault">bulletDefault</a> [<a href="Syntax.html">Syntax</a>]</td>
+<td></td></tr>
+<tr><td align="left"><br>C</td></tr>
+<tr><td><a href="Interp.html#VALcollect_obj">collect_obj</a> [<a href="Interp.html">Interp</a>]</td>
+<td><div class="info">
+Create the list of descendants of an <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a>, including itself.
+</div>
+</td></tr>
+<tr><td align="left"><br>I</td></tr>
+<tr><td><a href="Interp.html#VALinitial_obj">initial_obj</a> [<a href="Interp.html">Interp</a>]</td>
+<td><div class="info">
+Given a program and a position, build an <a href="Interp_types.html#TYPEobj"><code class="code">Interp_types.obj</code></a> with default
+   values.
+</div>
+</td></tr>
+<tr><td><a href="Interp.html#VALint_pos">int_pos</a> [<a href="Interp.html">Interp</a>]</td>
+<td><div class="info">
+Convert a (float) <a href="Interp_types.html#TYPEposition"><code class="code">Interp_types.position</code></a> to a pair of ints.
+</div>
+</td></tr>
+<tr><td align="left"><br>M</td></tr>
+<tr><td><a href="Interp.html#VALmain_loop">main_loop</a> [<a href="Interp.html">Interp</a>]</td>
+<td><div class="info">
+Skeleton for a main loop.
+</div>
+</td></tr>
+<tr><td align="left"><br>P</td></tr>
+<tr><td><a href="Parser.html#VALparse_action">parse_action</a> [<a href="Parser.html">Parser</a>]</td>
+<td><div class="info">
+Parse only a <a href="Syntax.html#TYPEaction"><code class="code">Syntax.action</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Parser.html#VALparse_bullet">parse_bullet</a> [<a href="Parser.html">Parser</a>]</td>
+<td><div class="info">
+Parse only a <a href="Syntax.html#TYPEbullet"><code class="code">Syntax.bullet</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Parser.html#VALparse_fire">parse_fire</a> [<a href="Parser.html">Parser</a>]</td>
+<td><div class="info">
+Parse only a <a href="Syntax.html#TYPEfire"><code class="code">Syntax.fire</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Parser.html#VALparse_xml">parse_xml</a> [<a href="Parser.html">Parser</a>]</td>
+<td><div class="info">
+Convert a whole document to a whole <a href="Syntax.html#TYPEt"><code class="code">Syntax.t</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Interp.html#VALprepare">prepare</a> [<a href="Interp.html">Interp</a>]</td>
+<td><div class="info">
+Compile and prepare a program for interpretation.
+</div>
+</td></tr>
+<tr><td><a href="Printer.html#VALprint_bulletml">print_bulletml</a> [<a href="Printer.html">Printer</a>]</td>
+<td><div class="info">
+Print a <a href="Syntax.html#TYPEt"><code class="code">Syntax.t</code></a>.
+</div>
+</td></tr>
+<tr><td><a href="Printer.html#VALprint_list">print_list</a> [<a href="Printer.html">Printer</a>]</td>
+<td><div class="info">
+Print a list.
+</div>
+</td></tr>
+<tr><td><a href="Printer.html#VALprint_opcode">print_opcode</a> [<a href="Printer.html">Printer</a>]</td>
+<td><div class="info">
+Print an <a href="Interp_types.html#TYPEopcode"><code class="code">Interp_types.opcode</code></a>.
+</div>
+</td></tr>
+</table>
+</body>
+</html>

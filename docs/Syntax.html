@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Interp_types.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Interp" rel="Chapter" href="Interp.html">
+<link title="Parser" rel="Chapter" href="Parser.html">
+<link title="Printer" rel="Chapter" href="Printer.html">
+<link title="Interp_types" rel="Chapter" href="Interp_types.html">
+<link title="Syntax" rel="Chapter" href="Syntax.html"><title>Syntax</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Interp_types.html" title="Interp_types">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Syntax.html">Syntax</a></h1>
+
+<pre><span class="keyword">module</span> Syntax: <code class="code">sig</code> <a href="Syntax.html">..</a> <code class="code">end</code></pre><div class="info module top">
+Abstract syntax of BulletML programs.<br>
+</div>
+<hr width="100%">
+<br>
+Abstract syntax of BulletML programs.<br>
+
+<pre><code><span id="TYPEop"><span class="keyword">type</span> <code class="type"></code>op</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTop.Add"><span class="constructor">Add</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTop.Sub"><span class="constructor">Sub</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTop.Mul"><span class="constructor">Mul</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTop.Div"><span class="constructor">Div</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTop.Mod"><span class="constructor">Mod</span></span></code></td>
+
+</tr></table>
+
+<div class="info ">
+Binary operations<br>
+</div>
+
+
+<pre><code><span id="TYPEexpr"><span class="keyword">type</span> <code class="type"></code>expr</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpr.Num"><span class="constructor">Num</span></span> <span class="keyword">of</span> <code class="type">float</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Constant</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpr.Op"><span class="constructor">Op</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEop">op</a> * <a href="Syntax.html#TYPEexpr">expr</a> * <a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Binary operation</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpr.Param"><span class="constructor">Param</span></span> <span class="keyword">of</span> <code class="type">int</code></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Function parameter</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpr.Rand"><span class="constructor">Rand</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Random value between 0.0 and 1.0</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTexpr.Rank"><span class="constructor">Rank</span></span></code></td>
+<td class="typefieldcomment" align="left" valign="top" ><code>(*</code></td><td class="typefieldcomment" align="left" valign="top" >Difficulty factor, between 0.0 and 1.0</td><td class="typefieldcomment" align="left" valign="bottom" ><code>*)</code></td>
+</tr></table>
+
+
+
+<pre><code><span id="TYPEspeed"><span class="keyword">type</span> <code class="type"></code>speed</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTspeed.SpdAbs"><span class="constructor">SpdAbs</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTspeed.SpdRel"><span class="constructor">SpdRel</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTspeed.SpdSeq"><span class="constructor">SpdSeq</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEdirection"><span class="keyword">type</span> <code class="type"></code>direction</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdirection.DirAbs"><span class="constructor">DirAbs</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdirection.DirSeq"><span class="constructor">DirSeq</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdirection.DirAim"><span class="constructor">DirAim</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTdirection.DirRel"><span class="constructor">DirRel</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="TYPEid"><span class="keyword">type</span> <code class="type">'a</code> id</span> = <code class="type">string</code> </pre>
+
+
+<pre><code><span id="TYPEind"><span class="keyword">type</span> <code class="type">'a</code> ind</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTind.Direct"><span class="constructor">Direct</span></span> <span class="keyword">of</span> <code class="type">'a</code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTind.Indirect"><span class="constructor">Indirect</span></span> <span class="keyword">of</span> <code class="type">'a <a href="Syntax.html#TYPEid">id</a> * <a href="Syntax.html#TYPEexpr">expr</a> list</code></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEsubaction"><span class="keyword">type</span> <code class="type"></code>subaction</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.Repeat"><span class="constructor">Repeat</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a> * <a href="Syntax.html#TYPEaction">action</a> <a href="Syntax.html#TYPEind">ind</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.Fire"><span class="constructor">Fire</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEfire">fire</a> <a href="Syntax.html#TYPEind">ind</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.ChangeSpeed"><span class="constructor">ChangeSpeed</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEspeed">speed</a> * <a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.ChangeDirection"><span class="constructor">ChangeDirection</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEdirection">direction</a> * <a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.Accel"><span class="constructor">Accel</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a> option * <a href="Syntax.html#TYPEexpr">expr</a> option * <a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.Wait"><span class="constructor">Wait</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEexpr">expr</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.Vanish"><span class="constructor">Vanish</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTsubaction.Action"><span class="constructor">Action</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEaction">action</a> <a href="Syntax.html#TYPEind">ind</a></code></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="TYPEaction"><span class="keyword">type</span> <code class="type"></code>action</span> = <code class="type"><a href="Syntax.html#TYPEsubaction">subaction</a> list</code> </pre>
+
+
+<pre><code><span id="TYPEbullet"><span class="keyword">type</span> <code class="type"></code>bullet</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTbullet.Bullet"><span class="constructor">Bullet</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEdirection">direction</a> option * <a href="Syntax.html#TYPEspeed">speed</a> option * <a href="Syntax.html#TYPEaction">action</a> <a href="Syntax.html#TYPEind">ind</a> list</code></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="TYPEfire"><span class="keyword">type</span> <code class="type"></code>fire</span> = <code class="type"><a href="Syntax.html#TYPEdirection">direction</a> option * <a href="Syntax.html#TYPEspeed">speed</a> option * <a href="Syntax.html#TYPEbullet">bullet</a> <a href="Syntax.html#TYPEind">ind</a></code> </pre>
+
+
+<pre><code><span id="TYPEhv"><span class="keyword">type</span> <code class="type"></code>hv</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThv.NoDir"><span class="constructor">NoDir</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThv.Horizontal"><span class="constructor">Horizontal</span></span></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELThv.Vertical"><span class="constructor">Vertical</span></span></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEelem"><span class="keyword">type</span> <code class="type"></code>elem</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTelem.EBullet"><span class="constructor">EBullet</span></span> <span class="keyword">of</span> <code class="type">string * <a href="Syntax.html#TYPEbullet">bullet</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTelem.EAction"><span class="constructor">EAction</span></span> <span class="keyword">of</span> <code class="type">string * <a href="Syntax.html#TYPEaction">action</a></code></code></td>
+
+</tr>
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTelem.EFire"><span class="constructor">EFire</span></span> <span class="keyword">of</span> <code class="type">string * <a href="Syntax.html#TYPEfire">fire</a></code></code></td>
+
+</tr></table>
+
+
+
+<pre><code><span id="TYPEt"><span class="keyword">type</span> <code class="type"></code>t</span> = </code></pre><table class="typetable">
+<tr>
+<td align="left" valign="top" >
+<code><span class="keyword">|</span></code></td>
+<td align="left" valign="top" >
+<code><span id="TYPEELTt.BulletML"><span class="constructor">BulletML</span></span> <span class="keyword">of</span> <code class="type"><a href="Syntax.html#TYPEhv">hv</a> * <a href="Syntax.html#TYPEelem">elem</a> list</code></code></td>
+
+</tr></table>
+
+
+
+<pre><span id="VAL(+@)"><span class="keyword">val</span> (+@)</span> : <code class="type"><a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a></code></pre>
+<pre><span id="VAL(-@)"><span class="keyword">val</span> (-@)</span> : <code class="type"><a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a></code></pre>
+<pre><span id="VAL( *@ )"><span class="keyword">val</span> ( *@ )</span> : <code class="type"><a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a></code></pre>
+<pre><span id="VAL(/@)"><span class="keyword">val</span> (/@)</span> : <code class="type"><a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a></code></pre>
+<pre><span id="VAL(~@)"><span class="keyword">val</span> (~@)</span> : <code class="type"><a href="Syntax.html#TYPEexpr">expr</a> -> <a href="Syntax.html#TYPEexpr">expr</a></code></pre>
+<pre><span id="VALbulletDefault"><span class="keyword">val</span> bulletDefault</span> : <code class="type"><a href="Syntax.html#TYPEbullet">bullet</a></code></pre></body></html>
