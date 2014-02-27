@@ -1,12 +1,14 @@
 .PHONY: build check js
 TESTEXEC=_obuild/bulletml_tests/bulletml_tests.asm
-SRC:=$(`ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.ml`)
-
-
+SRC:=$(shell ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.ml)
 MLI=$(SRC:.ml=.mli)
 
 build:
 	ocp-build || ocp-build -init
+
+
+clean : 
+	ocp-build clean
 
 check: build
 	./$(TESTEXEC)
@@ -15,14 +17,16 @@ js: build
 	js_of_ocaml _obuild/app/app.byte
 
 %.mli:%.ml 	
-	ocamlfind ocamlc -package js_of_ocaml.syntax -syntax camlp4o -i $< > $@
+	ocamlfind ocamlc $(ML) -package js_of_ocaml.syntax -syntax camlp4o -i  $< > $@ 
 
 
 install: build
 	ocp-build install
 
+mli : $(MLI)
+
 doc : $(MLI) install
-	ocamlfind ocamldoc -package bulletml -d docs *.mli
+	ocamlfind ocamldoc -html -package bulletml -d docs *.mli
 
 
 
