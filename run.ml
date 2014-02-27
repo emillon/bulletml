@@ -9,13 +9,13 @@ let enemy_pos = (float screen_w /. 2., float screen_h *. 0.3)
 
 let ship_pos = (float screen_w /. 2., float screen_h *.0.9)
 
-let make_global () =
+let make_global_ctx () =
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
   let surf = Sdlvideo.set_video_mode ~w:screen_w ~h:screen_h [] in
   let bullet = Sdlloader.load_image "bullet.png" in
   (surf, bullet)
 
-let make_local (surf, bullet) =
+let make_local_ctx (surf, bullet) =
   Sdlevent.pump ();
   begin
     match Sdlevent.poll () with
@@ -29,7 +29,7 @@ let clear (surf, _) =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
   Sdlvideo.fill_rect ~rect surf 0x00ffffffl
 
-let combine (surf, _) k =
+let run_cont (surf, _) k =
   Sdlvideo.flip surf;
   k ()
 
@@ -55,9 +55,17 @@ let main () =
   let x = Xml.parse_file fname in
   let bml = Bulletml.Parser.parse_xml x in
   main_loop
-    bml enemy_pos ship_pos
-    screen_w screen_h
-    make_global make_local
-    clear draw combine
+    bml
+    { p_enemy = enemy_pos
+    ; p_ship = ship_pos
+    ; p_screen_w = screen_w
+    ; p_screen_h = screen_h
+    }
+    { make_global_ctx
+    ; make_local_ctx
+    ; clear
+    ; draw
+    ; run_cont
+    }
 
 let _ = main ()

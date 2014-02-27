@@ -256,15 +256,14 @@ let for_all_examples f () =
 let compile b =
   let open Bulletml.Syntax in
   let open Bulletml.Interp_types in
-  let enemy_pos = (100., 300.) in
-  let ship_pos = (100., 50.) in
-  let screen_w = 200 in
-  let screen_h = 200 in
-  let (env, obj, top) =
-    Bulletml.Interp.prepare
-      b enemy_pos ship_pos
-      screen_w screen_h
+  let params =
+    { p_ship = (100., 50.)
+    ; p_enemy = (100., 300.)
+    ; p_screen_w = 200
+    ; p_screen_h = 200
+    }
   in
+  let (env, obj, top) = Bulletml.Interp.prepare b params in
   let top_act = List.assoc top env.actions in
   Bulletml.Interp.build_prog env [] (Action (Direct top_act))
 

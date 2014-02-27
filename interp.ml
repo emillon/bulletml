@@ -343,7 +343,7 @@ let rec find_assoc env = function
   | [] -> raise Not_found
   | x::xs -> try (List.assoc x env, x) with Not_found -> find_assoc env xs
 
-let prepare bml enemy_pos ship_pos screen_w screen_h =
+let prepare bml params =
   let (aenv, benv, fenv) = read_prog bml in
   let print_env e = String.concat ", " (List.map fst e) in
   Printf.printf "a: %s\nb: %s\nf: %s\n"
@@ -353,34 +353,30 @@ let prepare bml enemy_pos ship_pos screen_w screen_h =
   let (act, top) = find_assoc aenv ["top";"top1"] in
   let global_env =
     { frame = 0
-    ; ship_pos = ship_pos
-    ; screen_w = screen_w
-    ; screen_h = screen_h
+    ; ship_pos = params.p_ship
+    ; screen_w = params.p_screen_w
+    ; screen_h = params.p_screen_h
     ; actions = aenv
     ; bullets = benv
     ; fires = fenv
     }
   in
   let k = build_prog global_env [] (Action (Direct act)) in
-  let obj = initial_obj k enemy_pos in
+  let obj = initial_obj k params.p_enemy in
   (global_env, obj, top)
 
-let main_loop bml enemy_pos ship_pos screen_w screen_h make_global make_local clear draw combine =
-  let global_ctx = make_global () in
-  let (global_env, obj0, _top) =
-    prepare
-      bml enemy_pos ship_pos
-      screen_w screen_h
-  in
+let main_loop bml params { make_global_ctx ; make_local_ctx ; clear ; draw ; run_cont } =
+  let global_ctx = make_global_ctx () in
+  let (global_env, obj0, _top) = prepare bml params in
   let rec go frame obj =
     let env =
       { global_env with
         frame = frame
       }
     in
-    let ctx = make_local global_ctx in
+    let ctx = make_local_ctx global_ctx in
     clear ctx;
     draw ctx obj;
-    combine ctx (fun () -> go (frame + 1) (animate env obj))
+    run_cont ctx (fun () -> go (frame + 1) (animate env obj))
   in
   go 1 obj0
