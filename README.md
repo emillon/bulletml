@@ -18,6 +18,10 @@ It contains:
   - a JS app using [js_of_ocaml](http://ocsigen.org/js_of_ocaml/)
   - a test suite
 
+### API documentation
+
+You can find it [here](http://emillon.github.io/bulletml/docs/).
+
 ### How to build
 
 #### Prereqs
