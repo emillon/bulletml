@@ -256,23 +256,17 @@ let for_all_examples f () =
 let compile b =
   let open Bulletml.Syntax in
   let open Bulletml.Interp_types in
-  let (ae, be, fe) = Bulletml.Interp.read_prog b in
-  let top =
-    try
-      List.assoc "top" ae
-    with Not_found -> List.assoc "top1" ae
+  let enemy_pos = (100., 300.) in
+  let ship_pos = (100., 50.) in
+  let screen_w = 200 in
+  let screen_h = 200 in
+  let (env, obj, top) =
+    Bulletml.Interp.prepare
+      b enemy_pos ship_pos
+      screen_w screen_h
   in
-  let env =
-    { frame = 0
-    ; ship_pos = (100., 50.)
-    ; screen_w = 200
-    ; screen_h = 200
-    ; actions = ae
-    ; bullets = be
-    ; fires = fe
-    }
-  in
-  Bulletml.Interp.build_prog env [] (Action (Direct top))
+  let top_act = List.assoc top env.actions in
+  Bulletml.Interp.build_prog env [] (Action (Direct top_act))
 
 let compspecs =
   let open Bulletml.Syntax in

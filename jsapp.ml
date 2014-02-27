@@ -1,6 +1,8 @@
 open Bulletml.Syntax
+open Bulletml.Interp
+open Bulletml.Interp_types
 
-let pat = (* {{{ *)
+let bml = (* {{{ *)
   BulletML (NoDir,
             [ EBullet ("fast",
                        Bullet (None, Some (SpdAbs (Num 10.)), [ Direct (
@@ -72,7 +74,8 @@ let create_canvas () =
   c
 
 (* A clearRect would be better but it does not work *)
-let clear_canvas ctx data =
+let clear (ctx, img) =
+  let data = img##data in
   for i = 0 to screen_w do
     for j = 0 to screen_h do
       let p = 4 * (j * screen_w + i) in
@@ -91,7 +94,8 @@ let draw_px ctx data i j =
   Dom_html.pixel_set data (p+3) 255;
   ()
 
-let draw_bullet ctx data x y =
+let draw_bullet ctx img x y =
+  let data = img##data in
   let i = int_of_float x in
   let j = int_of_float y in
   draw_px ctx data i j;
@@ -101,52 +105,32 @@ let draw_bullet ctx data x y =
   draw_px ctx data (i-1) j;
   ()
 
+let draw (ctx, img) root =
+  let objs =
+    List.filter
+      (fun o -> not o.vanished)
+      (collect_obj root)
+  in
+  List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx img x y) objs;
+  ctx##putImageData (img, 0., 0.)
+
 let _ =
-  let open Bulletml.Interp in
-  let open Bulletml.Interp_types in
-  let (aenv, benv, fenv) = read_prog pat in
-  let print_env e = String.concat ", " (List.map fst e) in
-  Printf.printf "a: %s\nb: %s\nf: %s\n"
-    (print_env aenv)
-    (print_env benv)
-    (print_env fenv);
-  let act = List.assoc "top" aenv in
-  let global_env =
-    { frame = 0
-    ; ship_pos = ship_pos
-    ; screen_w = screen_w
-    ; screen_h = screen_h
-    ; actions = aenv
-    ; bullets = benv
-    ; fires = fenv
-    }
+  let make_global () =
+    let canvas = create_canvas () in
+    Dom.appendChild Dom_html.document##body canvas;
+    canvas
   in
-  let k = build_prog global_env [] (Action (Direct act)) in
-  let canvas = create_canvas () in
-  Dom.appendChild Dom_html.document##body canvas;
-  let draw_frame ctx data root =
-    let objs =
-      List.filter
-        (fun o -> not o.vanished)
-        (collect_obj root)
-    in
-    List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx data x y) objs
-  in
-  let obj0 = initial_obj k enemy_pos in
-  let open Lwt in
-  let rec go frame obj =
-    let env =
-      { global_env with
-        frame = frame
-      }
-    in
+  let make_local canvas =
     let ctx = canvas##getContext (Dom_html._2d_) in
     let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
-    let data = img##data in
-    clear_canvas ctx data;
-    draw_frame ctx data obj;
-    ctx##putImageData (img, 0., 0.);
-    Lwt_js.yield () >>= fun () ->
-    go (frame + 1) (animate env obj);
+    (ctx, img)
   in
-  go 1 obj0
+  let combine _ k =
+    let open Lwt in
+    Lwt_js.yield () >>= k
+  in
+  main_loop
+    bml enemy_pos ship_pos
+    screen_w screen_h
+    make_global make_local
+    clear draw combine
