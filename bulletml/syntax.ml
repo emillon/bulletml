@@ -1,3 +1,6 @@
+(** Abstract syntax of BulletML programs. *)
+
+(** Binary operations *)
 type op =
   | Add
   | Sub
@@ -6,11 +9,11 @@ type op =
   | Mod
 
 type expr =
-  | Num of float
-  | Op of op * expr * expr
-  | Param of int
-  | Rand
-  | Rank
+  | Num of float (** Constant *)
+  | Op of op * expr * expr (** Binary operation *)
+  | Param of int (** Function parameter *)
+  | Rand (** Random value between 0.0 and 1.0 *)
+  | Rank (** Difficulty factor, between 0.0 and 1.0 *)
 
 type speed =
   | SpdAbs of expr

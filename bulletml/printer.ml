@@ -1,6 +1,8 @@
 open Syntax
 open Interp_types
 
+type 'a printer = 'a -> string
+
 let print_list prn l =
   "["^ String.concat ", " (List.map prn l) ^ "]"
 
