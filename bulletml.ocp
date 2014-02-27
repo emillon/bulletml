@@ -1,6 +1,7 @@
 comp = ["-g"]
 
 begin library "bulletml"
+  dirname = ["bulletml"]
   files = [
     pack Bulletml [
       "syntax.ml" "interp_types.ml" "printer.ml" "parser.ml" "interp.ml"
@@ -10,6 +11,7 @@ begin library "bulletml"
 end
 
 begin program "bulletml_tests"
+  dirname = ["tests"]
   files = ["tests.ml"]
   requires = ["bulletml" "alcotest"]
 end
