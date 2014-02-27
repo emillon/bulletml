@@ -1,11 +1,11 @@
 .PHONY: build check js
 TESTEXEC=_obuild/bulletml_tests/bulletml_tests.asm
-SRC:=$(shell ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.ml)
-MLI=$(SRC:.ml=.mli)
+LIBDIR:=bulletml
+SRC:=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.ml)
+MLI=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.mli)
 
 build:
-	ocp-build || ocp-build -init
-
+	ocp-build 
 
 clean : 
 	ocp-build clean
@@ -16,18 +16,39 @@ check: build
 js: build
 	js_of_ocaml _obuild/app/app.byte
 
-%.mli:%.ml 	
-	ocamlfind ocamlc -package bulletml,js_of_ocaml.syntax -linkpkg -syntax camlp4o -i  $< > $@ 
+%.mli:bulletml/%.ml 
+	cp bulletml/$@ . 2>/dev/null ||  \
+	ocamlfind ocamlc *.mli -package bulletml,js_of_ocaml.syntax -syntax camlp4o -c -i  $< > $@ || (rm $@; exit 1)
 
 
-install: build
+install: build uninstall
 	ocp-build install
+	cp _obuild/bulletml/*.cmi `ocamlfind query bulletml`
 
-mli : $(MLI)
-
-doc : $(MLI) install
-	ocamlfind ocamldoc -html -package bulletml -d docs *.mli
-
-
+uninstall:
+	ocp-build uninstall
+	ocamlfind remove bulletml
 
 
+doc :  install
+	mkdir -p tmp
+	for i in $(SRC); do \
+	echo $$i; \
+	echo "open Bulletml" > tmp/$$i; \
+	cat bulletml/$$i >> tmp/$$i; \
+	done
+	for i in $(MLI); do \
+	echo $$i; \
+	echo "open Bulletml" > tmp/$$i; \
+	cat bulletml/$$i >> tmp/$$i; \
+	cd tmp && ocamlfind ocamlc -package bulletml -c $$i ;\
+	done
+	mkdir -p docs
+	ocamlfind ocamldoc -thread -I tmp -html -package bulletml -d docs tmp/*.mli tmp/*.ml 
+	rm -rf tmp
+
+
+
+
+mrproper: clean
+	rm -rf tmp docs
