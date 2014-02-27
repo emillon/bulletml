@@ -4,6 +4,10 @@ let parse_string s =
   let x = Xml.parse_string s in
   print_endline (Xml.to_string_fmt x)
 
+let parse_label = function
+  | [(("label"|"LABEL"), l)] -> l
+  | _ -> assert false
+
 let parse_expr s :expr =
   let open MParser in
   let app op x y = Op (op, x, y) in
@@ -120,11 +124,12 @@ let rec parse_fire nodes :fire =
           let b = parse_bullet ns in
           bullet := Some (Direct b)
         end
-      | Xml.Element ("bulletRef", [("label" | "LABEL"), s], ns) ->
+      | Xml.Element ("bulletRef", attrs, ns) ->
         begin
           assert (!bullet = None);
           let params = parse_params ns in
-          bullet := Some (Indirect (s, params))
+          let label = parse_label attrs in
+          bullet := Some (Indirect (label, params))
         end
       | Xml.Element ("direction", attrs, [Xml.PCData s]) ->
         begin
@@ -220,19 +225,19 @@ and parse_bullet nodes :bullet =
     ) nodes;
   Bullet (!dir, !speed, List.rev !acts)
 
-let parse_elems nodes =
+let parse_elems =
   List.map (function
-      | Xml.Element ("action", [(("label"|"LABEL"), l)], ns) ->
-        let act = parse_action ns in
-        EAction (l, act)
-      | Xml.Element ("bullet", [(("label"|"LABEL"), l)], ns) ->
-        let b = parse_bullet ns in
-        EBullet (l, b)
-      | Xml.Element ("fire", [(("label"|"LABEL"), l)], ns) ->
-        let f = parse_fire ns in
-        EFire (l, f)
+      | Xml.Element (n, attrs, ns) ->
+        let l = parse_label attrs in
+        begin
+          match n with
+          | "action" -> EAction (l, parse_action ns)
+          | "bullet" -> EBullet (l, parse_bullet ns)
+          | "fire" -> EFire (l, parse_fire ns)
+          | _ -> assert false
+        end
       | x -> fail_parse "parse_elems" x
-    ) nodes
+    )
 
 let parse_xml = function
   | Xml.Element ("bulletml", attrs, ns) ->
