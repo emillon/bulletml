@@ -27,7 +27,7 @@ opam install ocp-build
 opam install ${OPAM_DEPENDS}
 
 opam install ocp-indent
-ocp-indent -i *.ml *.mli
+ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml
 [ -z "$(git diff)" ]
 
 ocp-build -init
