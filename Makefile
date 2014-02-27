@@ -17,7 +17,7 @@ js: build
 	js_of_ocaml _obuild/app/app.byte
 
 %.mli:%.ml 	
-	ocamlfind ocamlc $(ML) -package js_of_ocaml.syntax -syntax camlp4o -i  $< > $@ 
+	ocamlfind ocamlc -package bulletml,js_of_ocaml.syntax -linkpkg -syntax camlp4o -i  $< > $@ 
 
 
 install: build
