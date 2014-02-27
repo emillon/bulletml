@@ -364,3 +364,23 @@ let prepare bml enemy_pos ship_pos screen_w screen_h =
   let k = build_prog global_env [] (Action (Direct act)) in
   let obj = initial_obj k enemy_pos in
   (global_env, obj, top)
+
+let main_loop bml enemy_pos ship_pos screen_w screen_h make_global make_local clear draw combine =
+  let global_ctx = make_global () in
+  let (global_env, obj0, _top) =
+    prepare
+      bml enemy_pos ship_pos
+      screen_w screen_h
+  in
+  let rec go frame obj =
+    let env =
+      { global_env with
+        frame = frame
+      }
+    in
+    let ctx = make_local global_ctx in
+    clear ctx;
+    draw ctx obj;
+    combine ctx (fun () -> go (frame + 1) (animate env obj))
+  in
+  go 1 obj0

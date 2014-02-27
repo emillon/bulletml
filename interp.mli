@@ -18,3 +18,16 @@ val prepare
   -> int (** screen width *)
   -> int (** screen height *)
   -> env * obj * string (** env, root object, name of top pattern *)
+
+val main_loop
+  :  Syntax.t
+  -> position                   (** enemy pos *)
+  -> position                   (** ship pos *)
+  -> int                        (** screen width *)
+  -> int                        (** screen height *)
+  -> (unit -> 'g)               (** make global context *)
+  -> ('g -> 'l)                 (** make context *)
+  -> ('l -> unit)               (** clear *)
+  -> ('l -> obj -> unit)        (** draw *)
+  -> ('l -> (unit -> 'r) -> 'r) (** how to run continuation *)
+  -> 'r
