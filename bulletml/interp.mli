@@ -22,6 +22,8 @@ val initial_obj : opcode list -> position -> obj
 
 (**
    Create the list of descendants of an {!Interp_types.obj}, including itself.
+
+   This is done in a prefix order, so the argument is the head.
 *)
 val collect_obj : obj -> obj list
 
