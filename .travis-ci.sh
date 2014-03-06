@@ -30,7 +30,26 @@ opam install ocp-indent
 ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml
 [ -z "$(git diff)" ]
 
+echo "0092a42114e7937ad06d1f19b6345c41a84196ad  Bisect.tar.gz" > bisect.SHA1SUMS
+wget \
+    http://sagotch.fr/Bisect.tar.gz \
+    https://raw.github.com/sagotch/ocveralls/9069356076e886ad0913fbc8550330f45d3cc664/ocveralls.sh
+sha1sum -c bisect.SHA1SUMS
+tar -xvf Bisect.tar.gz
+cd Bisect
+chmod +x configure
+./configure
+cat Makefile.config
+make all
+sudo make install
+cd ..
+
 ocp-build -init
 make check
 make js
 make doc
+
+ocp-build build bulletml_tests_cov
+BISECT_FILE=bulletml ./_obuild/bulletml_tests_cov/bulletml_tests_cov.asm
+chmod +x ocveralls.sh
+./ocveralls.sh bulletml*.out
