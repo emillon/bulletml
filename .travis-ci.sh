@@ -34,3 +34,13 @@ ocp-build -init
 make check
 make js
 make doc
+
+wget http://sagotch.fr/Bisect.tar.gz
+tar -xvf Bisect.tar.gz
+cd Bisect
+chmod +x configure
+./configure
+cat Makefile.config
+make all
+sudo make install
+cd ..
