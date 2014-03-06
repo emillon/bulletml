@@ -37,7 +37,7 @@ begin
   end
 
   begin objects "bisect_pp.objects"
-    dirname = [ "%{HOME}%/.opam/system/lib/bisect" ]
+    dirname = [ "%{bisect_SRC_DIR}%" ]
     files = [ "bisect_pp.ml" ]
     requires = [ "str" ]
   end
