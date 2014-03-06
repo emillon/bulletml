@@ -37,7 +37,7 @@ begin
   end
 
   begin objects "bisect_pp.objects"
-    dirname = [ "%{HOME}%/.opam/4.01.0/lib/bisect" ]
+    dirname = [ "/usr/lib/ocaml/bisect" ]
     files = [ "bisect_pp.ml" ]
     requires = [ "str" ]
   end
