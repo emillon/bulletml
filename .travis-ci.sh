@@ -35,7 +35,9 @@ make check
 make js
 make doc
 
+echo "0092a42114e7937ad06d1f19b6345c41a84196ad  Bisect.tar.gz" > bisect.SHA1SUMS
 wget http://sagotch.fr/Bisect.tar.gz
+sha1sum -c bisect.SHA1SUM
 tar -xvf Bisect.tar.gz
 cd Bisect
 chmod +x configure
