@@ -5,3 +5,4 @@ _obuild
 _tests
 oUnit-anon.cache
 docs/
+*.cmp
