@@ -19,25 +19,10 @@ let parse_expr s :expr =
       ; infix "-" Sub Assoc_left
       ]
     ] in
-  let mknum sign n = match sign with
-    | Some '-' -> float (-n)
-    | None -> float n
-    | _ -> assert false
-  in
-  let num =
-    option (char '-') >>= fun sign ->
-    Tokens.decimal >>= fun n ->
-    return (Num (mknum sign n))
-  in
-  let mknum_float sign n = match sign with
-    | Some '-' -> (-. n)
-    | None -> (n)
-    | _ -> failwith "error in float"
-  in
-  let float_num =
-    option (char '-') >>= fun sign ->
-    Tokens.float >>= fun n ->
-    return (Num (mknum_float sign ( n)))
+  let number =
+    let num x = Num x in
+    regexp (make_regexp "-?\\d+(\\.\\d*)?\\s*") >>= fun s ->
+    s |> String.trim |> float_of_string |> num |> return
   in
   let rand = string "$rand" >> spaces >> return Rand in
   let rank = string "$rank" >> spaces >> return Rank in
@@ -49,8 +34,7 @@ let parse_expr s :expr =
   let rec term s =
     (spaces >> choice
        [ Tokens.parens expr
-       ; attempt float_num
-       ; num
+       ; number
        ; rand
        ; rank
        ; param

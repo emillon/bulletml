@@ -20,3 +20,6 @@ val parse_bullet : Xml.xml list -> Syntax.bullet
     The argument is a list of children of a [<fire>] element.
 *)
 val parse_fire : Xml.xml list -> Syntax.fire
+
+(** Parse only a {!Syntax.expr}. *)
+val parse_expr : string -> Syntax.expr

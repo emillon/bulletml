@@ -9,6 +9,9 @@ type 'a printer = 'a -> string
 val print_list : 'a printer -> 'a list printer
 
 (** Print a {!Syntax.t}. *)
+val print_expr : Syntax.expr printer
+
+(** Print a {!Syntax.t}. *)
 val print_bulletml : Syntax.t printer
 
 (** Print an {!Interp_types.opcode}. *)
