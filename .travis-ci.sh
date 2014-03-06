@@ -52,4 +52,4 @@ make doc
 ocp-build build bulletml_tests_cov
 BISECT_FILE=bulletml ./_obuild/bulletml_tests_cov/bulletml_tests_cov.asm
 chmod +x ocveralls.sh
-./ocveralls.sh ./ocveralls.sh bulletml*.out
+./ocveralls.sh bulletml*.out
