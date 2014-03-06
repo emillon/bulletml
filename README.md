@@ -1,4 +1,4 @@
-λx. colored nonsense [![Build Status](https://secure.travis-ci.org/emillon/bulletml.png)](http://travis-ci.org/emillon/bulletml)
+λx. colored nonsense [![Build Status](https://secure.travis-ci.org/emillon/bulletml.png)](http://travis-ci.org/emillon/bulletml) [![Coverage Status](https://coveralls.io/repos/emillon/bulletml/badge.png)](https://coveralls.io/r/emillon/bulletml)
 ====================
 
 BulletML is a language designed to express bullet behaviour in a shoot'em up
