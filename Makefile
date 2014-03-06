@@ -5,7 +5,7 @@ SRC:=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax 
 MLI=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.mli)
 
 build:
-	ocp-build 
+	ocp-build build bulletml_run bullet_tests
 
 clean : 
 	ocp-build clean
