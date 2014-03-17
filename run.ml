@@ -7,7 +7,7 @@ let screen_h = 600
 
 let enemy_pos = (float screen_w /. 2., float screen_h *. 0.3)
 
-let ship_pos = (float screen_w /. 2., float screen_h *.0.9)
+let ship_pos = ref (float screen_w /. 2., float screen_h *.0.9)
 
 type global_ctx =
   { window : Sdlvideo.surface
@@ -27,25 +27,17 @@ let make_global_ctx () =
   Sdlvideo.fill_rect ship 0x69D2E7l;
   { window ; bullet; ship }
 
-let make_local_ctx ctx =
+let make_local_ctx g_ctx =
   Sdlevent.pump ();
   begin
     match Sdlevent.poll () with
     | Some ( Sdlevent.MOUSEBUTTONDOWN _
            | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_q } ) -> raise Exit
-    | Some ( Sdlevent.MOUSEMOTION _ as e ) -> Sdlevent.add [e]
+    | Some ( Sdlevent.MOUSEMOTION { Sdlevent.mme_x ; Sdlevent.mme_y } ) ->
+      ship_pos := (float mme_x, float mme_y)
     | _ -> ()
   end;
-  ctx
-
-let move_ship ctx spos =
-  Sdlevent.pump ();
-  begin
-    match Sdlevent.poll () with
-    | Some ( Sdlevent.MOUSEMOTION { Sdlevent.mme_x ; Sdlevent.mme_y } ) ->
-      (float mme_x, float mme_y)
-    | _ -> spos
-  end
+  g_ctx
 
 let clear { window } =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
@@ -68,8 +60,8 @@ let draw ctx root =
   in
   List.iter (draw_bullet ctx) objs
 
-let draw_ship { window ; bullet ; ship } pos =
-  let (px, py) = int_pos pos in
+let draw_ship { window ; bullet ; ship } =
+  let (px, py) = int_pos (!ship_pos) in
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
   Sdlvideo.blit_surface ~src:ship ~dst:window ~dst_rect ()
 
@@ -79,7 +71,6 @@ let interp :(global_ctx, global_ctx, unit) interpreter =
   ; clear
   ; draw
   ; draw_ship
-  ; move_ship
   ; run_cont
   }
 
@@ -94,7 +85,7 @@ let main () =
   main_loop
     bml
     { p_enemy = enemy_pos
-    ; p_ship = ship_pos
+    ; p_ship = !ship_pos
     ; p_screen_w = screen_w
     ; p_screen_h = screen_h
     }

@@ -131,8 +131,9 @@ let draw (ctx, img) root =
   in
   List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx img x y) objs
 
-let draw_ship (ctx, img) (x, y) =
+let draw_ship (ctx, img) =
   let color = (0x69, 0xD2, 0xE7) in
+  let (x, y) = ship_pos in
   draw_bullet ~color ctx img x y
 
 let run_cont (ctx, img) k =
@@ -149,6 +150,5 @@ let _ =
     ; clear
     ; draw
     ; draw_ship
-    ; move_ship = (fun _ p -> p)
     ; run_cont
     }
