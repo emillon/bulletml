@@ -143,5 +143,6 @@ let _ =
     ; make_local_ctx
     ; clear
     ; draw
+    ; draw_ship = (fun _ _ -> ())
     ; run_cont
     }

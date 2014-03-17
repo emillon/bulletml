@@ -110,6 +110,7 @@ type ('g, 'l, 'r) interpreter =
   ; make_local_ctx : 'g -> 'l (** (each frame) create a local context *)
   ; clear : 'l -> unit (** clear frame *)
   ; draw : 'l -> obj -> unit (** draw the object and its descendants *)
+  ; draw_ship : 'l -> position -> unit (** draw the ship's sprite *)
   ; run_cont : 'l -> (unit -> 'r) -> 'r
   (** run the next frame. When in doubt, [fun _ k -> k ()] works *)
   }
