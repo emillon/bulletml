@@ -365,19 +365,21 @@ let prepare bml params =
   let obj = initial_obj k params.p_enemy in
   (global_env, obj, top)
 
-let main_loop bml params { make_global_ctx ; make_local_ctx ; clear ; draw ; draw_ship ; run_cont } =
+let main_loop bml params { make_global_ctx ; make_local_ctx ; clear ; draw ; draw_ship ; move_ship ; run_cont } =
   let global_ctx = make_global_ctx () in
   let (global_env, obj0, _top) = prepare bml params in
-  let rec go frame obj =
+  let rec go frame obj ship_pos =
     let env =
       { global_env with
         frame = frame
+      ; ship_pos
       }
     in
     let ctx = make_local_ctx global_ctx in
+    let new_pos = move_ship ctx env.ship_pos in
     clear ctx;
     draw ctx obj;
     draw_ship ctx env.ship_pos;
-    run_cont ctx (fun () -> go (frame + 1) (animate env obj))
+    run_cont ctx (fun () -> go (frame + 1) (animate env obj) new_pos)
   in
-  go 1 obj0
+  go 1 obj0 global_env.ship_pos

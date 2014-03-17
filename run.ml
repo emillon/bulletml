@@ -33,9 +33,19 @@ let make_local_ctx ctx =
     match Sdlevent.poll () with
     | Some ( Sdlevent.MOUSEBUTTONDOWN _
            | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_q } ) -> raise Exit
+    | Some ( Sdlevent.MOUSEMOTION _ as e ) -> Sdlevent.add [e]
     | _ -> ()
   end;
   ctx
+
+let move_ship ctx spos =
+  Sdlevent.pump ();
+  begin
+    match Sdlevent.poll () with
+    | Some ( Sdlevent.MOUSEMOTION { Sdlevent.mme_x ; Sdlevent.mme_y } ) ->
+      (float mme_x, float mme_y)
+    | _ -> spos
+  end
 
 let clear { window } =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
@@ -69,7 +79,7 @@ let interp :(global_ctx, global_ctx, unit) interpreter =
   ; clear
   ; draw
   ; draw_ship
-  ; move_ship = (fun _ p -> p)
+  ; move_ship
   ; run_cont
   }
 
