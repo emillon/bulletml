@@ -38,13 +38,13 @@ let draw_bullet (window, bullet) b =
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
   Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
 
-let draw window root =
+let draw ctx root =
   let objs =
     List.filter
       (fun o -> not o.vanished)
       (collect_obj root)
   in
-  List.iter (draw_bullet window) objs
+  List.iter (draw_bullet ctx) objs
 
 let main () =
   let (fname, patname) = match Sys.argv with
