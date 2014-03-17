@@ -65,19 +65,24 @@ let bml = (* {{{ *)
 let screen_w = 400
 let screen_h = 300
 let enemy_pos = (200., 100.)
-let ship_pos = (200., 250.)
+let ship_pos = ref (200., 250.)
 
 let params =
   { p_screen_w = screen_w
   ; p_screen_h = screen_h
   ; p_enemy = enemy_pos
-  ; p_ship = ship_pos
+  ; p_ship = !ship_pos
   }
+
+let mouse_handler e =
+  ship_pos := (float e##clientX, float e##clientY);
+  Js._true
 
 let create_canvas () =
   let c = Dom_html.createCanvas Dom_html.document in
   c##width <- screen_w;
   c##height <- screen_h;
+  c##onmousemove <- Dom_html.handler mouse_handler;
   c
 
 let make_global_ctx () =
@@ -133,7 +138,7 @@ let draw (ctx, img) root =
 
 let draw_ship (ctx, img) =
   let color = (0x69, 0xD2, 0xE7) in
-  let (x, y) = ship_pos in
+  let (x, y) = !ship_pos in
   draw_bullet ~color ctx img x y
 
 let run_cont (ctx, img) k =
