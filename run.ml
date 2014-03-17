@@ -77,6 +77,7 @@ let main () =
     ; clear
     ; draw
     ; draw_ship
+    ; move_ship = (fun _ p -> p)
     ; run_cont
     }
 

@@ -144,5 +144,6 @@ let _ =
     ; clear
     ; draw
     ; draw_ship = (fun _ _ -> ())
+    ; move_ship = (fun _ p -> p)
     ; run_cont
     }

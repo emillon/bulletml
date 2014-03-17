@@ -111,6 +111,7 @@ type ('g, 'l, 'r) interpreter =
   ; clear : 'l -> unit (** clear frame *)
   ; draw : 'l -> obj -> unit (** draw the object and its descendants *)
   ; draw_ship : 'l -> position -> unit (** draw the ship's sprite *)
+  ; move_ship : 'l -> position -> position (** move ship *)
   ; run_cont : 'l -> (unit -> 'r) -> 'r
   (** run the next frame. When in doubt, [fun _ k -> k ()] works *)
   }
