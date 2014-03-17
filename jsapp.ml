@@ -103,23 +103,24 @@ let clear (ctx, img) =
     done
   done
 
-let draw_px ctx data i j =
+let draw_px ~color ctx data i j =
+  let (r, g, b) = color in
   let p = 4 * (j * screen_w + i) in
-  Dom_html.pixel_set data (p+0) 0xfa;
-  Dom_html.pixel_set data (p+1) 0x69;
-  Dom_html.pixel_set data (p+2) 0x00;
+  Dom_html.pixel_set data (p+0) r;
+  Dom_html.pixel_set data (p+1) g;
+  Dom_html.pixel_set data (p+2) b;
   Dom_html.pixel_set data (p+3) 255;
   ()
 
-let draw_bullet ctx img x y =
+let draw_bullet ?(color=(0xfa, 0x69, 0x00)) ctx img x y =
   let data = img##data in
   let i = int_of_float x in
   let j = int_of_float y in
-  draw_px ctx data i j;
-  draw_px ctx data i (j+1);
-  draw_px ctx data (i+1) j;
-  draw_px ctx data i (j-1);
-  draw_px ctx data (i-1) j;
+  draw_px ~color ctx data i j;
+  draw_px ~color ctx data i (j+1);
+  draw_px ~color ctx data (i+1) j;
+  draw_px ~color ctx data i (j-1);
+  draw_px ~color ctx data (i-1) j;
   ()
 
 let draw (ctx, img) root =
@@ -128,11 +129,15 @@ let draw (ctx, img) root =
       (fun o -> not o.vanished)
       (collect_obj root)
   in
-  List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx img x y) objs;
-  ctx##putImageData (img, 0., 0.)
+  List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx img x y) objs
 
-let run_cont _ k =
+let draw_ship (ctx, img) (x, y) =
+  let color = (0x69, 0xD2, 0xE7) in
+  draw_bullet ~color ctx img x y
+
+let run_cont (ctx, img) k =
   let open Lwt in
+  ctx##putImageData (img, 0., 0.);
   Lwt_js.yield () >>= k
 
 let _ =
@@ -143,7 +148,7 @@ let _ =
     ; make_local_ctx
     ; clear
     ; draw
-    ; draw_ship = (fun _ _ -> ())
+    ; draw_ship
     ; move_ship = (fun _ p -> p)
     ; run_cont
     }
