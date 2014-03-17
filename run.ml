@@ -27,6 +27,14 @@ let make_global_ctx () =
   Sdlvideo.fill_rect ship 0x69D2E7l;
   { window ; bullet; ship }
 
+let move_x dx =
+  let (x, y) = !ship_pos in
+  ship_pos := (x +. dx, y)
+
+let move_y dy =
+  let (x, y) = !ship_pos in
+  ship_pos := (x, y +. dy)
+
 let make_local_ctx g_ctx =
   Sdlevent.pump ();
   begin
@@ -35,6 +43,10 @@ let make_local_ctx g_ctx =
            | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_q } ) -> raise Exit
     | Some ( Sdlevent.MOUSEMOTION { Sdlevent.mme_x ; Sdlevent.mme_y } ) ->
       ship_pos := (float mme_x, float mme_y)
+    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_UP } ) -> move_y (-10.)
+    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_DOWN } ) -> move_y (10.)
+    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_LEFT } ) -> move_x (-10.)
+    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_RIGHT } ) -> move_x (10.)
     | _ -> ()
   end;
   g_ctx
