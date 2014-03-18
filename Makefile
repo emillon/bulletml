@@ -5,7 +5,7 @@ SRC:=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax 
 MLI=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.mli)
 
 build:
-	ocp-build
+	ocp-build build bulletml bulletml_tests bulletml_run
 
 clean : 
 	ocp-build clean
@@ -47,8 +47,10 @@ doc :  install
 	ocamlfind ocamldoc -thread -I tmp -html -package bulletml -d docs tmp/*.mli tmp/*.ml 
 	rm -rf tmp
 
-
-
+cov:
+	BISECT_FILE=bulletml ./_obuild/bulletml_tests_cov/bulletml_tests_cov.asm
+	bisect-report -html coverage bulletml*.out
+	rm bulletml*.out
 
 mrproper: clean
 	rm -rf tmp docs

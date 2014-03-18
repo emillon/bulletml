@@ -6,3 +6,4 @@ _tests
 oUnit-anon.cache
 docs/
 *.cmp
+coverage/
