@@ -47,8 +47,10 @@ doc :  install
 	ocamlfind ocamldoc -thread -I tmp -html -package bulletml -d docs tmp/*.mli tmp/*.ml 
 	rm -rf tmp
 
-
-
+cov:
+	BISECT_FILE=bulletml ./_obuild/bulletml_tests_cov/bulletml_tests_cov.asm
+	bisect-report -html coverage bulletml*.out
+	rm bulletml*.out
 
 mrproper: clean
 	rm -rf tmp docs
