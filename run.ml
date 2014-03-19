@@ -72,11 +72,13 @@ let draw_msg =
 module Options = struct
   let parse_only = ref false
   let fname = ref None
+  let limit_fps = ref None
 end
 
 let _ =
   let args =
     [ ("-p", Arg.Set Options.parse_only, "parse and print only")
+    ; ("-f", Arg.String (fun s -> Options.limit_fps := Some (float_of_string s)), "limit FPS")
     ]
   in
   let usage = "Use the source, Luke" in
@@ -130,6 +132,13 @@ let _ =
     draw_msg window !msg;
     Sdlvideo.flip window;
     let new_obj = (animate env obj) in
+    begin match !Options.limit_fps with
+      | None -> ()
+      | Some f ->
+        let time = !last_frame +. 1. /. f -. now in
+        if time > 0. then
+          ignore (Unix.select [] [] [] time)
+    end;
     last_frame := now;
     go (frame + 1) new_obj
   in
