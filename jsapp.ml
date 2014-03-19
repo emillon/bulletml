@@ -3,15 +3,8 @@ open Bulletml.Interp
 open Bulletml.Interp_types
 
 let bml = (*{{{*)
-BulletML (Horizontal, [EAction ("top",[Repeat (Num 20.,Direct ([Fire (Direct
-((Some (DirAim (((Num 0. -@ Num 60.) +@ (Rand *@ Num 120.)))), None, Indirect
-("hmgLsr", [])))); Repeat (Num 8.,Direct ([Wait (Num 1.); Fire (Direct ((Some
-(DirSeq (Num 0.)), None, Indirect ("hmgLsr", []))))])); Wait (Num 10.)])); Wait
-(Num 60.)]); EBullet ("hmgLsr",Bullet (None,Some (SpdAbs (Num 2.)),[Direct
-([ChangeSpeed (SpdAbs (Num 0.3),Num 30.); Wait (Num 100.); ChangeSpeed (SpdAbs
-(Num 5.),Num 100.)]); Direct ([Repeat (Num 12.,Direct ([ChangeDirection (DirAim
-(Num 0.),(Num 45. -@ (Rank *@ Num 30.))); Wait (Num 5.)]))])]))])
-  (*}}}*)
+  BulletML (Horizontal, [EAction ("top", [Repeat (Num 20.,Direct ([Fire (Direct ((Some (DirAim (((Num 0. -@ Num 60.) +@ (Rand *@ Num 120.)))), None, Indirect ("hmgLsr", [])))); Repeat (Num 8.,Direct ([Wait (Num 1.); Fire (Direct ((Some (DirSeq (Num 0.)), None, Indirect ("hmgLsr", []))))])); Wait (Num 10.)])); Wait (Num 60.)]); EBullet ("hmgLsr",Bullet (None,Some (SpdAbs (Num 2.)),[Direct ([ChangeSpeed (SpdAbs (Num 0.3),Num 30.); Wait (Num 100.); ChangeSpeed (SpdAbs (Num 5.),Num 100.)]); Direct ([Repeat (Num 12.,Direct ([ChangeDirection (DirAim (Num 0.),(Num 45. -@ (Rank *@ Num 30.))); Wait (Num 5.)]))])]))])
+(*}}}*)
 
 let screen_w = 400
 let screen_h = 300
