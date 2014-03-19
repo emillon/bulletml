@@ -18,7 +18,7 @@ end
 
 begin program "bulletml_run"
   files = ["run.ml"]
-  requires = ["bulletml" "sdl" "sdl.sdlimage"]
+  requires = ["bulletml" "sdl" "sdl.sdlimage" "sdl.sdlttf"]
 end
 
 begin

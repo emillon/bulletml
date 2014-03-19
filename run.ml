@@ -51,24 +51,45 @@ let draw window bullet root =
       (fun o -> not o.vanished)
       (collect_obj root)
   in
-  List.iter (draw_bullet window bullet) objs
+  let r = ref 0 in
+  List.iter (fun b -> incr r; draw_bullet window bullet b) objs;
+  !r
 
 let draw_ship window bullet ship =
   let (px, py) = int_pos (!ship_pos) in
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
   Sdlvideo.blit_surface ~src:ship ~dst:window ~dst_rect ()
 
+let draw_msg =
+  let open Sdlttf in
+  init ();
+  let font = open_font "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf" 10 in
+  fun surface msg ->
+    let text = render_text_solid font msg ~fg:Sdlvideo.black in
+    let dst_rect = Sdlvideo.rect ~x:10 ~y:10 ~w:0 ~h:0 in
+    Sdlvideo.blit_surface ~src:text ~dst:surface ~dst_rect ()
+
+module Options = struct
+  let parse_only = ref false
+  let fname = ref None
+  let limit_fps = ref None
+end
+
 let _ =
-  let parse_only = ref false in
-  let (fname, patname) = match Sys.argv with
-    | [| _ ; "-p" ; a1 |] -> (parse_only := true ; (a1, "top"))
-    | [| _ ; a1 ; a2 |] -> (a1, a2)
-    | [| _ ; a1 |] -> (a1, "top")
-    | _ -> failwith "usage: bulletml pattern.xml name"
+  let args =
+    [ ("-p", Arg.Set Options.parse_only, "parse and print only")
+    ; ("-f", Arg.String (fun s -> Options.limit_fps := Some (float_of_string s)), "limit FPS")
+    ]
+  in
+  let usage = "Use the source, Luke" in
+  Arg.parse args (fun s -> Options.fname := Some s) usage;
+  let fname = match !Options.fname with
+    | Some f -> f
+    | None -> (print_endline usage;exit 1)
   in
   let x = Xml.parse_file fname in
   let bml = Bulletml.Parser.parse_xml x in
-  if !parse_only then begin
+  if !Options.parse_only then begin
     print_endline (Bulletml.Printer.print_bulletml bml);
     exit 0
   end;
@@ -89,6 +110,8 @@ let _ =
   in
   Sdlvideo.fill_rect ship 0x69D2E7l;
   let (global_env, obj0, _top) = prepare bml params in
+  let last_frame = ref (Unix.gettimeofday ()) in
+  let msg = ref "xxx" in
   let rec go frame obj =
     handle_events ();
     let env =
@@ -98,10 +121,25 @@ let _ =
       }
     in
     clear window;
-    draw window bullet obj;
+    let nbullets = draw window bullet obj in
     draw_ship window bullet ship;
+    let now = Unix.gettimeofday () in
+    let frametime = now -. !last_frame in
+    let fps = 1. /. frametime in
+    if frame mod 20 = 0 then
+      (msg := (Printf.sprintf "%d bullets %.1f fps %.1f bfps" nbullets fps (float nbullets *. fps)))
+    ;
+    draw_msg window !msg;
     Sdlvideo.flip window;
     let new_obj = (animate env obj) in
+    begin match !Options.limit_fps with
+      | None -> ()
+      | Some f ->
+        let time = !last_frame +. 1. /. f -. now in
+        if time > 0. then
+          ignore (Unix.select [] [] [] time)
+    end;
+    last_frame := now;
     go (frame + 1) new_obj
   in
   while true do
