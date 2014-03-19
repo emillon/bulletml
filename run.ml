@@ -101,6 +101,7 @@ let _ =
   Sdlvideo.fill_rect ship 0x69D2E7l;
   let (global_env, obj0, _top) = prepare bml params in
   let last_frame = ref (Unix.gettimeofday ()) in
+  let msg = ref "xxx" in
   let rec go frame obj =
     handle_events ();
     let env =
@@ -115,9 +116,10 @@ let _ =
     let now = Unix.gettimeofday () in
     let frametime = now -. !last_frame in
     let fps = 1. /. frametime in
-    draw_msg window
-      (Printf.sprintf "%d bullets %.1f fps %.1f bfps"
-        nbullets fps (float nbullets *. fps));
+    if frame mod 20 = 0 then
+      (msg := (Printf.sprintf "%d bullets %.1f fps %.1f bfps" nbullets fps (float nbullets *. fps)))
+    ;
+    draw_msg window !msg;
     Sdlvideo.flip window;
     let new_obj = (animate env obj) in
     last_frame := now;
