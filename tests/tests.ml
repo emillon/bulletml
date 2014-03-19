@@ -212,21 +212,21 @@ let tests () =
         begin match x with
           | Xml.Element ("bullet", _, ns) ->
             let b = Bulletml.Parser.parse_bullet ns in
-            OUnit.assert_equal b bspec
+            OUnit.assert_equal bspec b
           | _ -> OUnit.assert_failure "not a bullet"
         end
       | `Action aspec ->
         begin match x with
           | Xml.Element ("action", [], ns) ->
             let a = Bulletml.Parser.parse_action ns in
-            OUnit.assert_equal a aspec
+            OUnit.assert_equal aspec a
           | _ -> OUnit.assert_failure "not an action"
         end
       | `Fire fspec ->
         begin match x with
           | Xml.Element ("fire", [], ns) ->
             let f = Bulletml.Parser.parse_fire ns in
-            OUnit.assert_equal f fspec
+            OUnit.assert_equal fspec f
           | _ -> OUnit.assert_failure "not a fire"
         end
       | `Bulletml bspec ->
@@ -315,7 +315,7 @@ let tests_interp () =
     let f () =
       let o = initial_obj before (0., 0.) in
       let o2 = animate env o in
-      OUnit.assert_equal o2.prog after
+      OUnit.assert_equal after o2.prog
     in
     (name, `Quick, f)
   in
