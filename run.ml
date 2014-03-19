@@ -59,13 +59,19 @@ let draw_ship window bullet ship =
   Sdlvideo.blit_surface ~src:ship ~dst:window ~dst_rect ()
 
 let _ =
+  let parse_only = ref false in
   let (fname, patname) = match Sys.argv with
+    | [| _ ; "-p" ; a1 |] -> (parse_only := true ; (a1, "top"))
     | [| _ ; a1 ; a2 |] -> (a1, a2)
     | [| _ ; a1 |] -> (a1, "top")
     | _ -> failwith "usage: bulletml pattern.xml name"
   in
   let x = Xml.parse_file fname in
   let bml = Bulletml.Parser.parse_xml x in
+  if !parse_only then begin
+    print_endline (Bulletml.Printer.print_bulletml bml);
+    exit 0
+  end;
   let params =
     { p_enemy = enemy_pos
     ; p_ship = !ship_pos
