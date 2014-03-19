@@ -222,8 +222,8 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
   | OpFire (dir_f, spd_f, bi)::k ->
     let Bullet (dir_b, spd_b, ais) = eval_bi st bi in
-    let dir = oneof dir_b dir_f (DirAim (Num self.dir)) in
-    let spd = oneof spd_b spd_f (SpdAbs (Num self.speed)) in
+    let dir = oneof dir_b dir_f (DirAim (Num 0.)) in
+    let spd = oneof spd_b spd_f (SpdAbs (Num 1.)) in
     let d = eval_dir st self dir in
     let s = eval_speed self spd in
     let sas: action = List.map (fun ai -> Action ai) ais in
