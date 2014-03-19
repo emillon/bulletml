@@ -95,6 +95,8 @@ let _ =
   let canvas = create_canvas () in
   Dom.appendChild Dom_html.document##body canvas;
   let (global_env, obj0, _top) = prepare bml params in
+  let stop = ref false in
+  canvas##onclick <- Dom_html.handler (fun e -> stop := true ; Js._true);
   let rec go frame obj () =
     let env =
       { global_env with
@@ -109,6 +111,12 @@ let _ =
     draw_ship (ctx, img);
     ctx##putImageData (img, 0., 0.);
     draw_msg ctx (string_of_int perf ^ " bullets");
-    Lwt_js.yield () >>= go (frame + 1) (animate env obj)
+    let k = if !stop then begin
+        stop := false;
+        go 1 obj0
+      end else
+        go (frame + 1) (animate env obj)
+    in
+    Lwt_js.yield () >>= k
   in
   go 1 obj0 ()
