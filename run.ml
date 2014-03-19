@@ -77,15 +77,6 @@ let draw_ship { window ; bullet ; ship } =
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
   Sdlvideo.blit_surface ~src:ship ~dst:window ~dst_rect ()
 
-let interp :(global_ctx, global_ctx, unit) interpreter =
-  { make_global_ctx
-  ; make_local_ctx
-  ; clear
-  ; draw
-  ; draw_ship
-  ; run_cont
-  }
-
 let main () =
   let (fname, patname) = match Sys.argv with
     | [| _ ; a1 ; a2 |] -> (a1, a2)
@@ -94,13 +85,27 @@ let main () =
   in
   let x = Xml.parse_file fname in
   let bml = Bulletml.Parser.parse_xml x in
-  main_loop
-    bml
+  let params =
     { p_enemy = enemy_pos
     ; p_ship = !ship_pos
     ; p_screen_w = screen_w
     ; p_screen_h = screen_h
     }
-    interp
+  in
+  let global_ctx = make_global_ctx () in
+  let (global_env, obj0, _top) = prepare bml params in
+  let rec go frame obj =
+    let env =
+      { global_env with
+        frame = frame
+      }
+    in
+    let ctx = make_local_ctx global_ctx in
+    clear ctx;
+    draw ctx obj;
+    draw_ship ctx;
+    run_cont ctx (fun () -> go (frame + 1) (animate env obj))
+  in
+  go 1 obj0
 
 let _ = main ()

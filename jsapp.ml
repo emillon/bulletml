@@ -147,13 +147,18 @@ let run_cont (ctx, img) k =
   Lwt_js.yield () >>= k
 
 let _ =
-  main_loop
-    bml
-    params
-    { make_global_ctx
-    ; make_local_ctx
-    ; clear
-    ; draw
-    ; draw_ship
-    ; run_cont
-    }
+  let global_ctx = make_global_ctx () in
+  let (global_env, obj0, _top) = prepare bml params in
+  let rec go frame obj =
+    let env =
+      { global_env with
+        frame = frame
+      }
+    in
+    let ctx = make_local_ctx global_ctx in
+    clear ctx;
+    draw ctx obj;
+    draw_ship ctx;
+    run_cont ctx (fun () -> go (frame + 1) (animate env obj))
+  in
+  go 1 obj0
