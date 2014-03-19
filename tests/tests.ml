@@ -297,6 +297,34 @@ let compile_all =
         OUnit.assert_failure ("Cannot compile " ^ n)
     )
 
+let tests_interp () =
+  let open Bulletml.Interp in
+  let open Bulletml.Interp_types in
+  let open Bulletml.Syntax in
+  let env =
+    { frame = 1
+    ; ship_pos = (0., 1.)
+    ; screen_w = 10
+    ; screen_h = 10
+    ; actions = []
+    ; bullets = []
+    ; fires = []
+    }
+  in
+  let make_tc (name, before, after) =
+    let f () =
+      let o = initial_obj before (0., 0.) in
+      let o2 = animate env o in
+      OUnit.assert_equal o2.prog after
+    in
+    (name, `Quick, f)
+  in
+  let tcs =
+    [ "Wait 2",  [OpWaitE (Num 2.)], [OpWaitN 1]
+    ]
+  in
+  List.map make_tc tcs
+
 let _ =
   match Sys.argv with
   | [| _ ; "-e" ; s |] ->
@@ -306,4 +334,5 @@ let _ =
            ; ("pspec", tests ())
            ; ("comp", [("Compile examples", `Quick, compile_all)])
            ; ("cspec", tests_compile ())
+           ; ("interp", tests_interp ())
            ]
