@@ -51,12 +51,23 @@ let draw window bullet root =
       (fun o -> not o.vanished)
       (collect_obj root)
   in
-  List.iter (draw_bullet window bullet) objs
+  let r = ref 0 in
+  List.iter (fun b -> incr r; draw_bullet window bullet b) objs;
+  !r
 
 let draw_ship window bullet ship =
   let (px, py) = int_pos (!ship_pos) in
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
   Sdlvideo.blit_surface ~src:ship ~dst:window ~dst_rect ()
+
+let draw_msg =
+  let open Sdlttf in
+  init ();
+  let font = open_font "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf" 20 in
+  fun surface msg ->
+    let text = render_text_solid font msg ~fg:Sdlvideo.black in
+    let dst_rect = Sdlvideo.rect ~x:10 ~y:10 ~w:0 ~h:0 in
+    Sdlvideo.blit_surface ~src:text ~dst:surface ~dst_rect ()
 
 let _ =
   let parse_only = ref false in
@@ -98,8 +109,9 @@ let _ =
       }
     in
     clear window;
-    draw window bullet obj;
+    let perf = draw window bullet obj in
     draw_ship window bullet ship;
+    draw_msg window (Printf.sprintf "%d bullets" perf);
     Sdlvideo.flip window;
     let new_obj = (animate env obj) in
     go (frame + 1) new_obj
