@@ -4,7 +4,7 @@ open Interp_types
 type 'a printer = 'a -> string
 
 let print_list prn l =
-  "["^ String.concat ", " (List.map prn l) ^ "]"
+  "["^ String.concat "; " (List.map prn l) ^ "]"
 
 let print_option prn = function
   | Some x -> "Some ("^prn x^")"
@@ -20,20 +20,20 @@ let print_variant n params =
 
 let rec print_ind prn = function
   | Direct x -> "Direct (" ^ prn x ^ ")"
-  | Indirect (n, args) -> "Indirect (" ^ n ^ ", " ^ print_list print_expr args ^ ")"
+  | Indirect (n, args) -> "Indirect (\"" ^ n ^ "\", " ^ print_list print_expr args ^ ")"
 
 and print_expr =
   let p_op = function
-    | Add -> " + "
-    | Sub -> " - "
-    | Mul -> " * "
-    | Div -> " / "
-    | Mod -> " % "
+    | Add -> " +@ "
+    | Sub -> " -@ "
+    | Mul -> " *@ "
+    | Div -> " /@ "
+    | Mod -> " %@ "
   in
   function
   | Num f -> "Num " ^ string_of_float f
   | Op (op, x, y) -> "(" ^ print_expr x ^ p_op op ^ print_expr y ^ ")"
-  | Param n -> "$" ^ string_of_int n
+  | Param n -> "Param " ^ string_of_int n
   | Rand -> "Rand"
   | Rank -> "Rank"
 
@@ -79,9 +79,9 @@ and print_fire (diro, spdo, bi) =
   ^ ")"
 
 let print_elem = function
-  | EBullet (l, b) -> print_variant "EBullet" [l;print_bullet b]
-  | EAction (l, a) -> print_variant "EAction" [l;print_action a]
-  | EFire (l, f) -> print_variant "EFire" [l;print_fire f]
+  | EBullet (l, b) -> print_variant "EBullet" ["\"" ^ l ^ "\"";print_bullet b]
+  | EAction (l, a) -> print_variant "EAction" ["\"" ^ l ^ "\"";print_action a]
+  | EFire (l, f) -> print_variant "EFire" ["\"" ^ l ^ "\"";print_fire f]
 
 let print_bulletml (BulletML (hv, elems)) =
   "BulletML (" ^ print_hv hv ^ ", " ^ print_list print_elem elems ^ ")"
