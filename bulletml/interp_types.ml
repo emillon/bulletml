@@ -92,26 +92,3 @@ type init_params =
   ; p_screen_w : int (** Screen width in pixels *)
   ; p_screen_h : int (** Screen height in pixels *)
   }
-
-(**
-   Interpreter functions, used for {!Interp.main_loop}.
-
-   It is polymorphic and quite parametric, to allow for different kind of
-   interpreters.
-
-   - ['g] is the global context, something that lasts during all the game. For
-     example, a window object.
-   - ['l] is the local context, something created at each frame.
-   - ['r] is the return type. Typically [unit], but who knows, you might be
-     writing a monadic interpreter.
-*)
-type ('g, 'l, 'r) interpreter =
-  { make_global_ctx : unit -> 'g (** (once) create the global, persistent context *)
-  ; make_local_ctx : 'g -> 'l (** (each frame) create a local context *)
-  ; clear : 'l -> unit (** clear frame *)
-  ; draw : 'l -> obj -> unit (** draw the object and its descendants *)
-  ; draw_ship : 'l -> unit
-  (** draw the ship's sprite (position is supposed to be in a global or 'l) *)
-  ; run_cont : 'l -> (unit -> 'r) -> 'r
-  (** run the next frame. When in doubt, [fun _ k -> k ()] works *)
-  }

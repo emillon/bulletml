@@ -1,9 +1,13 @@
 open Interp_types
 open Syntax
 
+let pi = acos (-1.)
+
 let from_deg x =
-  let pi = acos (-1.) in
   2. *. pi *. x /. 360.
+
+let to_deg x =
+  360. *. x /. (2. *. pi)
 
 let (+:) (xa, ya) (xb, yb) =
   (xa +. xb, ya +. yb)
@@ -178,7 +182,7 @@ let initial_obj k pos =
 
 let dir_to_ship st obj =
   let (vx, vy) = (st.ship_pos -: obj.pos) in
-  atan2 vy vx
+  to_deg (atan2 vx vy)
 
 let dir_to_prev obj =
   obj.prev_dir
@@ -218,8 +222,8 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
   | OpFire (dir_f, spd_f, bi)::k ->
     let Bullet (dir_b, spd_b, ais) = eval_bi st bi in
-    let dir = oneof dir_b dir_f (DirAbs (Num self.dir)) in
-    let spd = oneof spd_b spd_f (SpdAbs (Num self.speed)) in
+    let dir = oneof dir_b dir_f (DirAim (Num 0.)) in
+    let spd = oneof spd_b spd_f (SpdAbs (Num 1.)) in
     let d = eval_dir st self dir in
     let s = eval_speed self spd in
     let sas: action = List.map (fun ai -> Action ai) ais in
@@ -364,20 +368,3 @@ let prepare bml params =
   let k = build_prog global_env [] (Action (Direct act)) in
   let obj = initial_obj k params.p_enemy in
   (global_env, obj, top)
-
-let main_loop bml params { make_global_ctx ; make_local_ctx ; clear ; draw ; draw_ship ; run_cont } =
-  let global_ctx = make_global_ctx () in
-  let (global_env, obj0, _top) = prepare bml params in
-  let rec go frame obj =
-    let env =
-      { global_env with
-        frame = frame
-      }
-    in
-    let ctx = make_local_ctx global_ctx in
-    clear ctx;
-    draw ctx obj;
-    draw_ship ctx;
-    run_cont ctx (fun () -> go (frame + 1) (animate env obj))
-  in
-  go 1 obj0

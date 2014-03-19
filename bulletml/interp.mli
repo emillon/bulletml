@@ -47,12 +47,3 @@ val prepare
   :  Syntax.t
   -> init_params
   -> env * obj * string
-
-(**
-   Skeleton for a main loop. See {!Interp_types.interpreter}.
-*)
-val main_loop
-  :  Syntax.t
-  -> init_params
-  -> ('g, 'l, 'r) interpreter
-  -> 'r
