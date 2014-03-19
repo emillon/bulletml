@@ -85,29 +85,6 @@ let create_canvas () =
   c##onmousemove <- Dom_html.handler mouse_handler;
   c
 
-let make_global_ctx () =
-  let canvas = create_canvas () in
-  Dom.appendChild Dom_html.document##body canvas;
-  canvas
-
-let make_local_ctx canvas =
-  let ctx = canvas##getContext (Dom_html._2d_) in
-  let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
-  (ctx, img)
-
-(* A clearRect would be better but it does not work *)
-let clear (ctx, img) =
-  let data = img##data in
-  for i = 0 to screen_w do
-    for j = 0 to screen_h do
-      let p = 4 * (j * screen_w + i) in
-      Dom_html.pixel_set data (p+0) 255;
-      Dom_html.pixel_set data (p+1) 255;
-      Dom_html.pixel_set data (p+2) 255;
-      Dom_html.pixel_set data (p+3) 255;
-    done
-  done
-
 let draw_px ~color ctx data i j =
   let (r, g, b) = color in
   let p = 4 * (j * screen_w + i) in
@@ -116,6 +93,16 @@ let draw_px ~color ctx data i j =
   Dom_html.pixel_set data (p+2) b;
   Dom_html.pixel_set data (p+3) 255;
   ()
+
+(* A clearRect would be better but it does not work *)
+let clear (ctx, img) =
+  let data = img##data in
+  let color = (0xff, 0xff, 0xff) in
+  for i = 0 to screen_w do
+    for j = 0 to screen_h do
+      draw_px ~color ctx data i j
+    done
+  done
 
 let draw_bullet ?(color=(0xfa, 0x69, 0x00)) ctx img x y =
   let data = img##data in
@@ -141,24 +128,23 @@ let draw_ship (ctx, img) =
   let (x, y) = !ship_pos in
   draw_bullet ~color ctx img x y
 
-let run_cont (ctx, img) k =
-  let open Lwt in
-  ctx##putImageData (img, 0., 0.);
-  Lwt_js.yield () >>= k
-
 let _ =
-  let global_ctx = make_global_ctx () in
+  let open Lwt in
+  let canvas = create_canvas () in
+  Dom.appendChild Dom_html.document##body canvas;
   let (global_env, obj0, _top) = prepare bml params in
-  let rec go frame obj =
+  let rec go frame obj () =
     let env =
       { global_env with
         frame = frame
       }
     in
-    let ctx = make_local_ctx global_ctx in
-    clear ctx;
-    draw ctx obj;
-    draw_ship ctx;
-    run_cont ctx (fun () -> go (frame + 1) (animate env obj))
+    let ctx = canvas##getContext (Dom_html._2d_) in
+    let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
+    clear (ctx, img);
+    draw (ctx, img) obj;
+    draw_ship (ctx, img);
+    ctx##putImageData (img, 0., 0.);
+    Lwt_js.yield () >>= go (frame + 1) (animate env obj)
   in
-  go 1 obj0
+  go 1 obj0 ()
