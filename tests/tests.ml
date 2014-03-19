@@ -321,6 +321,7 @@ let tests_interp () =
   in
   let tcs =
     [ "Wait 2",  [OpWaitE (Num 2.)], [OpWaitN 1]
+    ; "Wait 1",  [OpWaitE (Num 1.)], []
     ]
   in
   List.map make_tc tcs
