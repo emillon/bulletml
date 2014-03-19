@@ -63,7 +63,7 @@ let draw_ship window bullet ship =
 let draw_msg =
   let open Sdlttf in
   init ();
-  let font = open_font "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf" 20 in
+  let font = open_font "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf" 10 in
   fun surface msg ->
     let text = render_text_solid font msg ~fg:Sdlvideo.black in
     let dst_rect = Sdlvideo.rect ~x:10 ~y:10 ~w:0 ~h:0 in
