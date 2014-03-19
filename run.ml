@@ -26,19 +26,21 @@ let move_y dy =
   ship_pos := (x, y +. dy)
 
 let make_local_ctx g_ctx =
-  Sdlevent.pump ();
+  let open Sdlevent in
+  let open Sdlkey in
+  let open Sdlmouse in
+  pump ();
   begin
-    match Sdlevent.poll () with
-    | Some ( Sdlevent.MOUSEBUTTONDOWN { Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT }
-           | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_q } ) -> raise Exit
-    | Some ( Sdlevent.MOUSEBUTTONDOWN { Sdlevent.mbe_button = Sdlmouse.BUTTON_RIGHT } ) ->
-      raise Reset
-    | Some ( Sdlevent.MOUSEMOTION { Sdlevent.mme_x ; Sdlevent.mme_y } ) ->
+    match poll () with
+    | Some ( MOUSEBUTTONDOWN { mbe_button = BUTTON_LEFT }
+           | KEYDOWN { keysym = KEY_q } ) -> raise Exit
+    | Some ( MOUSEBUTTONDOWN { mbe_button = BUTTON_RIGHT } ) -> raise Reset
+    | Some ( MOUSEMOTION { mme_x ; mme_y } ) ->
       ship_pos := (float mme_x, float mme_y)
-    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_UP } ) -> move_y (-10.)
-    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_DOWN } ) -> move_y (10.)
-    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_LEFT } ) -> move_x (-10.)
-    | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_RIGHT } ) -> move_x (10.)
+    | Some ( KEYDOWN { keysym = KEY_UP } ) -> move_y (-10.)
+    | Some ( KEYDOWN { keysym = KEY_DOWN } ) -> move_y (10.)
+    | Some ( KEYDOWN { keysym = KEY_LEFT } ) -> move_x (-10.)
+    | Some ( KEYDOWN { keysym = KEY_RIGHT } ) -> move_x (10.)
     | _ -> ()
   end;
   g_ctx
