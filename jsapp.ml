@@ -99,6 +99,7 @@ let _ =
     let env =
       { global_env with
         frame = frame
+      ; ship_pos = !ship_pos
       }
     in
     let ctx = canvas##getContext (Dom_html._2d_) in
