@@ -246,7 +246,7 @@ let for_all_examples f () =
   Array.sort String.compare files_a;
   let files =
     List.filter
-      ((<>) "fragments")
+      (fun x -> not (List.mem x ["fragments"; "mini"]))
       (Array.to_list files_a)
   in
   List.iter (fun n ->
