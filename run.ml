@@ -11,12 +11,6 @@ let enemy_pos = (float screen_w /. 2., float screen_h *. 0.3)
 
 let ship_pos = ref (float screen_w /. 2., float screen_h *.0.9)
 
-type global_ctx =
-  { window : Sdlvideo.surface
-  ; bullet : Sdlvideo.surface
-  ; ship : Sdlvideo.surface
-  }
-
 let move_x dx =
   let (x, y) = !ship_pos in
   ship_pos := (x +. dx, y)
@@ -25,42 +19,39 @@ let move_y dy =
   let (x, y) = !ship_pos in
   ship_pos := (x, y +. dy)
 
-let make_local_ctx g_ctx =
+let handle_events () =
   let open Sdlevent in
   let open Sdlkey in
   let open Sdlmouse in
   pump ();
-  begin
-    match poll () with
-    | Some ( MOUSEBUTTONDOWN { mbe_button = BUTTON_LEFT }
-           | KEYDOWN { keysym = KEY_q } ) -> raise Exit
-    | Some ( MOUSEBUTTONDOWN { mbe_button = BUTTON_RIGHT } ) -> raise Reset
-    | Some ( MOUSEMOTION { mme_x ; mme_y } ) ->
-      ship_pos := (float mme_x, float mme_y)
-    | Some ( KEYDOWN { keysym = KEY_UP } ) -> move_y (-10.)
-    | Some ( KEYDOWN { keysym = KEY_DOWN } ) -> move_y (10.)
-    | Some ( KEYDOWN { keysym = KEY_LEFT } ) -> move_x (-10.)
-    | Some ( KEYDOWN { keysym = KEY_RIGHT } ) -> move_x (10.)
-    | _ -> ()
-  end;
-  g_ctx
+  match poll () with
+  | Some ( MOUSEBUTTONDOWN { mbe_button = BUTTON_LEFT }
+         | KEYDOWN { keysym = KEY_q } ) -> raise Exit
+  | Some ( MOUSEBUTTONDOWN { mbe_button = BUTTON_RIGHT } ) -> raise Reset
+  | Some ( MOUSEMOTION { mme_x ; mme_y } ) ->
+    ship_pos := (float mme_x, float mme_y)
+  | Some ( KEYDOWN { keysym = KEY_UP } ) -> move_y (-10.)
+  | Some ( KEYDOWN { keysym = KEY_DOWN } ) -> move_y (10.)
+  | Some ( KEYDOWN { keysym = KEY_LEFT } ) -> move_x (-10.)
+  | Some ( KEYDOWN { keysym = KEY_RIGHT } ) -> move_x (10.)
+  | _ -> ()
 
 let clear window =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
   Sdlvideo.fill_rect ~rect window 0x00ffffffl
 
-let draw_bullet {window;bullet} b =
+let draw_bullet window bullet b =
   let (px, py) = int_pos b.pos in
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
   Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
 
-let draw ctx root =
+let draw window bullet root =
   let objs =
     List.filter
       (fun o -> not o.vanished)
       (collect_obj root)
   in
-  List.iter (draw_bullet ctx) objs
+  List.iter (draw_bullet window bullet) objs
 
 let draw_ship window bullet ship =
   let (px, py) = int_pos (!ship_pos) in
@@ -91,20 +82,19 @@ let _ =
       ~rmask:0l ~gmask:0l ~bmask:0l ~amask:0l
   in
   Sdlvideo.fill_rect ship 0x69D2E7l;
-  let global_ctx = { window ; bullet; ship } in
   let (global_env, obj0, _top) = prepare bml params in
   let rec go frame obj =
-    let ctx = make_local_ctx global_ctx in
+    handle_events ();
     let env =
       { global_env with
         frame = frame
       ; ship_pos = !ship_pos
       }
     in
-    clear ctx.window;
-    draw ctx obj;
-    draw_ship ctx.window ctx.bullet ctx.ship;
-    Sdlvideo.flip ctx.window;
+    clear window;
+    draw window bullet obj;
+    draw_ship window bullet ship;
+    Sdlvideo.flip window;
     let new_obj = (animate env obj) in
     go (frame + 1) new_obj
   in
