@@ -1,9 +1,13 @@
 open Interp_types
 open Syntax
 
+let pi = acos (-1.)
+
 let from_deg x =
-  let pi = acos (-1.) in
   2. *. pi *. x /. 360.
+
+let to_deg x =
+  360. *. x /. (2. *. pi)
 
 let (+:) (xa, ya) (xb, yb) =
   (xa +. xb, ya +. yb)
@@ -178,7 +182,7 @@ let initial_obj k pos =
 
 let dir_to_ship st obj =
   let (vx, vy) = (st.ship_pos -: obj.pos) in
-  atan2 vy vx
+  to_deg (atan2 vx vy)
 
 let dir_to_prev obj =
   obj.prev_dir
