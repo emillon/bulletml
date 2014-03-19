@@ -20,7 +20,7 @@ let ( *% ) (x, y) l =
 
 let unit_vec dir =
   let dir_rad = from_deg dir in
-  (sin dir_rad, cos dir_rad) *% 0.4
+  (sin dir_rad, cos dir_rad)
 
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
