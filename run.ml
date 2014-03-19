@@ -2,6 +2,8 @@ open Bulletml.Syntax
 open Bulletml.Interp
 open Bulletml.Interp_types
 
+exception Reset
+
 let screen_w = 800
 let screen_h = 600
 
@@ -27,8 +29,10 @@ let make_local_ctx g_ctx =
   Sdlevent.pump ();
   begin
     match Sdlevent.poll () with
-    | Some ( Sdlevent.MOUSEBUTTONDOWN _
+    | Some ( Sdlevent.MOUSEBUTTONDOWN { Sdlevent.mbe_button = Sdlmouse.BUTTON_LEFT }
            | Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_q } ) -> raise Exit
+    | Some ( Sdlevent.MOUSEBUTTONDOWN { Sdlevent.mbe_button = Sdlmouse.BUTTON_RIGHT } ) ->
+      raise Reset
     | Some ( Sdlevent.MOUSEMOTION { Sdlevent.mme_x ; Sdlevent.mme_y } ) ->
       ship_pos := (float mme_x, float mme_y)
     | Some ( Sdlevent.KEYDOWN { Sdlevent.keysym = Sdlkey.KEY_UP } ) -> move_y (-10.)
@@ -102,4 +106,6 @@ let _ =
     let new_obj = (animate env obj) in
     go (frame + 1) new_obj
   in
-  go 1 obj0
+  while true do
+    try go 1 obj0 with Reset -> ()
+  done
