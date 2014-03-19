@@ -106,14 +106,20 @@ let clear (ctx, img) =
 
 let draw_bullet ?(color=(0xfa, 0x69, 0x00)) ctx img x y =
   let data = img##data in
-  let i = int_of_float x in
-  let j = int_of_float y in
-  draw_px ~color ctx data i j;
-  draw_px ~color ctx data i (j+1);
-  draw_px ~color ctx data (i+1) j;
-  draw_px ~color ctx data i (j-1);
-  draw_px ~color ctx data (i-1) j;
-  ()
+  let i0 = int_of_float x in
+  let j0 = int_of_float y in
+  let pix =
+    [ -2,  0 ; -2,  1 ; -2,  2 ; -2, -1
+    ; -1,  0 ; -1,  1 ; -1,  2 ; -1,  3
+    ; -1, -1 ; -1, -2 ;  0,  0 ;  0,  1
+    ;  0,  2 ;  0,  3 ;  0, -1 ;  0, -2
+    ;  1,  0 ;  1,  1 ;  1,  2 ;  1,  3
+    ;  1, -1 ;  1, -2 ;  2,  0 ;  2,  1
+    ;  2,  2 ;  2,  3 ;  2, -1 ;  2, -2
+    ;  3,  0 ;  3,  1 ;  3,  2 ;  3, -1
+    ]
+  in
+  List.iter (fun (i, j) -> draw_px ~color ctx data (i0 + i) (j0 + j)) pix
 
 let draw (ctx, img) root =
   let objs =
