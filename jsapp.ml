@@ -127,12 +127,17 @@ let draw (ctx, img) root =
       (fun o -> not o.vanished)
       (collect_obj root)
   in
-  List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx img x y) objs
+  let r = ref 0 in
+  List.iter (fun o -> let (x, y) = o.pos in draw_bullet ctx img x y;incr r) objs;
+  !r
 
 let draw_ship (ctx, img) =
   let color = (0x69, 0xD2, 0xE7) in
   let (x, y) = !ship_pos in
   draw_bullet ~color ctx img x y
+
+let draw_msg ctx msg =
+  ctx##fillText (Js.string msg, 0., 10.)
 
 let _ =
   let open Lwt in
@@ -148,9 +153,10 @@ let _ =
     let ctx = canvas##getContext (Dom_html._2d_) in
     let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
     clear (ctx, img);
-    draw (ctx, img) obj;
+    let perf = draw (ctx, img) obj in
     draw_ship (ctx, img);
     ctx##putImageData (img, 0., 0.);
+    draw_msg ctx (string_of_int perf ^ " bullets");
     Lwt_js.yield () >>= go (frame + 1) (animate env obj)
   in
   go 1 obj0 ()
