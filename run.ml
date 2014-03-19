@@ -69,17 +69,25 @@ let draw_msg =
     let dst_rect = Sdlvideo.rect ~x:10 ~y:10 ~w:0 ~h:0 in
     Sdlvideo.blit_surface ~src:text ~dst:surface ~dst_rect ()
 
+module Options = struct
+  let parse_only = ref false
+  let fname = ref None
+end
+
 let _ =
-  let parse_only = ref false in
-  let (fname, patname) = match Sys.argv with
-    | [| _ ; "-p" ; a1 |] -> (parse_only := true ; (a1, "top"))
-    | [| _ ; a1 ; a2 |] -> (a1, a2)
-    | [| _ ; a1 |] -> (a1, "top")
-    | _ -> failwith "usage: bulletml pattern.xml name"
+  let args =
+    [ ("-p", Arg.Set Options.parse_only, "parse and print only")
+    ]
+  in
+  let usage = "Use the source, Luke" in
+  Arg.parse args (fun s -> Options.fname := Some s) usage;
+  let fname = match !Options.fname with
+    | Some f -> f
+    | None -> (print_endline usage;exit 1)
   in
   let x = Xml.parse_file fname in
   let bml = Bulletml.Parser.parse_xml x in
-  if !parse_only then begin
+  if !Options.parse_only then begin
     print_endline (Bulletml.Printer.print_bulletml bml);
     exit 0
   end;
