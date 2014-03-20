@@ -303,7 +303,7 @@ let tests_interp () =
   let open Bulletml.Syntax in
   let env =
     { frame = 0
-    ; ship_pos = (0., 1.)
+    ; ship_pos = (1., 0.)
     ; screen_w = 10
     ; screen_h = 10
     ; actions = []
@@ -350,7 +350,24 @@ let tests_interp () =
         [0.;10.;20.;30.;40.;50.;50.]
         [o0.dir;o1.dir;o2.dir;o3.dir;o4.dir;o5.dir;o6.dir]
     ) in
-  t1 :: t2 :: List.map make_tc tcs
+  let t3 = ("Fire", `Quick, fun () ->
+      let bullet = Bullet (None, None, []) in
+      let o0 = initial_obj [OpFire (None, None, Direct bullet)] (0., 0.) in
+      let o1 = animate { env with frame = 1 } o0 in
+      let o2 = animate { env with frame = 2 } o1 in
+      let o3 = animate { env with frame = 3 } o2 in
+      let o4 = animate { env with frame = 4 } o3 in
+      let o5 = animate { env with frame = 5 } o4 in
+      let printer = Bulletml.Printer.print_list string_of_float in
+      OUnit.assert_equal ~printer
+        [0.;1.;2.;3.;4.]
+        (List.map (fun o ->
+             match o.children with
+             | [bullet] -> fst bullet.pos
+             | _ -> OUnit.assert_failure "no child"
+           ) [o1;o2;o3;o4;o5])
+    ) in
+  t1 :: t2 :: t3 :: List.map make_tc tcs
 
 let _ =
   match Sys.argv with
