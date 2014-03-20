@@ -287,23 +287,18 @@ let rec next_prog st self :obj = match self.prog with
     let h = eval h_e in
     let v = eval v_e in
     let t = eval t_e in
-    let vec_spd = (unit_vec self.dir) *% self.speed in
-    let m =
-      { frame_start = st.frame
-      ; frame_end = st.frame + int_of_float t
-      ; val_start = vec_spd
-      ; val_end = vec_spd +: (h, v)
-      }
-    in
-    next_prog st { self with prog = OpAccelN m::k }
-  | OpAccelN m::k ->
-    if st.frame > m.frame_end then
-      { self with prog = k }
-    else
-      let (vx, vy) = interp_map_vec st m in
-      let ns = hypot vx vy in
-      let nd = atan2 vx vy in
-      { self with speed = ns ; dir = nd }
+    next_prog st { self with prog = OpAccelN (h, v, int_of_float t)::k }
+  | OpAccelN (h, v, t)::k when t <= 0 ->
+    next_prog st { self with prog = k }
+  | OpAccelN (h, v, t)::k ->
+    let (vx, vy) = (unit_vec self.dir *% self.speed) +: (h, v) in
+    let ns = hypot vx vy in
+    let nd = atan2 vx vy in
+    { self with
+      prog = OpAccelN (h, v, t - 1)::k
+    ; speed = self.speed +. ns
+    ; dir = self.dir +. nd
+    }
   | OpCall (n, params)::k ->
     let act_templ = List.assoc n st.actions in
     let params_ev = List.map (fun e -> Num (eval e)) params in

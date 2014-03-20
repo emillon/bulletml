@@ -3,6 +3,9 @@ open Interp_types
 
 (** Functions to build a BulletML interpreter. *)
 
+(** Convert from degrees to radians. *)
+val from_deg : float -> float
+
 (** 
    Convert a list {!Syntax.subaction} into a list of {!Interp_types.opcode}s.
    The extra list given as argument is the list to prepend to.

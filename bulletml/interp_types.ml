@@ -50,7 +50,7 @@ type opcode =
   | OpDirE of direction * expr (** Change direction (unevaluated form) *)
   | OpDirN of float linear_map (** Change direction (evaluated form) *)
   | OpAccelE of expr * expr * expr (** Accelerate (unevaluated form) *)
-  | OpAccelN of (float * float) linear_map (** Accelerate (unevaluated form): [h, v, term] *)
+  | OpAccelN of (float * float * int) (** Accelerate (evaluated form): [h, v, term] *)
   | OpVanish (** Let the bullet disappear *)
   | OpCall of string * expr list (** Call an indirect action with parameters *)
 

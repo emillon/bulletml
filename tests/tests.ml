@@ -364,7 +364,30 @@ let tests_interp () =
              | _ -> OUnit.assert_failure "no child"
            ) (List.tl os))
     ) in
-  t1 :: t2 :: t3 :: List.map make_tc tcs
+  let t_accel h v exp =
+    let os = get_frames [OpAccelE (Num h, Num v, Num 5.)] in
+    let print_speed_vec (x, y) = Printf.sprintf "(%.1f, %.1f)" x y in
+    let printer = Bulletml.Printer.print_list print_speed_vec in
+    let speed_vec o =
+      let dir_rad = Bulletml.Interp.from_deg o.dir in
+      (o.speed *. sin dir_rad, o.speed *. cos dir_rad)
+    in
+    OUnit.assert_equal ~printer
+      exp
+      (List.map speed_vec os)
+  in
+  let t4 = ("Accel 0", `Quick, fun () ->
+      t_accel 0. 0.
+        [ (0., 0.)
+        ; (0., 0.)
+        ; (0., 0.)
+        ; (0., 0.)
+        ; (0., 0.)
+        ; (0., 0.)
+        ; (0., 0.)
+        ]
+    ) in
+  t1 :: t2 :: t3 :: t4 :: List.map make_tc tcs
 
 let _ =
   match Sys.argv with

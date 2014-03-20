@@ -103,6 +103,6 @@ let print_opcode = function
   | OpDirE (d, e) -> print_variant "OpDirE" [print_expr e]
   | OpDirN m -> print_variant "OpDirN" [print_linear_map string_of_float m]
   | OpAccelE (e1, e2, e3) -> print_variant "OpAccelE" [print_expr e1;print_expr e2;print_expr e3]
-  | OpAccelN m -> print_variant "OpAccelN" [print_linear_map print_pos m]
+  | OpAccelN (h, v, t) -> print_variant "OpAccelN" [string_of_float h;string_of_float v;string_of_int t]
   | OpVanish -> "OpVanish"
   | OpCall (n, es) -> print_variant "OpCall" [n;print_list print_expr es]
