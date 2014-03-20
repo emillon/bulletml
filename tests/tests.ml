@@ -324,48 +324,39 @@ let tests_interp () =
     ; "Wait 1",  [OpWaitE (Num 1.)], []
     ]
   in
+  let get_frames prog =
+    let o0 = initial_obj prog (0., 0.) in
+    let o1 = animate { env with frame = 1 } o0 in
+    let o2 = animate { env with frame = 2 } o1 in
+    let o3 = animate { env with frame = 3 } o2 in
+    let o4 = animate { env with frame = 4 } o3 in
+    let o5 = animate { env with frame = 5 } o4 in
+    let o6 = animate { env with frame = 6 } o5 in
+    [o0;o1;o2;o3;o4;o5;o6]
+  in
+  let printer = Bulletml.Printer.print_list string_of_float in
   let t1 = ("ChangeSpd", `Quick, fun () ->
-      let o0 = initial_obj [OpSpdE (SpdAbs (Num 5.), Num 5.)] (0., 0.) in
-      let o1 = animate { env with frame = 1 } o0 in
-      let o2 = animate { env with frame = 2 } o1 in
-      let o3 = animate { env with frame = 3 } o2 in
-      let o4 = animate { env with frame = 4 } o3 in
-      let o5 = animate { env with frame = 5 } o4 in
-      let o6 = animate { env with frame = 6 } o5 in
-      let printer = Bulletml.Printer.print_list string_of_float in
+      let os = get_frames [OpSpdE (SpdAbs (Num 5.), Num 5.)] in
       OUnit.assert_equal ~printer
         [0.;1.;2.;3.;4.;5.;5.]
-        [o0.speed;o1.speed;o2.speed;o3.speed;o4.speed;o5.speed;o6.speed]
+        (List.map (fun o -> o.speed) os)
     ) in
   let t2 = ("ChangeDir", `Quick, fun () ->
-      let o0 = initial_obj [OpDirE (DirAbs (Num 50.), Num 5.)] (0., 0.) in
-      let o1 = animate { env with frame = 1 } o0 in
-      let o2 = animate { env with frame = 2 } o1 in
-      let o3 = animate { env with frame = 3 } o2 in
-      let o4 = animate { env with frame = 4 } o3 in
-      let o5 = animate { env with frame = 5 } o4 in
-      let o6 = animate { env with frame = 6 } o5 in
-      let printer = Bulletml.Printer.print_list string_of_float in
+      let os = get_frames [OpDirE (DirAbs (Num 50.), Num 5.)] in
       OUnit.assert_equal ~printer
         [0.;10.;20.;30.;40.;50.;50.]
-        [o0.dir;o1.dir;o2.dir;o3.dir;o4.dir;o5.dir;o6.dir]
+        (List.map (fun o -> o.dir) os)
     ) in
   let t3 = ("Fire", `Quick, fun () ->
       let bullet = Bullet (None, None, []) in
-      let o0 = initial_obj [OpFire (None, None, Direct bullet)] (0., 0.) in
-      let o1 = animate { env with frame = 1 } o0 in
-      let o2 = animate { env with frame = 2 } o1 in
-      let o3 = animate { env with frame = 3 } o2 in
-      let o4 = animate { env with frame = 4 } o3 in
-      let o5 = animate { env with frame = 5 } o4 in
-      let printer = Bulletml.Printer.print_list string_of_float in
+      let os = get_frames [OpFire (None, None, Direct bullet)] in
       OUnit.assert_equal ~printer
-        [0.;1.;2.;3.;4.]
+        [0.;1.;2.;3.;4.;5.]
         (List.map (fun o ->
              match o.children with
              | [bullet] -> fst bullet.pos
              | _ -> OUnit.assert_failure "no child"
-           ) [o1;o2;o3;o4;o5])
+           ) (List.tl os))
     ) in
   t1 :: t2 :: t3 :: List.map make_tc tcs
 
