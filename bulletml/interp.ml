@@ -254,8 +254,8 @@ let rec next_prog st self :obj = match self.prog with
     let sp = eval_speed self sp_e in
     let t = int_of_float (eval t_e) in
     let m =
-      { frame_start = st.frame
-      ; frame_end = st.frame + t
+      { frame_start = st.frame - 1
+      ; frame_end = st.frame + t - 1
       ; val_start = self.speed
       ; val_end = sp
       }
@@ -275,8 +275,8 @@ let rec next_prog st self :obj = match self.prog with
     let dir = eval_dir st self d_e in
     let t = int_of_float (eval t_e) in
     let m =
-      { frame_start = st.frame
-      ; frame_end = st.frame + t
+      { frame_start = st.frame - 1
+      ; frame_end = st.frame + t - 1
       ; val_start = self.dir
       ; val_end = dir
       }

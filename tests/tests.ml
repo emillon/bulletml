@@ -302,7 +302,7 @@ let tests_interp () =
   let open Bulletml.Interp_types in
   let open Bulletml.Syntax in
   let env =
-    { frame = 1
+    { frame = 0
     ; ship_pos = (0., 1.)
     ; screen_w = 10
     ; screen_h = 10
@@ -324,7 +324,33 @@ let tests_interp () =
     ; "Wait 1",  [OpWaitE (Num 1.)], []
     ]
   in
-  List.map make_tc tcs
+  let t1 = ("ChangeSpd", `Quick, fun () ->
+      let o0 = initial_obj [OpSpdE (SpdAbs (Num 5.), Num 5.)] (0., 0.) in
+      let o1 = animate { env with frame = 1 } o0 in
+      let o2 = animate { env with frame = 2 } o1 in
+      let o3 = animate { env with frame = 3 } o2 in
+      let o4 = animate { env with frame = 4 } o3 in
+      let o5 = animate { env with frame = 5 } o4 in
+      let o6 = animate { env with frame = 6 } o5 in
+      let printer = Bulletml.Printer.print_list string_of_float in
+      OUnit.assert_equal ~printer
+        [0.;1.;2.;3.;4.;5.;5.]
+        [o0.speed;o1.speed;o2.speed;o3.speed;o4.speed;o5.speed;o6.speed]
+    ) in
+  let t2 = ("ChangeDir", `Quick, fun () ->
+      let o0 = initial_obj [OpDirE (DirAbs (Num 50.), Num 5.)] (0., 0.) in
+      let o1 = animate { env with frame = 1 } o0 in
+      let o2 = animate { env with frame = 2 } o1 in
+      let o3 = animate { env with frame = 3 } o2 in
+      let o4 = animate { env with frame = 4 } o3 in
+      let o5 = animate { env with frame = 5 } o4 in
+      let o6 = animate { env with frame = 6 } o5 in
+      let printer = Bulletml.Printer.print_list string_of_float in
+      OUnit.assert_equal ~printer
+        [0.;10.;20.;30.;40.;50.;50.]
+        [o0.dir;o1.dir;o2.dir;o3.dir;o4.dir;o5.dir;o6.dir]
+    ) in
+  t1 :: t2 :: List.map make_tc tcs
 
 let _ =
   match Sys.argv with
