@@ -4,7 +4,7 @@ open Interp_types
 (** Functions to build a BulletML interpreter. *)
 
 (** 
-   Convert a list of {!Syntax.subaction}s into a list of {!Interp_types.opcode}s.
+   Convert a list {!Syntax.subaction} into a list of {!Interp_types.opcode}s.
    The extra list given as argument is the list to prepend to.
 *)
 val build_prog : env -> opcode list -> subaction -> opcode list

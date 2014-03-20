@@ -212,21 +212,21 @@ let tests () =
         begin match x with
           | Xml.Element ("bullet", _, ns) ->
             let b = Bulletml.Parser.parse_bullet ns in
-            OUnit.assert_equal b bspec
+            OUnit.assert_equal bspec b
           | _ -> OUnit.assert_failure "not a bullet"
         end
       | `Action aspec ->
         begin match x with
           | Xml.Element ("action", [], ns) ->
             let a = Bulletml.Parser.parse_action ns in
-            OUnit.assert_equal a aspec
+            OUnit.assert_equal aspec a
           | _ -> OUnit.assert_failure "not an action"
         end
       | `Fire fspec ->
         begin match x with
           | Xml.Element ("fire", [], ns) ->
             let f = Bulletml.Parser.parse_fire ns in
-            OUnit.assert_equal f fspec
+            OUnit.assert_equal fspec f
           | _ -> OUnit.assert_failure "not a fire"
         end
       | `Bulletml bspec ->
@@ -297,6 +297,75 @@ let compile_all =
         OUnit.assert_failure ("Cannot compile " ^ n)
     )
 
+let tests_interp () =
+  let open Bulletml.Interp in
+  let open Bulletml.Interp_types in
+  let open Bulletml.Syntax in
+  let env =
+    { frame = 0
+    ; ship_pos = (1., 0.)
+    ; screen_w = 10
+    ; screen_h = 10
+    ; actions = []
+    ; bullets = []
+    ; fires = []
+    }
+  in
+  let make_tc (name, before, after) =
+    let f () =
+      let o = initial_obj before (0., 0.) in
+      let o2 = animate env o in
+      let printer = Bulletml.Printer.print_list Bulletml.Printer.print_opcode in
+      OUnit.assert_equal ~printer after o2.prog
+    in
+    (name, `Quick, f)
+  in
+  let bullet = Bullet (None, None, []) in
+  let fire = (None, None, Direct bullet) in
+  let tcs =
+    [ "Wait 2",  [OpWaitE (Num 2.)], [OpWaitN 1]
+    ; "Wait 1",  [OpWaitE (Num 1.)], []
+    ; "Repeat 3",
+      [OpRepeatE (Num 3., [Fire (Direct fire)])],
+      [OpFire fire;OpFire fire]
+    ; "Wait 0",  [OpWaitE (Num 0.);OpFire fire], []
+    ]
+  in
+  let get_frames prog =
+    let o0 = initial_obj prog (0., 0.) in
+    let o1 = animate { env with frame = 1 } o0 in
+    let o2 = animate { env with frame = 2 } o1 in
+    let o3 = animate { env with frame = 3 } o2 in
+    let o4 = animate { env with frame = 4 } o3 in
+    let o5 = animate { env with frame = 5 } o4 in
+    let o6 = animate { env with frame = 6 } o5 in
+    [o0;o1;o2;o3;o4;o5;o6]
+  in
+  let printer = Bulletml.Printer.print_list string_of_float in
+  let t1 = ("ChangeSpd", `Quick, fun () ->
+      let os = get_frames [OpSpdE (SpdAbs (Num 5.), Num 5.)] in
+      OUnit.assert_equal ~printer
+        [0.;1.;2.;3.;4.;5.;5.]
+        (List.map (fun o -> o.speed) os)
+    ) in
+  let t2 = ("ChangeDir", `Quick, fun () ->
+      let os = get_frames [OpDirE (DirAbs (Num 50.), Num 5.)] in
+      OUnit.assert_equal ~printer
+        [0.;10.;20.;30.;40.;50.;50.]
+        (List.map (fun o -> o.dir) os)
+    ) in
+  let t3 = ("Fire", `Quick, fun () ->
+      let os = get_frames [OpFire fire] in
+      OUnit.assert_equal ~printer
+        [0.;1.;2.;3.;4.;5.]
+        (List.map (fun o ->
+             match o.children with
+             | [bullet] -> fst bullet.pos
+             | _ -> OUnit.assert_failure "no child"
+           ) (List.tl os))
+    ) in
+  t1 :: t2 :: t3 :: List.map make_tc tcs
+
 let _ =
   match Sys.argv with
   | [| _ ; "-e" ; s |] ->
@@ -306,4 +375,5 @@ let _ =
            ; ("pspec", tests ())
            ; ("comp", [("Compile examples", `Quick, compile_all)])
            ; ("cspec", tests_compile ())
+           ; ("interp", tests_interp ())
            ]
