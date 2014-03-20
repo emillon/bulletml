@@ -315,13 +315,19 @@ let tests_interp () =
     let f () =
       let o = initial_obj before (0., 0.) in
       let o2 = animate env o in
-      OUnit.assert_equal after o2.prog
+      let printer = Bulletml.Printer.print_list Bulletml.Printer.print_opcode in
+      OUnit.assert_equal ~printer after o2.prog
     in
     (name, `Quick, f)
   in
+  let bullet = Bullet (None, None, []) in
+  let fire = (None, None, Direct bullet) in
   let tcs =
     [ "Wait 2",  [OpWaitE (Num 2.)], [OpWaitN 1]
     ; "Wait 1",  [OpWaitE (Num 1.)], []
+    ; "Repeat 3",
+      [OpRepeatE (Num 3., [Fire (Direct fire)])],
+      [OpFire fire;OpFire fire]
     ]
   in
   let get_frames prog =
@@ -348,8 +354,7 @@ let tests_interp () =
         (List.map (fun o -> o.dir) os)
     ) in
   let t3 = ("Fire", `Quick, fun () ->
-      let bullet = Bullet (None, None, []) in
-      let os = get_frames [OpFire (None, None, Direct bullet)] in
+      let os = get_frames [OpFire fire] in
       OUnit.assert_equal ~printer
         [0.;1.;2.;3.;4.;5.]
         (List.map (fun o ->
