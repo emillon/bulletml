@@ -328,6 +328,7 @@ let tests_interp () =
     ; "Repeat 3",
       [OpRepeatE (Num 3., [Fire (Direct fire)])],
       [OpFire fire;OpFire fire]
+    ; "Wait 0",  [OpWaitE (Num 0.);OpFire fire], []
     ]
   in
   let get_frames prog =
