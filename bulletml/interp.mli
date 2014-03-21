@@ -3,8 +3,32 @@ open Interp_types
 
 (** Functions to build a BulletML interpreter. *)
 
-(** Convert from degrees to radians. *)
-val from_deg : float -> float
+(** Convert from (x, y) to (magnitude, dir) *)
+val polar : position -> (float * angle)
+
+(** Convert from (magnitude, dir) to (x, y) *)
+val from_polar : (float * angle) -> position
+
+(** The mathematical constant. It's not in Pervasives! *)
+val pi : float
+
+(** Pointwise addition. *)
+val (+:) : (float * float) -> (float * float) -> (float * float)
+
+(** Pointwise substraction. *)
+val (-:) : (float * float) -> (float * float) -> (float * float)
+
+(** Well-typed angle addition *)
+val add_angle : angle -> angle -> angle
+
+(** Well-typed angle substraction *)
+val sub_angle : angle -> angle -> angle
+
+(** Extract or convert angle value in degrees *)
+val in_degs : angle -> float
+
+(** Extract or convert angle value in radians *)
+val in_rads : angle -> float
 
 (** 
    Convert a list {!Syntax.subaction} into a list of {!Interp_types.opcode}s.

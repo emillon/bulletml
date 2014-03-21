@@ -18,9 +18,37 @@ let (-:) (xa, ya) (xb, yb) =
 let ( *% ) (x, y) l =
   (x *. l, y *. l)
 
+let add_angle a b = match (a, b) with
+  | ADeg da, ADeg db -> ADeg (da +. db)
+  | ARad ra, ARad rb -> ARad (ra +. rb)
+  | ARad ra, ADeg db -> ARad (ra +. from_deg db)
+  | ADeg da, ARad rb -> ARad (from_deg da +. rb)
+
+let sub_angle a = function
+  | ADeg d -> add_angle a (ADeg (-.d))
+  | ARad r -> add_angle a (ARad (-.r))
+
+let in_rads = function
+  | ARad r -> r
+  | ADeg r -> from_deg r
+
+let in_degs = function
+  | ADeg d -> d
+  | ARad r -> to_deg r
+
+let unit_vec_rad dir =
+  (sin dir, cos dir)
+
 let unit_vec dir =
-  let dir_rad = from_deg dir in
-  (sin dir_rad, cos dir_rad)
+  unit_vec_rad (in_rads dir)
+
+let polar (x, y) =
+  let r = hypot x y in
+  let t = ARad (atan2 x y) in
+  (r, t)
+
+let from_polar (r, t) =
+  unit_vec t *% r
 
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
@@ -119,11 +147,6 @@ let interp_map st m =
   let frames_total = float (m.frame_end - m.frame_start) in
   m.val_start +. frames_done *. (m.val_end -. m.val_start) /. frames_total
 
-let interp_map_vec st (m:(float*float) linear_map) : (float*float) =
-  let frames_done = float (st.frame - m.frame_start) in
-  let frames_total = float (m.frame_end - m.frame_start) in
-  m.val_start +: ((m.val_end -: m.val_start) *% (frames_done /. frames_total))
-
 let rec replicate n x =
   match n with
   | _ when n < 0 -> assert false
@@ -172,17 +195,17 @@ let read_prog (BulletML (hv, ts)) =
 let initial_obj k pos =
   { prog = k
   ; speed = 0.0
-  ; dir = 0.0
+  ; dir = ARad 0.0
   ; children = []
   ; pos = pos
-  ; prev_dir = 0.0
+  ; prev_dir = ARad 0.0
   ; prev_speed = 0.0
   ; vanished = false
   }
 
 let dir_to_ship st obj =
   let (vx, vy) = (st.ship_pos -: obj.pos) in
-  to_deg (atan2 vx vy)
+  ARad (atan2 vx vy)
 
 let dir_to_prev obj =
   obj.prev_dir
@@ -191,10 +214,10 @@ let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
 let eval_dir st self = function
-  | DirAbs e -> eval e
-  | DirAim e -> eval e +. dir_to_ship st self
-  | DirSeq e -> eval e +. dir_to_prev self
-  | DirRel e -> eval e +. self.dir
+  | DirAbs e -> ADeg (eval e)
+  | DirAim e -> add_angle (ADeg (eval e)) (dir_to_ship st self)
+  | DirSeq e -> add_angle (ADeg (eval e)) (dir_to_prev self)
+  | DirRel e -> add_angle (ADeg (eval e)) self.dir
 
 let eval_speed self = function
   | SpdAbs e -> eval e
@@ -270,15 +293,16 @@ let rec next_prog st self :obj = match self.prog with
     if st.frame > m.frame_end then
       { self with prog = k }
     else
-      { self with dir = interp_map st m }
+      let new_dir = ARad (interp_map st m) in
+      { self with dir = new_dir }
   | OpDirE (d_e, t_e)::k ->
     let dir = eval_dir st self d_e in
     let t = int_of_float (eval t_e) in
     let m =
       { frame_start = st.frame - 1
       ; frame_end = st.frame + t - 1
-      ; val_start = self.dir
-      ; val_end = dir
+      ; val_start = in_rads self.dir
+      ; val_end = in_rads dir
       }
     in
     next_prog st { self with prog = OpDirN m::k }
@@ -292,12 +316,11 @@ let rec next_prog st self :obj = match self.prog with
     next_prog st { self with prog = k }
   | OpAccelN (h, v, t)::k ->
     let (vx, vy) = (unit_vec self.dir *% self.speed) +: (h, v) in
-    let ns = hypot vx vy in
-    let nd = atan2 vx vy in
+    let (ns, nd) = polar (vx, vy) in
     { self with
       prog = OpAccelN (h, v, t - 1)::k
-    ; speed = self.speed +. ns
-    ; dir = self.dir +. nd
+    ; speed = ns
+    ; dir = nd
     }
   | OpCall (n, params)::k ->
     let act_templ = List.assoc n st.actions in

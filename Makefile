@@ -57,3 +57,6 @@ cov: build-cov
 
 mrproper: clean
 	rm -rf tmp docs
+
+indent:
+	ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml

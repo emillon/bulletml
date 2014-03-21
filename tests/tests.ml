@@ -200,6 +200,14 @@ let testspecs =
   (* }}} *)
   ]
 
+let eps = 0.000001
+
+let cfloat x y =
+  abs_float (x -. y) < eps
+
+let clist lx ly =
+  List.for_all2 cfloat lx ly
+
 let tests () =
   let mk_test (n, s) =
     let run_test () =
@@ -350,9 +358,11 @@ let tests_interp () =
     ) in
   let t2 = ("ChangeDir", `Quick, fun () ->
       let os = get_frames [OpDirE (DirAbs (Num 50.), Num 5.)] in
-      OUnit.assert_equal ~printer
+      OUnit.assert_equal
+        ~cmp:clist
+        ~printer
         [0.;10.;20.;30.;40.;50.;50.]
-        (List.map (fun o -> o.dir) os)
+        (List.map (fun o -> in_degs o.dir) os)
     ) in
   let t3 = ("Fire", `Quick, fun () ->
       let os = get_frames [OpFire fire] in
@@ -366,11 +376,10 @@ let tests_interp () =
     ) in
   let t_accel h v exp =
     let os = get_frames [OpAccelE (Num h, Num v, Num 5.)] in
-    let print_speed_vec (x, y) = Printf.sprintf "(%.1f, %.1f)" x y in
+    let print_speed_vec = Bulletml.Printer.print_position in (* works too *)
     let printer = Bulletml.Printer.print_list print_speed_vec in
     let speed_vec o =
-      let dir_rad = Bulletml.Interp.from_deg o.dir in
-      (o.speed *. sin dir_rad, o.speed *. cos dir_rad)
+      Bulletml.Interp.from_polar (o.speed, o.dir)
     in
     OUnit.assert_equal ~printer
       exp
@@ -387,7 +396,47 @@ let tests_interp () =
         ; (0., 0.)
         ]
     ) in
-  t1 :: t2 :: t3 :: t4 :: List.map make_tc tcs
+  let t5 = ("Accel 1, 2", `Quick, fun () ->
+      t_accel 1. 2.
+        [ (0., 0.)
+        ; (1., 2.)
+        ; (2., 4.)
+        ; (3., 6.)
+        ; (4., 8.)
+        ; (5., 10.)
+        ; (5., 10.)
+        ]
+    ) in
+  t1 :: t2 :: t3 :: t4 :: t5 :: List.map make_tc tcs
+
+let tests_unit () =
+  let open Bulletml.Interp in
+  let open Bulletml.Interp_types in
+  List.map (fun (xy, (r, d)) ->
+      let rt = (r, ADeg d) in
+      let prt (r, t) =
+        Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
+      in
+      let pxy = Bulletml.Printer.print_position in
+      let cxy a b =
+        let (dx, dy) = a -: b in
+        hypot dx dy < eps
+      in
+      let crt (ra, ta) (rb, tb) =
+        (* A bit hackish but we can't rely on from_polar *)
+        cfloat ra rb
+        &&
+        abs_float (in_rads (sub_angle ta tb)) < eps
+      in
+      ("polar " ^ pxy xy, `Quick, fun () ->
+          OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
+          OUnit.assert_equal ~cmp:cxy ~printer:pxy xy (from_polar rt);
+      ))
+    [ (1., 1.), (sqrt 2., 45.)
+    ; (1., -1.), (sqrt 2., 135.)
+    ; (-1., -1.), (sqrt 2., -135.)
+    ; (-1., 1.), (sqrt 2., -45.)
+    ]
 
 let _ =
   match Sys.argv with
@@ -399,4 +448,5 @@ let _ =
            ; ("comp", [("Compile examples", `Quick, compile_all)])
            ; ("cspec", tests_compile ())
            ; ("interp", tests_interp ())
+           ; ("unit", tests_unit ())
            ]

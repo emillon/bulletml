@@ -26,6 +26,15 @@ type 'a linear_map =
   }
 
 (**
+   Well-typed angle.
+   Program is in degrees, operations are in radians so it's
+   better to be careful.
+*)
+type angle =
+  | ADeg of float
+  | ARad of float
+
+(**
    Abstract operation, specific to a particular {!obj}.
 
    Some cases have an both an unevaluated form and an evaluated form.
@@ -60,10 +69,10 @@ type opcode =
 type obj =
   { prog : opcode list (** Behaviour *)
   ; speed : float (** In pixels/frame *)
-  ; dir : float (** In degrees. Top is 0, clockwise. Strange, I know *)
+  ; dir : angle (** Top is 0, clockwise. Strange, I know *)
   ; children : obj list (** {!obj}s created by this one *)
   ; pos : position (** Where to draw it *)
-  ; prev_dir : float (** Used for interpreting [DirSeq e] *)
+  ; prev_dir : angle (** Used for interpreting [DirSeq e] *)
   ; prev_speed : float (** Used for interpreting [SpdSeq e] *)
   ; vanished : bool (** If true, don't draw this bullet *)
   }
