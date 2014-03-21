@@ -396,7 +396,18 @@ let tests_interp () =
         ; (0., 0.)
         ]
     ) in
-  t1 :: t2 :: t3 :: t4 :: List.map make_tc tcs
+  let t5 = ("Accel 1, 2", `Quick, fun () ->
+      t_accel 1. 2.
+        [ (0., 0.)
+        ; (1., 2.)
+        ; (2., 4.)
+        ; (3., 6.)
+        ; (4., 8.)
+        ; (5., 10.)
+        ; (5., 10.)
+        ]
+    ) in
+  t1 :: t2 :: t3 :: t4 :: t5 :: List.map make_tc tcs
 
 let tests_unit () =
   let open Bulletml.Interp in
