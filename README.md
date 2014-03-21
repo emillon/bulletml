@@ -39,7 +39,7 @@ And the drawing code uses the state to determine the correct sprite.
     let draw_bullet window (bulleto, bulletp) b =
       let (px, py) = int_pos b.pos in
       let src = match b.state with
-      | Orange -> bulleto
+      | Blue -> bulleto
       | Purple -> bulletp
       in
       let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in

@@ -40,15 +40,15 @@ let clear window =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
   Sdlvideo.fill_rect ~rect window 0x00ffffffl
 
-type color = Orange | Purple
+type color = Blue | Purple
 
 let hooks =
   [ "changecolor", fun _ -> Purple ]
 
-let draw_bullet window (bulleto, bulletp) b =
+let draw_bullet window (bulletb, bulletp) b =
   let (px, py) = int_pos b.pos in
   let src = match b.state with
-    | Orange -> bulleto
+    | Blue -> bulletb
     | Purple -> bulletp
   in
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
@@ -117,8 +117,8 @@ let _ =
       ~w:8 ~h:8 ~bpp:32
       ~rmask:0l ~gmask:0l ~bmask:0l ~amask:0l
   in
-  Sdlvideo.fill_rect ship 0x69D2E7l;
-  let (global_env, obj0, _top) = prepare bml params Orange in
+  Sdlvideo.fill_rect ship 0xfa6900l;
+  let (global_env, obj0, _top) = prepare bml params Blue in
   let global_env = { global_env with hooks } in
   let last_frame = ref (Unix.gettimeofday ()) in
   let msg = ref "xxx" in
