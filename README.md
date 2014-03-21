@@ -18,6 +18,33 @@ It contains:
   - a JS app using [js_of_ocaml](http://ocsigen.org/js_of_ocaml/)
   - a test suite
 
+### Interpreter
+
+An interpreter is available. Compile it using `make` and run
+`./_obuild/bulletml_run/bulletml_run.asm examples/\[Original\]_btb_6.xml` (or
+any other pattern!).
+
+Left click quits, right click reloads the pattern (if you think this is
+backwards, this is a great pull request to start contributing).
+
+This particular example also displays the extensible nature of the interpreter:
+bulletML has no language of colors, but there is a system of hooks. In that
+case, this hook sets the state of bullets to `Purple`:
+
+    let hooks =
+      [ "changecolor", fun _ -> Purple ]
+
+And the drawing code uses the state to determine the correct sprite.
+
+    let draw_bullet window (bulleto, bulletp) b =
+      let (px, py) = int_pos b.pos in
+      let src = match b.state with
+      | Orange -> bulleto
+      | Purple -> bulletp
+      in
+      let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
+      Sdlvideo.blit_surface ~src ~dst:window ~dst_rect ()
+
 ### API documentation
 
 You can find it [here](http://emillon.github.io/bulletml/docs/).
