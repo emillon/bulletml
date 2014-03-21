@@ -413,25 +413,25 @@ let tests_unit () =
   let open Bulletml.Interp in
   let open Bulletml.Interp_types in
   List.map (fun (xy, (r, d)) ->
-    let rt = (r, ADeg d) in
-    let prt (r, t) =
-      Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
-    in
-    let pxy = Bulletml.Printer.print_position in
-    let cxy a b =
-      let (dx, dy) = a -: b in
-      hypot dx dy < eps
-    in
-    let crt (ra, ta) (rb, tb) =
-      (* A bit hackish but we can't rely on from_polar *)
-      cfloat ra rb
-      &&
-      abs_float (in_rads (sub_angle ta tb)) < eps
-    in
-    ("polar " ^ pxy xy, `Quick, fun () ->
-      OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
-      OUnit.assert_equal ~cmp:cxy ~printer:pxy xy (from_polar rt);
-    ))
+      let rt = (r, ADeg d) in
+      let prt (r, t) =
+        Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
+      in
+      let pxy = Bulletml.Printer.print_position in
+      let cxy a b =
+        let (dx, dy) = a -: b in
+        hypot dx dy < eps
+      in
+      let crt (ra, ta) (rb, tb) =
+        (* A bit hackish but we can't rely on from_polar *)
+        cfloat ra rb
+        &&
+        abs_float (in_rads (sub_angle ta tb)) < eps
+      in
+      ("polar " ^ pxy xy, `Quick, fun () ->
+          OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
+          OUnit.assert_equal ~cmp:cxy ~printer:pxy xy (from_polar rt);
+      ))
     [ (1., 1.), (sqrt 2., 45.)
     ; (1., -1.), (sqrt 2., 135.)
     ; (-1., -1.), (sqrt 2., -135.)
