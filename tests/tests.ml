@@ -391,10 +391,16 @@ let tests_interp () =
 
 let tests_unit () =
   let open Bulletml.Interp in
-  List.map (fun (pos, exp) ->
+  List.map (fun (xy, rt) ->
     let printer = Bulletml.Printer.print_position in
-    ("polar " ^ printer pos, `Quick, fun () ->
-      OUnit.assert_equal ~printer exp (polar pos)
+    let eps = 0.000001 in
+    let cmp a b =
+      let (dx, dy) = a -: b in
+      hypot dx dy < eps
+    in
+    ("polar " ^ printer xy, `Quick, fun () ->
+      OUnit.assert_equal ~cmp ~printer rt (polar xy);
+      OUnit.assert_equal ~cmp ~printer xy (from_polar rt);
     ))
     [ (1., 1.), (sqrt 2., pi /. 4.)
     ; (1., -1.), (sqrt 2., 3. *. pi /. 4.)

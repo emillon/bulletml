@@ -6,11 +6,20 @@ open Interp_types
 (** Convert from degrees to radians. *)
 val from_deg : float -> float
 
-(** Convert from (x, y) to (speed, dir) *)
+(** Convert from (x, y) to (magnitude, dir) *)
 val polar : position -> (float * float)
+
+(** Convert from (magnitude, dir) to (x, y) *)
+val from_polar : (float * float) -> position
 
 (** The mathematical constant. It's not in Pervasives! *)
 val pi : float
+
+(** Pointwise addition. *)
+val (+:) : (float * float) -> (float * float) -> (float * float)
+
+(** Pointwise substraction. *)
+val (-:) : (float * float) -> (float * float) -> (float * float)
 
 (** 
    Convert a list {!Syntax.subaction} into a list of {!Interp_types.opcode}s.

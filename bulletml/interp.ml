@@ -9,11 +9,6 @@ let from_deg x =
 let to_deg x =
   360. *. x /. (2. *. pi)
 
-let polar (x, y) =
-  let r = hypot x y in
-  let t = atan2 x y in
-  (r, t)
-
 let (+:) (xa, ya) (xb, yb) =
   (xa +. xb, ya +. yb)
 
@@ -23,9 +18,20 @@ let (-:) (xa, ya) (xb, yb) =
 let ( *% ) (x, y) l =
   (x *. l, y *. l)
 
+let unit_vec_rad dir =
+  (sin dir, cos dir)
+
 let unit_vec dir =
   let dir_rad = from_deg dir in
-  (sin dir_rad, cos dir_rad)
+  unit_vec_rad dir_rad
+
+let polar (x, y) =
+  let r = hypot x y in
+  let t = atan2 x y in
+  (r, t)
+
+let from_polar (r, t) =
+  unit_vec_rad t *% r
 
 let int_pos (x, y) =
   (int_of_float x, int_of_float y)
