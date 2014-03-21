@@ -66,22 +66,26 @@ type opcode =
 (**
    A movable (and drawable) entity.
 *)
-type obj =
+type 'a obj =
   { prog : opcode list (** Behaviour *)
   ; speed : float (** In pixels/frame *)
   ; dir : angle (** Top is 0, clockwise. Strange, I know *)
-  ; children : obj list (** {!obj}s created by this one *)
+  ; children : 'a obj list (** {!obj}s created by this one *)
   ; pos : position (** Where to draw it *)
   ; prev_dir : angle (** Used for interpreting [DirSeq e] *)
   ; prev_speed : float (** Used for interpreting [SpdSeq e] *)
   ; vanished : bool (** If true, don't draw this bullet *)
+  ; state : 'a (** Private state *)
   }
+
+(** A way to modify a ['a obj] *)
+type 'a hook = ('a -> 'a)
 
 (**
    Stuff that does not change during a frame and can be referred to during
    computations.
 *)
-type env =
+type 'a env =
   { frame : int (** Frame number. Usually starts at 1, but only deltas are significant *)
   ; ship_pos : position (** Where patterns can aim *)
   ; screen_w : int (** Screen width in pixels *)
@@ -89,6 +93,7 @@ type env =
   ; actions : action table (** Definitions of {!Syntax.action}s *)
   ; bullets : bullet table (** Definitions of {!Syntax.bullet}s *)
   ; fires : fire table (** Definitions of {!Syntax.fire}s *)
+  ; hooks : 'a hook table (** Hooks for bullets *)
   }
 
 (**

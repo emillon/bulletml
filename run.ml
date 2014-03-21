@@ -109,7 +109,7 @@ let _ =
       ~rmask:0l ~gmask:0l ~bmask:0l ~amask:0l
   in
   Sdlvideo.fill_rect ship 0x69D2E7l;
-  let (global_env, obj0, _top) = prepare bml params in
+  let (global_env, obj0, _top) = prepare bml params () in
   let last_frame = ref (Unix.gettimeofday ()) in
   let msg = ref "xxx" in
   let rec go frame obj =

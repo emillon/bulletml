@@ -271,7 +271,7 @@ let compile b =
     ; p_screen_h = 200
     }
   in
-  let (env, obj, top) = Bulletml.Interp.prepare b params in
+  let (env, obj, top) = Bulletml.Interp.prepare b params () in
   let top_act = List.assoc top env.actions in
   Bulletml.Interp.build_prog env [] (Action (Direct top_act))
 
@@ -317,11 +317,12 @@ let tests_interp () =
     ; actions = []
     ; bullets = []
     ; fires = []
+    ; hooks = []
     }
   in
   let make_tc (name, before, after) =
     let f () =
-      let o = initial_obj before (0., 0.) in
+      let o = initial_obj before (0., 0.) () in
       let o2 = animate env o in
       let printer = Bulletml.Printer.print_list Bulletml.Printer.print_opcode in
       OUnit.assert_equal ~printer after o2.prog
@@ -340,7 +341,7 @@ let tests_interp () =
     ]
   in
   let get_frames prog =
-    let o0 = initial_obj prog (0., 0.) in
+    let o0 = initial_obj prog (0., 0.) () in
     let o1 = animate { env with frame = 1 } o0 in
     let o2 = animate { env with frame = 2 } o1 in
     let o3 = animate { env with frame = 3 } o2 in
