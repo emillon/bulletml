@@ -147,11 +147,6 @@ let interp_map st m =
   let frames_total = float (m.frame_end - m.frame_start) in
   m.val_start +. frames_done *. (m.val_end -. m.val_start) /. frames_total
 
-let interp_map_vec st (m:(float*float) linear_map) : (float*float) =
-  let frames_done = float (st.frame - m.frame_start) in
-  let frames_total = float (m.frame_end - m.frame_start) in
-  m.val_start +: ((m.val_end -: m.val_start) *% (frames_done /. frames_total))
-
 let rec replicate n x =
   match n with
   | _ when n < 0 -> assert false
