@@ -40,10 +40,19 @@ let clear window =
   let rect = Sdlvideo.rect ~x:0 ~y:0 ~h:screen_h ~w:screen_w in
   Sdlvideo.fill_rect ~rect window 0x00ffffffl
 
-let draw_bullet window bullet b =
+type color = Blue | Purple
+
+let hooks =
+  [ "changecolor", fun _ -> Purple ]
+
+let draw_bullet window (bulletb, bulletp) b =
   let (px, py) = int_pos b.pos in
+  let src = match b.state with
+    | Blue -> bulletb
+    | Purple -> bulletp
+  in
   let dst_rect = Sdlvideo.rect ~x:px ~y:py ~w:0 ~h:0 in
-  Sdlvideo.blit_surface ~src:bullet ~dst:window ~dst_rect ()
+  Sdlvideo.blit_surface ~src ~dst:window ~dst_rect ()
 
 let draw window bullet root =
   let objs =
@@ -102,14 +111,15 @@ let _ =
   in
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
   let window = Sdlvideo.set_video_mode ~w:screen_w ~h:screen_h [] in
-  let bullet = Sdlloader.load_image "bullet.png" in
+  let bullets = (Sdlloader.load_image "bullet.png", Sdlloader.load_image "bullet2.png") in
   let ship =
     Sdlvideo.create_RGB_surface []
       ~w:8 ~h:8 ~bpp:32
       ~rmask:0l ~gmask:0l ~bmask:0l ~amask:0l
   in
-  Sdlvideo.fill_rect ship 0x69D2E7l;
-  let (global_env, obj0, _top) = prepare bml params in
+  Sdlvideo.fill_rect ship 0xfa6900l;
+  let (global_env, obj0, _top) = prepare bml params Blue in
+  let global_env = { global_env with hooks } in
   let last_frame = ref (Unix.gettimeofday ()) in
   let msg = ref "xxx" in
   let rec go frame obj =
@@ -121,8 +131,8 @@ let _ =
       }
     in
     clear window;
-    let nbullets = draw window bullet obj in
-    draw_ship window bullet ship;
+    let nbullets = draw window bullets obj in
+    draw_ship window bullets ship;
     let now = Unix.gettimeofday () in
     let frametime = now -. !last_frame in
     let fps = 1. /. frametime in

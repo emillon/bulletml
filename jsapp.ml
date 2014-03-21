@@ -87,7 +87,7 @@ let _ =
   let open Lwt in
   let canvas = create_canvas () in
   Dom.appendChild Dom_html.document##body canvas;
-  let (global_env, obj0, _top) = prepare bml params in
+  let (global_env, obj0, _top) = prepare bml params () in
   let stop = ref false in
   canvas##onclick <- Dom_html.handler (fun e -> stop := true ; Js._true);
   let rec go frame obj () =

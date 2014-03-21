@@ -128,19 +128,19 @@ let number_params l =
       (!i, p)
     ) l
 
-let ind_call getenv sub st = function
-  | Direct x -> x
+let ind_call env sub = function
+  | Direct x -> (x, None)
   | Indirect (n, params) ->
-    let a = List.assoc n (getenv st) in
+    let a = List.assoc n env in
     let params_ev = List.map (
         fun e -> Num (eval e)
       ) params in
     let p = number_params params_ev in
-    sub p a
+    (sub p a, Some n)
 
-let eval_ai = ind_call (fun st -> st.actions) (subst_action)
-let eval_bi = ind_call (fun st -> st.bullets) (subst_bullet)
-let eval_fi = ind_call (fun st -> st.fires) (subst_fire)
+let eval_ai st = ind_call st.actions subst_action
+let eval_bi st = ind_call st.bullets subst_bullet
+let eval_fi st = ind_call st.fires subst_fire
 
 let interp_map st m =
   let frames_done = float (st.frame - m.frame_start) in
@@ -155,11 +155,11 @@ let rec replicate n x =
 
 let rec build_prog st next = function
   | Repeat (e_n, ai) ->
-    let a = eval_ai st ai in
+    let (a, _) = eval_ai st ai in
     OpRepeatE (e_n, a) :: next
   | Wait e_n -> OpWaitE e_n :: next
   | Fire fi ->
-    let f = eval_fi st fi in
+    let (f, _) = eval_fi st fi in
     OpFire f :: next
   | ChangeSpeed (s, e) -> OpSpdE (s, e) :: next
   | ChangeDirection (d, e) -> OpDirE (d, e) :: next
@@ -192,7 +192,7 @@ let read_prog (BulletML (hv, ts)) =
     ) ts;
   (!ae, !be, !fe)
 
-let initial_obj k pos =
+let initial_obj k pos s =
   { prog = k
   ; speed = 0.0
   ; dir = ARad 0.0
@@ -201,6 +201,7 @@ let initial_obj k pos =
   ; prev_dir = ARad 0.0
   ; prev_speed = 0.0
   ; vanished = false
+  ; state = s
   }
 
 let dir_to_ship st obj =
@@ -232,7 +233,15 @@ let oneof x y z =
     | Some r -> r
     | None -> z
 
-let rec next_prog st self :obj = match self.prog with
+let apply_hook st obj = function
+  | None -> obj
+  | Some n ->
+    try
+      let f = List.assoc n st.hooks in
+      { obj with state = f obj.state }
+    with Not_found -> obj
+
+let rec next_prog st self :'a obj = match self.prog with
   | [] -> self
   | OpRepeatE (n_e, a)::k ->
     let n = int_of_float (eval n_e) in
@@ -244,14 +253,14 @@ let rec next_prog st self :obj = match self.prog with
   | OpWaitN 1::k -> { self with prog = k }
   | OpWaitN n::k -> { self with prog = OpWaitN (n-1)::k }
   | OpFire (dir_f, spd_f, bi)::k ->
-    let Bullet (dir_b, spd_b, ais) = eval_bi st bi in
+    let Bullet (dir_b, spd_b, ais), name_o = eval_bi st bi in
     let dir = oneof dir_b dir_f (DirAim (Num 0.)) in
     let spd = oneof spd_b spd_f (SpdAbs (Num 1.)) in
     let d = eval_dir st self dir in
     let s = eval_speed self spd in
     let sas: action = List.map (fun ai -> Action ai) ais in
     let ops: opcode list = seq_prog st sas [] in
-    let o =
+    let o_base =
       { self with
         speed = s
       ; dir = d
@@ -259,6 +268,7 @@ let rec next_prog st self :obj = match self.prog with
       ; children = []
       }
     in
+    let o = apply_hook st o_base name_o in
     let pd = match dir with
       | DirSeq _ -> d
       | _ -> self.prev_dir
@@ -365,7 +375,7 @@ let rec find_assoc env = function
   | [] -> raise Not_found
   | x::xs -> try (List.assoc x env, x) with Not_found -> find_assoc env xs
 
-let prepare bml params =
+let prepare bml params s =
   let (aenv, benv, fenv) = read_prog bml in
   let print_env e = String.concat ", " (List.map fst e) in
   Printf.printf "a: %s\nb: %s\nf: %s\n"
@@ -381,8 +391,9 @@ let prepare bml params =
     ; actions = aenv
     ; bullets = benv
     ; fires = fenv
+    ; hooks = []
     }
   in
   let k = build_prog global_env [] (Action (Direct act)) in
-  let obj = initial_obj k params.p_enemy in
+  let obj = initial_obj k params.p_enemy s in
   (global_env, obj, top)

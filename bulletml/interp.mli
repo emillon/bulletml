@@ -34,7 +34,7 @@ val in_rads : angle -> float
    Convert a list {!Syntax.subaction} into a list of {!Interp_types.opcode}s.
    The extra list given as argument is the list to prepend to.
 *)
-val build_prog : env -> opcode list -> subaction -> opcode list
+val build_prog : 'a env -> opcode list -> subaction -> opcode list
 
 (**
    Convert a (float) {!Interp_types.position} to a pair of ints.
@@ -45,14 +45,14 @@ val int_pos : position -> (int * int)
    Given a program and a position, build an {!Interp_types.obj} with default
    values.
 *)
-val initial_obj : opcode list -> position -> obj
+val initial_obj : opcode list -> position -> 'a -> 'a obj
 
 (**
    Create the list of descendants of an {!Interp_types.obj}, including itself.
 
    This is done in a prefix order, so the argument is the head.
 *)
-val collect_obj : obj -> obj list
+val collect_obj : 'a obj -> 'a obj list
 
 (**
    Compute the next state of an {!Interp_types.obj}:
@@ -64,7 +64,7 @@ val collect_obj : obj -> obj list
    The interpretation phase can interpret several {!Interp_types.opcode}s, for
    example until a [OpWait] instruction is found.
 *)
-val animate : env -> obj -> obj
+val animate : 'a env -> 'a obj -> 'a obj
 
 (**
    Compile and prepare a program for interpretation.
@@ -73,4 +73,5 @@ val animate : env -> obj -> obj
 val prepare
   :  Syntax.t
   -> init_params
-  -> env * obj * string
+  -> 'a
+  -> 'a env * 'a obj * string
