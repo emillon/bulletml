@@ -16,3 +16,6 @@ val print_bulletml : Syntax.t printer
 
 (** Print an {!Interp_types.opcode}. *)
 val print_opcode : Interp_types.opcode printer
+
+(** Print an {!Interp_types.position}. *)
+val print_position : Interp_types.position printer

@@ -9,6 +9,11 @@ let from_deg x =
 let to_deg x =
   360. *. x /. (2. *. pi)
 
+let polar (x, y) =
+  let r = hypot x y in
+  let t = atan2 x y in
+  (r, t)
+
 let (+:) (xa, ya) (xb, yb) =
   (xa +. xb, ya +. yb)
 

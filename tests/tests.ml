@@ -366,7 +366,7 @@ let tests_interp () =
     ) in
   let t_accel h v exp =
     let os = get_frames [OpAccelE (Num h, Num v, Num 5.)] in
-    let print_speed_vec (x, y) = Printf.sprintf "(%.1f, %.1f)" x y in
+    let print_speed_vec = Bulletml.Printer.print_position in (* works too *)
     let printer = Bulletml.Printer.print_list print_speed_vec in
     let speed_vec o =
       let dir_rad = Bulletml.Interp.from_deg o.dir in
@@ -389,6 +389,19 @@ let tests_interp () =
     ) in
   t1 :: t2 :: t3 :: t4 :: List.map make_tc tcs
 
+let tests_unit () =
+  let open Bulletml.Interp in
+  List.map (fun (pos, exp) ->
+    let printer = Bulletml.Printer.print_position in
+    ("polar " ^ printer pos, `Quick, fun () ->
+      OUnit.assert_equal ~printer exp (polar pos)
+    ))
+    [ (1., 1.), (sqrt 2., pi /. 4.)
+    ; (1., -1.), (sqrt 2., 3. *. pi /. 4.)
+    ; (-1., -1.), (sqrt 2., -3. *. pi /. 4.)
+    ; (-1., 1.), (sqrt 2., -.pi /. 4.)
+    ]
+
 let _ =
   match Sys.argv with
   | [| _ ; "-e" ; s |] ->
@@ -399,4 +412,5 @@ let _ =
            ; ("comp", [("Compile examples", `Quick, compile_all)])
            ; ("cspec", tests_compile ())
            ; ("interp", tests_interp ())
+           ; ("unit", tests_unit ())
            ]
