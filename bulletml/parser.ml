@@ -74,74 +74,70 @@ let parse_params = List.map (function
     | _ -> failwith "parse_params"
   )
 
-let parse_accel ns =
-  let h = ref None in
-  let v = ref None in
-  let t = ref None in
-  List.iter (function
-      | Xml.Element ("horizontal", _, [Xml.PCData s]) ->
-        h := Some (parse_expr s)
-      | Xml.Element ("vertical", _, [Xml.PCData s]) ->
-        v := Some (parse_expr s)
-      | Xml.Element ("term", _, [Xml.PCData s]) ->
-        t := Some (parse_expr s)
-      | x -> fail_parse "parse_accel" x
-    ) ns;
-  let term = match !t with
-    | Some tt -> tt
-    | None -> assert false
-  in
-  Accel (!h, !v, term)
+let rec map_maybe f = function
+  | [] -> []
+  | x::xs ->
+    begin
+      match f x with
+      | Some y -> y::map_maybe f xs
+      | None -> map_maybe f xs
+    end
+
+let from_some ?msg = function
+  | Some x -> x
+  | _ ->
+    failwith ("from_some" ^ (match msg with None -> "" | Some x -> ": "^x))
+
+let parse_sub_list p ns =
+  map_maybe p ns
+
+let parse_sub p ns =
+  match parse_sub_list p ns with
+  | [x] -> Some x
+  | [] -> None
+  | _ -> assert false
+
+let p_expr_named name = function
+  | Xml.Element (n, _, [Xml.PCData s]) when n = name ->
+    Some (parse_expr s)
+  | _ -> None
+
+let p_speed = function
+  | Xml.Element ("speed", attrs, [Xml.PCData s]) ->
+    Some (interp_speed (parse_expr s) attrs)
+  | _ -> None
+
+let p_dir = function
+  | Xml.Element ("direction", attrs, [Xml.PCData s]) ->
+    Some (interp_dir (parse_expr s) attrs)
+  | _ -> None
+
+let p_ind name_dir name_ind parse_dir = function
+  | Xml.Element (name, _, ns) when name = name_dir ->
+    Some (Direct (parse_dir ns))
+  | Xml.Element (name, attrs, ns) when name = name_ind ->
+    let l = parse_label attrs in
+    let p = parse_params ns in
+    Some (Indirect (l, p))
+  | _ -> None
 
 let rec parse_fire nodes :fire =
-  let dir = ref None in
-  let speed = ref None in
-  let bullet = ref None in
-  List.iter (function
-      | Xml.Element ("bullet", _, ns) ->
-        begin
-          assert (!bullet = None);
-          let b = parse_bullet ns in
-          bullet := Some (Direct b)
-        end
-      | Xml.Element ("bulletRef", attrs, ns) ->
-        begin
-          assert (!bullet = None);
-          let params = parse_params ns in
-          let label = parse_label attrs in
-          bullet := Some (Indirect (label, params))
-        end
-      | Xml.Element ("direction", attrs, [Xml.PCData s]) ->
-        begin
-          assert (!dir = None);
-          let az = parse_expr s in
-          dir := Some (interp_dir az attrs)
-        end
-      | Xml.Element ("speed", attrs, [Xml.PCData s]) ->
-        begin
-          assert (!speed = None);
-          let sp = parse_expr s in
-          speed := Some (interp_speed sp attrs)
-        end
-      | x -> fail_parse "parse_fire" x
-    ) nodes;
-  let bul = match !bullet with
-    | Some b -> b
-    | None -> assert false
-  in
-  (!dir, !speed, bul)
+  let bullet = parse_sub p_bullet nodes in
+  let dir = parse_sub p_dir nodes in
+  let speed = parse_sub p_speed nodes in
+  (dir, speed, from_some ~msg:"parse_fire" bullet)
 
 and parse_action nodes :action =
   List.map (function
       | Xml.Element ("accel", _, ns) ->
-        parse_accel ns
-      | Xml.Element ("changeSpeed", [],
-                     [ Xml.Element ("speed", attrs, [Xml.PCData s_speed])
-                     ; Xml.Element ("term", [], [Xml.PCData s_term])
-                     ]) ->
-        let speed = parse_expr s_speed in
-        let term = parse_expr s_term in
-        ChangeSpeed (interp_speed speed attrs, term)
+        let h = parse_sub (p_expr_named "horizontal") ns in
+        let v = parse_sub (p_expr_named "vertical") ns in
+        let t = parse_sub (p_expr_named "term") ns in
+        Accel (h, v, from_some t)
+      | Xml.Element ("changeSpeed", [], ns) ->
+        let speed = parse_sub p_speed ns in
+        let term = parse_sub (p_expr_named "term") ns in
+        ChangeSpeed (from_some speed, from_some term)
       | Xml.Element ("wait", _, [Xml.PCData s]) ->
         let t = parse_expr s in
         Wait t
@@ -153,27 +149,14 @@ and parse_action nodes :action =
         Fire (Indirect (l, params))
       | Xml.Element ("vanish", [], _) ->
         Vanish
-      | Xml.Element ("repeat", [],
-                     [ Xml.Element ("times", _, [Xml.PCData s_times])
-                     ; Xml.Element ("action", [], ns)
-                     ]) ->
-        let times = parse_expr s_times in
-        let act = parse_action ns in
-        Repeat (times, Direct act)
-      | Xml.Element ("repeat", [],
-                     [ Xml.Element ("times", _, [Xml.PCData s_times])
-                     ; Xml.Element ("actionRef", [("LABEL", l)], ns)
-                     ]) ->
-        let times = parse_expr s_times in
-        let p = parse_params ns in
-        Repeat (times, Indirect (l, p))
-      | Xml.Element ("changeDirection", [],
-                     [Xml.Element ("direction", attrs, [Xml.PCData s_dir])
-                     ;Xml.Element ("term", [], [Xml.PCData s_term])
-                     ]) ->
-        let dir = interp_dir (parse_expr s_dir) attrs in
-        let term = parse_expr s_term in
-        ChangeDirection (dir, term)
+      | Xml.Element ("repeat", [], ns) ->
+        let times = parse_sub (p_expr_named "times") ns in
+        let act = parse_sub p_action ns in
+        Repeat (from_some times, from_some act)
+      | Xml.Element ("changeDirection", [], ns) ->
+        let dir = parse_sub p_dir ns in
+        let term = parse_sub (p_expr_named "term") ns in
+        ChangeDirection (from_some dir, from_some term)
       | Xml.Element ("actionRef", [(("label"|"LABEL"), s)], ns) ->
         let params = parse_params ns in
         Action (Indirect (s, params))
@@ -181,29 +164,14 @@ and parse_action nodes :action =
     ) nodes
 
 and parse_bullet nodes :bullet =
-  let dir = ref None in
-  let speed = ref None in
-  let acts = ref [] in
-  List.iter (function
-      | Xml.Element ("direction", attrs, [Xml.PCData s]) ->
-        begin
-          assert (!dir = None);
-          dir := Some (interp_dir (parse_expr s) attrs)
-        end
-      | Xml.Element ("speed", attrs, [Xml.PCData s]) ->
-        begin
-          assert (!speed = None);
-          speed := Some (interp_speed (parse_expr s) attrs)
-        end
-      | Xml.Element ("action", _, ns) ->
-        let a = parse_action ns in
-        acts := (Direct a) :: !acts
-      | Xml.Element ("actionRef", [("LABEL", l)], ns) ->
-        let p = parse_params ns in
-        acts := (Indirect (l, p)) :: !acts
-      | x -> fail_parse "parse_bullet" x
-    ) nodes;
-  Bullet (!dir, !speed, List.rev !acts)
+  let dir = parse_sub p_dir nodes in
+  let speed = parse_sub p_speed nodes in
+  let acts = parse_sub_list p_action nodes in
+  Bullet (dir, speed, acts)
+
+and p_action ns = p_ind "action" "actionRef" parse_action ns
+
+and p_bullet ns = p_ind "bullet" "bulletRef" parse_bullet ns
 
 let parse_elems =
   List.map (function
