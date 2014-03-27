@@ -323,8 +323,11 @@ let tests_compile () =
     (n, `Quick, f)
   in
   let compspecs_dir =
-    [
-      ("vanish", [Vanish], [OpVanish])
+    [ ("vanish", [Vanish], [OpVanish])
+    ; ("accel", [Accel(Some (Num 3.), Some (Num 5.), Num 1.)],
+       [OpAccelE(Num 3., Num 5., Num 1.)])
+    ; ("acceldef", [Accel(None, None, Num 1.)],
+       [OpAccelE(Num 0., Num 0., Num 1.)])
     ]
   in
   List.map mk_test compspecs @ List.map mk_test_direct compspecs_dir
