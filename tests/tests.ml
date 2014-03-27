@@ -490,11 +490,13 @@ let tests_unit () =
       ; (-1., 1.), (sqrt 2., -45.)
       ]
   in
-  let t_angle = ("angle", `Quick, fun () ->
+  let t_angle = ("misc", `Quick, fun () ->
       OUnit.assert_equal (ADeg 180.) (add_angle (ADeg 90.) (ADeg 90.));
       OUnit.assert_equal (ARad 2.) (add_angle (ARad 1.) (ARad 1.));
       OUnit.assert_equal (ARad pi) (add_angle (ARad (pi/.2.)) (ADeg 90.));
       OUnit.assert_equal (ADeg 0.) (sub_angle (ADeg 45.) (ADeg 45.));
+      OUnit.assert_raises ~msg:"replicate (-1)" (Invalid_argument "replicate")
+        (fun () -> replicate (-1) true);
     )
   in
   t_angle :: t_polar
