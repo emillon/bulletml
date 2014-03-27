@@ -297,6 +297,7 @@ let compspecs =
                   ])
      ; OpWaitE (Num 450.)
      ])
+  ; ("[ESP_RADE]_round_5_boss_gara_5.xml", [OpCall ("gara5", [])])
   ]
 
 let tests_compile () =
