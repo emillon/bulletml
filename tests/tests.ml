@@ -432,31 +432,41 @@ let tests_interp () =
 let tests_unit () =
   let open Bulletml.Interp in
   let open Bulletml.Interp_types in
-  List.map (fun (xy, (r, d)) ->
-      let rt = (r, ADeg d) in
-      let prt (r, t) =
-        Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
-      in
-      let pxy = Bulletml.Printer.print_position in
-      let cxy a b =
-        let (dx, dy) = a -: b in
-        hypot dx dy < eps
-      in
-      let crt (ra, ta) (rb, tb) =
-        (* A bit hackish but we can't rely on from_polar *)
-        cfloat ra rb
-        &&
-        abs_float (in_rads (sub_angle ta tb)) < eps
-      in
-      ("polar " ^ pxy xy, `Quick, fun () ->
-          OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
-          OUnit.assert_equal ~cmp:cxy ~printer:pxy xy (from_polar rt);
-      ))
-    [ (1., 1.), (sqrt 2., 45.)
-    ; (1., -1.), (sqrt 2., 135.)
-    ; (-1., -1.), (sqrt 2., -135.)
-    ; (-1., 1.), (sqrt 2., -45.)
-    ]
+  let t_polar =
+    List.map (fun (xy, (r, d)) ->
+        let rt = (r, ADeg d) in
+        let prt (r, t) =
+          Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
+        in
+        let pxy = Bulletml.Printer.print_position in
+        let cxy a b =
+          let (dx, dy) = a -: b in
+          hypot dx dy < eps
+        in
+        let crt (ra, ta) (rb, tb) =
+          (* A bit hackish but we can't rely on from_polar *)
+          cfloat ra rb
+          &&
+          abs_float (in_rads (sub_angle ta tb)) < eps
+        in
+        ("polar " ^ pxy xy, `Quick, fun () ->
+            OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
+            OUnit.assert_equal ~cmp:cxy ~printer:pxy xy (from_polar rt);
+        ))
+      [ (1., 1.), (sqrt 2., 45.)
+      ; (1., -1.), (sqrt 2., 135.)
+      ; (-1., -1.), (sqrt 2., -135.)
+      ; (-1., 1.), (sqrt 2., -45.)
+      ]
+  in
+  let t_angle = ("angle", `Quick, fun () ->
+      OUnit.assert_equal (ADeg 180.) (add_angle (ADeg 90.) (ADeg 90.));
+      OUnit.assert_equal (ARad 2.) (add_angle (ARad 1.) (ARad 1.));
+      OUnit.assert_equal (ARad pi) (add_angle (ARad (pi/.2.)) (ADeg 90.));
+      OUnit.assert_equal (ADeg 0.) (sub_angle (ADeg 45.) (ADeg 45.));
+    )
+  in
+  t_angle :: t_polar
 
 let _ =
   Alcotest.run "BulletML"
