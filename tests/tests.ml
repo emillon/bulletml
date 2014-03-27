@@ -333,7 +333,7 @@ let tests_interp () =
     ; ship_pos = (1., 0.)
     ; screen_w = 10
     ; screen_h = 10
-    ; actions = []
+    ; actions = [("f", [])]
     ; bullets = []
     ; fires = []
     ; hooks = []
@@ -357,6 +357,7 @@ let tests_interp () =
       [OpRepeatE (Num 3., [Fire (Direct fire)])],
       [OpFire fire;OpFire fire]
     ; "Wait 0",  [OpWaitE (Num 0.);OpFire fire], []
+    ; "Call", [OpCall ("f", [])], []
     ]
   in
   let get_frames prog =
