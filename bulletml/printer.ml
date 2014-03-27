@@ -91,8 +91,6 @@ let print_linear_map prn m =
     "{ frame_start = %d ; frame_end = %d ; val_start = %s ; val_end = %s }"
     m.frame_start m.frame_end (prn m.val_start) (prn m.val_end)
 
-let print_pos (x, y) = Printf.sprintf "(%f,%f)" x y
-
 let print_opcode = function
   | OpRepeatE (e, a) -> print_variant "OpRepeatE " [print_expr e;print_action a]
   | OpWaitE e -> print_variant "OpWaitE" [print_expr e]
