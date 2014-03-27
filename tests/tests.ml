@@ -295,6 +295,19 @@ let compspecs =
          )
      ; OpWaitE (Num 60.)
      ])
+  ; ("[OtakuTwo]_self-2020.xml",
+     [ OpDirE (DirAbs (Num 0.), Num 1.)
+     ; OpWaitE (Num 1.)
+     ; OpSpdE (SpdAbs (Num 5.), Num 1.)
+     ; OpWaitE (Num 15.)
+     ; OpSpdE (SpdAbs (Num 0.), Num 1.)
+     ; OpRepeatE (Num 45.,
+                  [ Fire (Indirect ("seed", [Num 1.]))
+                  ; Fire (Indirect ("seed", [Num 0. -@ Num 1.]))
+                  ; Wait (Num 30.)
+                  ])
+     ; OpWaitE (Num 450.)
+     ])
   ]
 
 let tests_compile () =
