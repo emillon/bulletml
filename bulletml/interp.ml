@@ -149,7 +149,7 @@ let interp_map st m =
 
 let rec replicate n x =
   match n with
-  | _ when n < 0 -> assert false
+  | _ when n < 0 -> invalid_arg "replicate"
   | 0 -> []
   | _ -> x ::  replicate (n-1) x
 

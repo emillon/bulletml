@@ -30,6 +30,9 @@ val in_degs : angle -> float
 (** Extract or convert angle value in radians *)
 val in_rads : angle -> float
 
+(** Build a list with n times the same element *)
+val replicate : int -> 'a -> 'a list
+
 (** 
    Convert a list {!Syntax.subaction} into a list of {!Interp_types.opcode}s.
    The extra list given as argument is the list to prepend to.

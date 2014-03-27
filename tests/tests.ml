@@ -215,31 +215,20 @@ let tests () =
       let x = Xml.parse_file fname in
       let str = Xml.to_string_fmt x in
       print_endline str;
-      match s with
-      | `Bullet bspec ->
-        begin match x with
-          | Xml.Element ("bullet", _, ns) ->
-            let b = Bulletml.Parser.parse_bullet ns in
-            OUnit.assert_equal bspec b
-          | _ -> OUnit.assert_failure "not a bullet"
-        end
-      | `Action aspec ->
-        begin match x with
-          | Xml.Element ("action", [], ns) ->
-            let a = Bulletml.Parser.parse_action ns in
-            OUnit.assert_equal aspec a
-          | _ -> OUnit.assert_failure "not an action"
-        end
-      | `Fire fspec ->
-        begin match x with
-          | Xml.Element ("fire", [], ns) ->
-            let f = Bulletml.Parser.parse_fire ns in
-            OUnit.assert_equal fspec f
-          | _ -> OUnit.assert_failure "not a fire"
-        end
-      | `Bulletml bspec ->
+      match s, x with
+      | `Bullet bspec, Xml.Element ("bullet", _, ns) ->
+        let b = Bulletml.Parser.parse_bullet ns in
+        OUnit.assert_equal bspec b
+      | `Action aspec, Xml.Element ("action", [], ns) ->
+        let a = Bulletml.Parser.parse_action ns in
+        OUnit.assert_equal aspec a
+      | `Fire fspec, Xml.Element ("fire", [], ns) ->
+        let f = Bulletml.Parser.parse_fire ns in
+        OUnit.assert_equal fspec f
+      | `Bulletml bspec, _ ->
         let b = Bulletml.Parser.parse_xml x in
         OUnit.assert_equal ~printer:Bulletml.Printer.print_bulletml bspec b
+      | _ -> assert false
     in
     (n, `Quick, run_test)
   in
@@ -279,9 +268,41 @@ let compspecs =
   let open Bulletml.Syntax in
   let open Bulletml.Interp_types in
   [ ("[1943]_rolling_fire.xml", [OpFire ((None, None, Indirect ("roll", [])))])
+  ; ("[Bulletsmorph]_aba_4.xml",
+     [ OpFire (None, Some (SpdAbs (Num 0.1)), Indirect ("cross", []))
+     ; OpWaitE (Num 5.)
+     ; OpRepeatE
+         ( Num 40. +@ (Num 60.) *@ Rank
+         , [ Fire ( Direct
+                      ( None
+                      , Some (SpdSeq (Num 0.04))
+                      , Indirect ("cross", [])
+                      )
+                  )
+           ; Wait (Num 20. -@ (Num 10.) *@ Rank)
+           ]
+         )
+     ; OpWaitE (Num 60.)
+     ])
+  ; ("[OtakuTwo]_self-2020.xml",
+     [ OpDirE (DirAbs (Num 0.), Num 1.)
+     ; OpWaitE (Num 1.)
+     ; OpSpdE (SpdAbs (Num 5.), Num 1.)
+     ; OpWaitE (Num 15.)
+     ; OpSpdE (SpdAbs (Num 0.), Num 1.)
+     ; OpRepeatE (Num 45.,
+                  [ Fire (Indirect ("seed", [Num 1.]))
+                  ; Fire (Indirect ("seed", [Num 0. -@ Num 1.]))
+                  ; Wait (Num 30.)
+                  ])
+     ; OpWaitE (Num 450.)
+     ])
+  ; ("[ESP_RADE]_round_5_boss_gara_5.xml", [OpCall ("gara5", [])])
   ]
 
 let tests_compile () =
+  let open Bulletml.Syntax in
+  let open Bulletml.Interp_types in
   let printer ops = Bulletml.Printer.print_list Bulletml.Printer.print_opcode ops in
   let mk_test (n, spec) =
     let f () =
@@ -292,7 +313,24 @@ let tests_compile () =
     in
     (n, `Quick, f)
   in
-  List.map mk_test compspecs
+  let mk_test_direct (n, a, spec) =
+    let f () =
+      let got =
+        compile (BulletML (Vertical, [EAction ("top", a)]))
+      in
+      OUnit.assert_equal ~printer got spec;
+    in
+    (n, `Quick, f)
+  in
+  let compspecs_dir =
+    [ ("vanish", [Vanish], [OpVanish])
+    ; ("accel", [Accel(Some (Num 3.), Some (Num 5.), Num 1.)],
+       [OpAccelE(Num 3., Num 5., Num 1.)])
+    ; ("acceldef", [Accel(None, None, Num 1.)],
+       [OpAccelE(Num 0., Num 0., Num 1.)])
+    ]
+  in
+  List.map mk_test compspecs @ List.map mk_test_direct compspecs_dir
 
 let parse_all =
   for_all_examples (fun _n _b -> ())
@@ -314,7 +352,7 @@ let tests_interp () =
     ; ship_pos = (1., 0.)
     ; screen_w = 10
     ; screen_h = 10
-    ; actions = []
+    ; actions = [("f", [])]
     ; bullets = []
     ; fires = []
     ; hooks = []
@@ -338,6 +376,7 @@ let tests_interp () =
       [OpRepeatE (Num 3., [Fire (Direct fire)])],
       [OpFire fire;OpFire fire]
     ; "Wait 0",  [OpWaitE (Num 0.);OpFire fire], []
+    ; "Call", [OpCall ("f", [])], []
     ]
   in
   let get_frames prog =
@@ -408,46 +447,66 @@ let tests_interp () =
         ; (5., 10.)
         ]
     ) in
-  t1 :: t2 :: t3 :: t4 :: t5 :: List.map make_tc tcs
+  let make_eval_tc (e, r) =
+    make_tc (Bulletml.Printer.print_expr e, [OpWaitE e], [OpWaitN (r-1)])
+  in
+  let ev_tests =
+    [ (Num 3., 3)
+    ; (Num 1. +@ Num 2., 3)
+    ; (Num 6. /@ Num 2., 3)
+    ; (Num 44. %@ Num 7., 2)
+    ; (Num 4. *@ Rank, 2) (* Rank is supposed to be 0.5 for tests *)
+    ]
+  in
+  t1::t2::t3::t4::t5::List.map make_tc tcs @ List.map make_eval_tc ev_tests
 
 let tests_unit () =
   let open Bulletml.Interp in
   let open Bulletml.Interp_types in
-  List.map (fun (xy, (r, d)) ->
-      let rt = (r, ADeg d) in
-      let prt (r, t) =
-        Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
-      in
-      let pxy = Bulletml.Printer.print_position in
-      let cxy a b =
-        let (dx, dy) = a -: b in
-        hypot dx dy < eps
-      in
-      let crt (ra, ta) (rb, tb) =
-        (* A bit hackish but we can't rely on from_polar *)
-        cfloat ra rb
-        &&
-        abs_float (in_rads (sub_angle ta tb)) < eps
-      in
-      ("polar " ^ pxy xy, `Quick, fun () ->
-          OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
-          OUnit.assert_equal ~cmp:cxy ~printer:pxy xy (from_polar rt);
-      ))
-    [ (1., 1.), (sqrt 2., 45.)
-    ; (1., -1.), (sqrt 2., 135.)
-    ; (-1., -1.), (sqrt 2., -135.)
-    ; (-1., 1.), (sqrt 2., -45.)
-    ]
+  let t_polar =
+    List.map (fun (xy, (r, d)) ->
+        let rt = (r, ADeg d) in
+        let prt (r, t) =
+          Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
+        in
+        let pxy = Bulletml.Printer.print_position in
+        let cxy a b =
+          let (dx, dy) = a -: b in
+          hypot dx dy < eps
+        in
+        let crt (ra, ta) (rb, tb) =
+          (* A bit hackish but we can't rely on from_polar *)
+          cfloat ra rb
+          &&
+          abs_float (in_rads (sub_angle ta tb)) < eps
+        in
+        ("polar " ^ pxy xy, `Quick, fun () ->
+            OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
+            OUnit.assert_equal ~cmp:cxy ~printer:pxy xy (from_polar rt);
+        ))
+      [ (1., 1.), (sqrt 2., 45.)
+      ; (1., -1.), (sqrt 2., 135.)
+      ; (-1., -1.), (sqrt 2., -135.)
+      ; (-1., 1.), (sqrt 2., -45.)
+      ]
+  in
+  let t_angle = ("misc", `Quick, fun () ->
+      OUnit.assert_equal (ADeg 180.) (add_angle (ADeg 90.) (ADeg 90.));
+      OUnit.assert_equal (ARad 2.) (add_angle (ARad 1.) (ARad 1.));
+      OUnit.assert_equal (ARad pi) (add_angle (ARad (pi/.2.)) (ADeg 90.));
+      OUnit.assert_equal (ADeg 0.) (sub_angle (ADeg 45.) (ADeg 45.));
+      OUnit.assert_raises ~msg:"replicate (-1)" (Invalid_argument "replicate")
+        (fun () -> replicate (-1) true);
+    )
+  in
+  t_angle :: t_polar
 
 let _ =
-  match Sys.argv with
-  | [| _ ; "-e" ; s |] ->
-    s |> Bulletml.Parser.parse_expr |> Bulletml.Printer.print_expr |> print_endline
-  | _ -> Alcotest.run "BulletML"
-           [ ("parse", [("Parse examples", `Quick, parse_all)])
-           ; ("pspec", tests ())
-           ; ("comp", [("Compile examples", `Quick, compile_all)])
-           ; ("cspec", tests_compile ())
-           ; ("interp", tests_interp ())
-           ; ("unit", tests_unit ())
-           ]
+  Alcotest.run "BulletML"
+    [ ("parse", [("Parse examples", `Quick, parse_all)])
+    ; ("pspec", tests ())
+    ; ("comp", [("Compile examples", `Quick, compile_all)])
+    ; ("cspec", tests_compile ())
+    ; ("interp", tests_interp ())
+    ; ("unit", tests_unit ())
+    ]
