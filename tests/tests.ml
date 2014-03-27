@@ -301,6 +301,8 @@ let compspecs =
   ]
 
 let tests_compile () =
+  let open Bulletml.Syntax in
+  let open Bulletml.Interp_types in
   let printer ops = Bulletml.Printer.print_list Bulletml.Printer.print_opcode ops in
   let mk_test (n, spec) =
     let f () =
@@ -311,7 +313,21 @@ let tests_compile () =
     in
     (n, `Quick, f)
   in
-  List.map mk_test compspecs
+  let mk_test_direct (n, a, spec) =
+    let f () =
+      let got =
+        compile (BulletML (Vertical, [EAction ("top", a)]))
+      in
+      OUnit.assert_equal ~printer got spec;
+    in
+    (n, `Quick, f)
+  in
+  let compspecs_dir =
+    [
+      ("vanish", [Vanish], [OpVanish])
+    ]
+  in
+  List.map mk_test compspecs @ List.map mk_test_direct compspecs_dir
 
 let parse_all =
   for_all_examples (fun _n _b -> ())
