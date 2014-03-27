@@ -279,6 +279,22 @@ let compspecs =
   let open Bulletml.Syntax in
   let open Bulletml.Interp_types in
   [ ("[1943]_rolling_fire.xml", [OpFire ((None, None, Indirect ("roll", [])))])
+  ; ("[Bulletsmorph]_aba_4.xml",
+     [ OpFire (None, Some (SpdAbs (Num 0.1)), Indirect ("cross", []))
+     ; OpWaitE (Num 5.)
+     ; OpRepeatE
+         ( Num 40. +@ (Num 60.) *@ Rank
+         , [ Fire ( Direct
+                      ( None
+                      , Some (SpdSeq (Num 0.04))
+                      , Indirect ("cross", [])
+                      )
+                  )
+           ; Wait (Num 20. -@ (Num 10.) *@ Rank)
+           ]
+         )
+     ; OpWaitE (Num 60.)
+     ])
   ]
 
 let tests_compile () =
