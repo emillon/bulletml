@@ -428,7 +428,18 @@ let tests_interp () =
         ; (5., 10.)
         ]
     ) in
-  t1 :: t2 :: t3 :: t4 :: t5 :: List.map make_tc tcs
+  let make_eval_tc (e, r) =
+    make_tc (Bulletml.Printer.print_expr e, [OpWaitE e], [OpWaitN (r-1)])
+  in
+  let ev_tests =
+    [ (Num 3., 3)
+    ; (Num 1. +@ Num 2., 3)
+    ; (Num 6. /@ Num 2., 3)
+    ; (Num 44. %@ Num 7., 2)
+    ; (Num 4. *@ Rank, 2) (* Rank is supposed to be 0.5 for tests *)
+    ]
+  in
+  t1::t2::t3::t4::t5::List.map make_tc tcs @ List.map make_eval_tc ev_tests
 
 let tests_unit () =
   let open Bulletml.Interp in
