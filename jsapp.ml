@@ -2,8 +2,10 @@ open Bulletml.Syntax
 open Bulletml.Interp
 open Bulletml.Interp_types
 
-let bml = (*{{{*)
-  BulletML (Horizontal, [EAction ("top", [Repeat (Num 20.,Direct ([Fire (Direct ((Some (DirAim (((Num 0. -@ Num 60.) +@ (Rand *@ Num 120.)))), None, Indirect ("hmgLsr", [])))); Repeat (Num 8.,Direct ([Wait (Num 1.); Fire (Direct ((Some (DirSeq (Num 0.)), None, Indirect ("hmgLsr", []))))])); Wait (Num 10.)])); Wait (Num 60.)]); EBullet ("hmgLsr",Bullet (None,Some (SpdAbs (Num 2.)),[Direct ([ChangeSpeed (SpdAbs (Num 0.3),Num 30.); Wait (Num 100.); ChangeSpeed (SpdAbs (Num 5.),Num 100.)]); Direct ([Repeat (Num 12.,Direct ([ChangeDirection (DirAim (Num 0.),(Num 45. -@ (Rank *@ Num 30.))); Wait (Num 5.)]))])]))])
+let stop = ref false
+
+let bml = ref ((*{{{*)
+    BulletML (Horizontal, [EAction ("top", [Repeat (Num 20.,Direct ([Fire (Direct ((Some (DirAim (((Num 0. -@ Num 60.) +@ (Rand *@ Num 120.)))), None, Indirect ("hmgLsr", [])))); Repeat (Num 8.,Direct ([Wait (Num 1.); Fire (Direct ((Some (DirSeq (Num 0.)), None, Indirect ("hmgLsr", []))))])); Wait (Num 10.)])); Wait (Num 60.)]); EBullet ("hmgLsr",Bullet (None,Some (SpdAbs (Num 2.)),[Direct ([ChangeSpeed (SpdAbs (Num 0.3),Num 30.); Wait (Num 100.); ChangeSpeed (SpdAbs (Num 5.),Num 100.)]); Direct ([Repeat (Num 12.,Direct ([ChangeDirection (DirAim (Num 0.),(Num 45. -@ (Rank *@ Num 30.))); Wait (Num 5.)]))])]))]))
 (*}}}*)
 
 let screen_w = 400
@@ -83,12 +85,27 @@ let draw_ship (ctx, img) =
 let draw_msg ctx msg =
   ctx##fillText (Js.string msg, 0., 10.)
 
+let setup_textarea elem =
+  elem##onkeyup <- Dom_html.handler (fun e ->
+      Dom_html.window##setTimeout (Js.wrap_callback (fun () ->
+          let s = Js.to_string elem##value in
+          bml := Bulletml.Parser.parse_pat_string s;
+          stop := true
+        ), 10.);
+      Js._true
+    )
+
 let _ =
   let open Lwt in
   let canvas = create_canvas () in
-  Dom.appendChild Dom_html.document##body canvas;
-  let (global_env, obj0, _top) = prepare bml params () in
-  let stop = ref false in
+  let doc = Dom_html.document in
+  let textarea = Dom_html.createTextarea doc in
+  Js.Opt.iter (doc##querySelector(Js.string"#shmup")) (fun e ->
+      Dom.appendChild e canvas;
+      Dom.appendChild e textarea;
+    );
+  setup_textarea textarea;
+  let (global_env, obj0, _top) = prepare (!bml) params () in
   canvas##onclick <- Dom_html.handler (fun e -> stop := true ; Js._true);
   let rec go frame obj () =
     let env =
@@ -106,7 +123,8 @@ let _ =
     draw_msg ctx (string_of_int perf ^ " bullets");
     let k = if !stop then begin
         stop := false;
-        go 1 obj0
+        let (_, o, _)  = prepare (!bml) params () in
+        go 1 o
       end else
         go (frame + 1) (animate env obj)
     in

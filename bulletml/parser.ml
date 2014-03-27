@@ -243,10 +243,8 @@ let highlight chan linenum col_start col_end =
   let marker = String.make (col_end - col_start + 1) '^' in
   Printf.sprintf "%s%c%s%s" l '\n' spc marker
 
-let parse_pat ?(fname = "<no name>") chan =
+let parse_pat_lexbuf ?chan lexbuf =
   let open Lexing in
-  let lexbuf = from_channel chan in
-  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = fname };
   try
     Parsepat.prog Lexpat.token lexbuf
   with Parsing.Parse_error ->
@@ -259,8 +257,24 @@ let parse_pat ?(fname = "<no name>") chan =
         pos.Lexing.pos_fname linenum col_start col_end
     in
     print_endline msg;
-    print_endline (highlight chan linenum col_start col_end);
+    begin match chan with
+      | Some c -> print_endline (highlight c linenum col_start col_end);
+      | _ -> () end;
     failwith "parse error"
+
+let set_lexbuf_name lexbuf name =
+  let open Lexing in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = name }
+
+let parse_pat ?(fname = "<no name>") chan =
+  let lexbuf = Lexing.from_channel chan in
+  set_lexbuf_name lexbuf fname;
+  parse_pat_lexbuf lexbuf
+
+let parse_pat_string str =
+  let lexbuf = Lexing.from_string str in
+  set_lexbuf_name lexbuf "<string>";
+  parse_pat_lexbuf lexbuf
 
 let extension fname =
   let dot = String.rindex fname '.' in
