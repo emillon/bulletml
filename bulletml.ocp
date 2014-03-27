@@ -4,6 +4,8 @@ begin library "bulletml"
   dirname = ["bulletml"]
   files = [
     pack Bulletml [
+      "parsepat.mly"
+      "lexpat.mll"
       "syntax.ml" "interp_types.ml" "printer.ml" "parser.ml" "interp.ml"
     ]
   ]

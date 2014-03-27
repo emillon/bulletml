@@ -23,3 +23,6 @@ val parse_fire : Xml.xml list -> Syntax.fire
 
 (** Parse only a {!Syntax.expr}. *)
 val parse_expr : string -> Syntax.expr
+
+(** Parse using custom syntax *)
+val parse_pat : in_channel -> Syntax.t

@@ -232,3 +232,7 @@ let parse_xml = function
     end in
     BulletML (dir, elems)
   | _ -> assert false
+
+let parse_pat chan =
+  let lexbuf = Lexing.from_channel chan in
+  Parsepat.prog Lexpat.token lexbuf
