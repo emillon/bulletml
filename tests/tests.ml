@@ -458,14 +458,11 @@ let tests_unit () =
     ]
 
 let _ =
-  match Sys.argv with
-  | [| _ ; "-e" ; s |] ->
-    s |> Bulletml.Parser.parse_expr |> Bulletml.Printer.print_expr |> print_endline
-  | _ -> Alcotest.run "BulletML"
-           [ ("parse", [("Parse examples", `Quick, parse_all)])
-           ; ("pspec", tests ())
-           ; ("comp", [("Compile examples", `Quick, compile_all)])
-           ; ("cspec", tests_compile ())
-           ; ("interp", tests_interp ())
-           ; ("unit", tests_unit ())
-           ]
+  Alcotest.run "BulletML"
+    [ ("parse", [("Parse examples", `Quick, parse_all)])
+    ; ("pspec", tests ())
+    ; ("comp", [("Compile examples", `Quick, compile_all)])
+    ; ("cspec", tests_compile ())
+    ; ("interp", tests_interp ())
+    ; ("unit", tests_unit ())
+    ]
