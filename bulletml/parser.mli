@@ -25,7 +25,7 @@ val parse_fire : Xml.xml list -> Syntax.fire
 val parse_expr : string -> Syntax.expr
 
 (** Parse using custom syntax *)
-val parse_pat : in_channel -> Syntax.t
+val parse_pat : ?fname:string -> in_channel -> Syntax.t
 
 (** Parse file, guess using extension *)
 val parse_auto : string -> Syntax.t

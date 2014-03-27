@@ -243,7 +243,7 @@ let for_all_examples f () =
   Array.sort String.compare files_a;
   let files =
     List.filter
-      (fun x -> not (List.mem x ["fragments"; "mini"]))
+      (fun x -> "examples/" ^ x |> Sys.is_directory |> not)
       (Array.to_list files_a)
   in
   List.iter (fun n ->

@@ -233,9 +233,34 @@ let parse_xml = function
     BulletML (dir, elems)
   | _ -> assert false
 
-let parse_pat chan =
-  let lexbuf = Lexing.from_channel chan in
-  Parsepat.prog Lexpat.token lexbuf
+let highlight chan linenum col_start col_end =
+  seek_in chan 0;
+  for i = 1 to linenum - 1 do
+    ignore (input_line chan)
+  done;
+  let l = input_line chan in
+  let spc = String.make col_start ' ' in
+  let marker = String.make (col_end - col_start + 1) '^' in
+  Printf.sprintf "%s%c%s%s" l '\n' spc marker
+
+let parse_pat ?(fname = "<no name>") chan =
+  let open Lexing in
+  let lexbuf = from_channel chan in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = fname };
+  try
+    Parsepat.prog Lexpat.token lexbuf
+  with Parsing.Parse_error ->
+    let pos = lexeme_start_p lexbuf in
+    let pos_end = lexeme_end_p lexbuf in
+    let linenum = pos.pos_lnum in
+    let col_start = pos.pos_cnum-pos.pos_bol in
+    let col_end = pos_end.pos_cnum-pos_end.pos_bol in
+    let msg = Printf.sprintf "Parse error in %s %d:%d-%d:"
+        pos.Lexing.pos_fname linenum col_start col_end
+    in
+    print_endline msg;
+    print_endline (highlight chan linenum col_start col_end);
+    failwith "parse error"
 
 let extension fname =
   let dot = String.rindex fname '.' in
@@ -251,5 +276,5 @@ let with_open_in fname f =
 let parse_auto fname =
   match extension fname with
   | "xml"   -> parse_xml (Xml.parse_file fname)
-  | "pat" -> with_open_in fname parse_pat
+  | "pat" -> with_open_in fname (parse_pat ~fname)
   | _     -> invalid_arg "unknown extension"
