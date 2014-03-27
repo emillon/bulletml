@@ -215,31 +215,20 @@ let tests () =
       let x = Xml.parse_file fname in
       let str = Xml.to_string_fmt x in
       print_endline str;
-      match s with
-      | `Bullet bspec ->
-        begin match x with
-          | Xml.Element ("bullet", _, ns) ->
-            let b = Bulletml.Parser.parse_bullet ns in
-            OUnit.assert_equal bspec b
-          | _ -> OUnit.assert_failure "not a bullet"
-        end
-      | `Action aspec ->
-        begin match x with
-          | Xml.Element ("action", [], ns) ->
-            let a = Bulletml.Parser.parse_action ns in
-            OUnit.assert_equal aspec a
-          | _ -> OUnit.assert_failure "not an action"
-        end
-      | `Fire fspec ->
-        begin match x with
-          | Xml.Element ("fire", [], ns) ->
-            let f = Bulletml.Parser.parse_fire ns in
-            OUnit.assert_equal fspec f
-          | _ -> OUnit.assert_failure "not a fire"
-        end
-      | `Bulletml bspec ->
+      match s, x with
+      | `Bullet bspec, Xml.Element ("bullet", _, ns) ->
+        let b = Bulletml.Parser.parse_bullet ns in
+        OUnit.assert_equal bspec b
+      | `Action aspec, Xml.Element ("action", [], ns) ->
+        let a = Bulletml.Parser.parse_action ns in
+        OUnit.assert_equal aspec a
+      | `Fire fspec, Xml.Element ("fire", [], ns) ->
+        let f = Bulletml.Parser.parse_fire ns in
+        OUnit.assert_equal fspec f
+      | `Bulletml bspec, _ ->
         let b = Bulletml.Parser.parse_xml x in
         OUnit.assert_equal ~printer:Bulletml.Printer.print_bulletml bspec b
+      | _ -> assert false
     in
     (n, `Quick, run_test)
   in
