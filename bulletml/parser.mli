@@ -26,3 +26,6 @@ val parse_expr : string -> Syntax.expr
 
 (** Parse using custom syntax *)
 val parse_pat : in_channel -> Syntax.t
+
+(** Parse file, guess using extension *)
+val parse_auto : string -> Syntax.t
