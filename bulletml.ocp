@@ -1,4 +1,5 @@
 comp = ["-g"]
+ocamlyacc = "menhir"
 
 begin library "bulletml"
   dirname = ["bulletml"]
