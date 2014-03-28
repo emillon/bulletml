@@ -87,11 +87,12 @@ let draw_msg ctx msg =
 
 let setup_textarea elem =
   elem##onkeyup <- Dom_html.handler (fun e ->
-      Dom_html.window##setTimeout (Js.wrap_callback (fun () ->
+      let cb = Js.wrap_callback (fun () ->
           let s = Js.to_string elem##value in
           bml := Bulletml.Parser.parse_pat_string s;
           stop := true
-        ), 10.);
+        ) in
+      let _ = Dom_html.window##setTimeout (cb, 10.) in
       Js._true
     )
 
