@@ -97,8 +97,7 @@ type 'a env =
   }
 
 (**
-   Initial parameters used to build an interpreter (see {!Interp.prepare} and
-   {!Interp.main_loop}).
+   Initial parameters used to build an interpreter (see {!Interp.prepare}).
 *)
 type init_params =
   { p_ship : position (** Where is the ship. The one that is aimed *)
