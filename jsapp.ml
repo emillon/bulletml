@@ -20,15 +20,20 @@ let params =
   ; p_ship = !ship_pos
   }
 
-let mouse_handler e =
-  ship_pos := (float e##clientX, float e##clientY);
+let mouse_handler c e =
+  let get_hard z = Js.Optdef.get z (fun () -> assert false) in
+  let px = get_hard (e##pageX) in
+  let py = get_hard (e##pageY) in
+  let x = px - c##offsetLeft in
+  let y = py - c##offsetTop in
+  ship_pos := (float x, float y);
   Js._true
 
 let create_canvas () =
   let c = Dom_html.createCanvas Dom_html.document in
   c##width <- screen_w;
   c##height <- screen_h;
-  c##onmousemove <- Dom_html.handler mouse_handler;
+  c##onmousemove <- Dom_html.handler (mouse_handler c);
   c
 
 let draw_px ~color ctx data i j =
