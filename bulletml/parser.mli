@@ -32,3 +32,8 @@ val parse_pat_string : string -> Syntax.t
 
 (** Parse file, guess using extension *)
 val parse_auto : string -> Syntax.t
+
+(** Return a string highlighting a part of a file.
+    Arguments are: file, line number, start column, end column.
+*)
+val highlight : in_channel -> int -> int -> int -> string

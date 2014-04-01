@@ -496,6 +496,11 @@ let tests_unit () =
       OUnit.assert_equal (ADeg 0.) (sub_angle (ADeg 45.) (ADeg 45.));
       OUnit.assert_raises ~msg:"replicate (-1)" (Invalid_argument "replicate")
         (fun () -> replicate (-1) true);
+      let fn = "examples/pat/01.pat" in
+      let c = open_in fn in
+      let spec = "    fire ();\n    ^^^^" in
+      OUnit.assert_equal spec (Bulletml.Parser.highlight c 3 4 7);
+      close_in c
     )
   in
   t_angle :: t_polar
