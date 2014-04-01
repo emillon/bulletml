@@ -501,6 +501,36 @@ let tests_unit () =
   in
   t_angle :: t_polar
 
+let tests_syntax () =
+  let open Bulletml.Syntax in
+  let tcs =
+    [("01.pat",
+      BulletML
+        ( NoDir
+        , [ EAction
+              ( "top"
+              , [ Repeat
+                    ( Num 500.
+                    , Direct
+                        [ Fire (Direct (None, None, Direct bulletDefault))
+                        ; Wait (Num 15.)
+                        ])
+                ]
+              )
+          ]
+        )
+     )
+    ]
+  in
+  let make_tc (n, spec) =
+    let f () =
+      let b = Bulletml.Parser.parse_auto ("examples/pat/" ^ n) in
+      OUnit.assert_equal spec b
+    in
+    (n, `Quick, f)
+  in
+  List.map make_tc tcs
+
 let _ =
   Alcotest.run "BulletML"
     [ ("parse", [("Parse examples", `Quick, parse_all)])
@@ -509,4 +539,5 @@ let _ =
     ; ("cspec", tests_compile ())
     ; ("interp", tests_interp ())
     ; ("unit", tests_unit ())
+    ; ("psyn", tests_syntax ())
     ]
