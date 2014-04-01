@@ -2,14 +2,32 @@
 <head>
 <style>
 canvas {
-  float: left;
-  border: solid 1px gray;
-  border-right: 0;
+    float: left;
+    border: solid 1px gray;
+    border-right: 0;
 }
 textarea {
-  height: 302px;
-  width: 200px;
-  float: left;
+    height: 302px;
+    width: 200px;
+    float: left;
+}
+.demo {
+    clear: both;
+    font-family: monospace;
+    white-space: pre;
+    background-color: #ddd;
+    width: 200px;
+    margin: 10px;
+}
+.demo:hover{
+    cursor: pointer;
+}
+.demo:before {
+    content: "Click to load";
+    font-family: sans-serif;
+    text-align: right;
+    font-size: 10px;
+    float:right;
 }
 </style>
 <script>
@@ -29,7 +47,29 @@ function caml_ml_output_char() {}
 </script>
 </head>
 </body>
-<div>
 <div id="shmup"></div>
+<div class="demo">
+action top (
+  repeat 500 (
+    fire ();
+    wait 15;
+  );
+);
+</div>
+<div class="demo">
+action top (
+  repeat 500 (
+    fire (
+        repeat 10 (
+            wait 60;
+            speed 0;
+            wait 60;
+            speed 1;
+        );
+    );
+    wait 10;
+  );
+);
+</div>
 <script src="_obuild/app/app.js"></script>
 </body>

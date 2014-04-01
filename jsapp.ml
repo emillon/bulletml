@@ -85,16 +85,34 @@ let draw_ship (ctx, img) =
 let draw_msg ctx msg =
   ctx##fillText (Js.string msg, 0., 10.)
 
+let reload elem =
+  let s = Js.to_string elem##value in
+  bml := Bulletml.Parser.parse_pat_string s;
+  stop := true
+
 let setup_textarea elem =
   elem##onkeyup <- Dom_html.handler (fun e ->
-      let cb = Js.wrap_callback (fun () ->
-          let s = Js.to_string elem##value in
-          bml := Bulletml.Parser.parse_pat_string s;
-          stop := true
-        ) in
+      let cb = Js.wrap_callback (fun () -> reload elem) in
       let _ = Dom_html.window##setTimeout (cb, 10.) in
       Js._true
     )
+
+let iter_nl f nl =
+  let n = nl##length in
+  for i = 0 to n - 1 do
+    Js.Opt.iter (nl##item(i)) f
+  done
+
+let setup_demos ta =
+  let demos = Dom_html.document##querySelectorAll(Js.string".demo") in
+  iter_nl (fun e ->
+      e##onclick <- Dom_html.handler (fun _ ->
+          let cont = e##innerHTML in
+          ta##innerHTML <- cont;
+          reload ta;
+          Js._true
+        )
+    ) demos
 
 let _ =
   let open Lwt in
@@ -106,6 +124,7 @@ let _ =
       Dom.appendChild e textarea;
     );
   setup_textarea textarea;
+  setup_demos textarea;
   let (global_env, obj0, _top) = prepare (!bml) params () in
   canvas##onclick <- Dom_html.handler (fun e -> stop := true ; Js._true);
   let rec go frame obj () =
