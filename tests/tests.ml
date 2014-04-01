@@ -504,35 +504,39 @@ let tests_unit () =
 let tests_syntax () =
   let open Bulletml.Syntax in
   let tcs =
-    [(`File "01.pat",
-      BulletML
-        ( NoDir
-        , [ EAction
-              ( "top"
-              , [ Repeat
-                    ( Num 500.
-                    , Direct
-                        [ Fire (Direct (None, None, Direct bulletDefault))
-                        ; Wait (Num 15.)
-                        ])
-                ]
-              )
-          ]
-        )
-     )
+    [(`File "01.pat", `OK (
+         BulletML
+           ( NoDir
+           , [ EAction
+                 ( "top"
+                 , [ Repeat
+                       ( Num 500.
+                       , Direct
+                           [ Fire (Direct (None, None, Direct bulletDefault))
+                           ; Wait (Num 15.)
+                           ])
+                   ]
+                 )
+             ]
+           )
+       ))
     ; ( `String "action x ( wait 3; );"
-      , BulletML ( NoDir , [ EAction ("x", [Wait (Num 3.)])])
+      , `OK (BulletML ( NoDir , [ EAction ("x", [Wait (Num 3.)])]))
       )
+    ; ( `String "action x ( wait );"
+      , `Err)
     ]
   in
-  let make_tc (w, spec) =
+  let make_tc (w, res) =
     let f () =
-      let b =
+      let b () =
         match w with
         | `File fn -> Bulletml.Parser.parse_auto ("examples/pat/" ^ fn)
         | `String s -> Bulletml.Parser.parse_pat_string s
       in
-      OUnit.assert_equal spec b
+      match res with
+      | `OK spec -> OUnit.assert_equal spec (b ())
+      | `Err -> OUnit.assert_raises (Failure "parse error") b
     in
     let n = match w with
       | `File fn -> fn
