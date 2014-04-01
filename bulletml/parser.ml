@@ -223,12 +223,72 @@ let parse_xml = function
   | Xml.Element ("bulletml", attrs, ns) ->
     let elems = parse_elems ns in
     let dir = begin match attrs with
-      | [] -> NoDir
-      | [("TYPE", "none")] -> NoDir
-      | [("XMLNS", _);("TYPE", "none")] -> NoDir
-      | [("XMLNS", _);("TYPE", "vertical")] -> Vertical
-      | [("XMLNS", _);("TYPE", "horizontal")] -> Horizontal
+      | [] -> None
+      | [("TYPE", "none")] -> None
+      | [("XMLNS", _);("TYPE", "none")] -> None
+      | [("XMLNS", _);("TYPE", "vertical")] -> Some Vertical
+      | [("XMLNS", _);("TYPE", "horizontal")] -> Some Horizontal
       | x -> failwith ("parse_xml: attrs = " ^ print_attrs attrs ^ ")")
     end in
     BulletML (dir, elems)
   | _ -> assert false
+
+let highlight chan linenum col_start col_end =
+  seek_in chan 0;
+  for i = 1 to linenum - 1 do
+    ignore (input_line chan)
+  done;
+  let l = input_line chan in
+  let spc = String.make col_start ' ' in
+  let marker = String.make (col_end - col_start + 1) '^' in
+  Printf.sprintf "%s%c%s%s" l '\n' spc marker
+
+let parse_pat_lexbuf ?chan lexbuf =
+  let open Lexing in
+  try
+    Parsepat.prog Lexpat.token lexbuf
+  with Parsing.Parse_error ->
+    let pos = lexeme_start_p lexbuf in
+    let pos_end = lexeme_end_p lexbuf in
+    let linenum = pos.pos_lnum in
+    let col_start = pos.pos_cnum-pos.pos_bol in
+    let col_end = pos_end.pos_cnum-pos_end.pos_bol in
+    let msg = Printf.sprintf "Parse error in %s %d:%d-%d:"
+        pos.Lexing.pos_fname linenum col_start col_end
+    in
+    print_endline msg;
+    begin match chan with
+      | Some c -> print_endline (highlight c linenum col_start col_end);
+      | _ -> () end;
+    failwith "parse error"
+
+let set_lexbuf_name lexbuf name =
+  let open Lexing in
+  lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = name }
+
+let parse_pat ?(fname = "<no name>") chan =
+  let lexbuf = Lexing.from_channel chan in
+  set_lexbuf_name lexbuf fname;
+  parse_pat_lexbuf ~chan lexbuf
+
+let parse_pat_string str =
+  let lexbuf = Lexing.from_string str in
+  set_lexbuf_name lexbuf "<string>";
+  parse_pat_lexbuf lexbuf
+
+let extension fname =
+  let dot = String.rindex fname '.' in
+  let len = String.length fname in
+  String.sub fname (dot + 1) (len - dot - 1)
+
+let with_open_in fname f =
+  let c = open_in fname in
+  let r = f c in
+  close_in c;
+  r
+
+let parse_auto fname =
+  match extension fname with
+  | "xml"   -> parse_xml (Xml.parse_file fname)
+  | "pat" -> with_open_in fname (parse_pat ~fname)
+  | _     -> invalid_arg "unknown extension"

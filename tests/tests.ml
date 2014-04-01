@@ -27,7 +27,7 @@ let testspecs =
           ])
        ]) (*}}}*)
   ; ("[Dodonpachi]_hibachi.xml"), `Bulletml ( (* {{{ *)
-      BulletML (NoDir,
+      BulletML (None,
                 [ EAction ("allWay",
                            [ Fire
                                ( Direct
@@ -85,7 +85,7 @@ let testspecs =
                 ]))
   (* }}} *)
   ; ("[MDA]_circular_sun.xml", `Bulletml ( (* {{{ *)
-      BulletML (Vertical,
+      BulletML (Some Vertical,
                 [ EAction ("top",
                            [ ChangeSpeed (SpdAbs (Num 0.75), Num 1.)
                            ; ChangeDirection (DirAbs (Num 90.), Num 1.)
@@ -119,7 +119,7 @@ let testspecs =
     )
   (* }}} *)
   ; ("[1943]_rolling_fire.xml", `Bulletml ( (* {{{ *)
-      BulletML (Vertical,
+      BulletML (Some Vertical,
                 [ EAction ("top",
                            [ Fire (Direct (None, None, Indirect ("roll", [])))
                            ])
@@ -138,7 +138,7 @@ let testspecs =
                )))
   (* }}} *)
   ; ("[Dodonpachi]_kitiku_1.xml", `Bulletml ( (* {{{ *)
-      BulletML (NoDir,
+      BulletML (None,
                 [ EBullet ("fast",
                            Bullet (None, Some (SpdAbs (Num 10.)), [ Direct (
                                [ Wait (Num 6.)
@@ -200,13 +200,8 @@ let testspecs =
   (* }}} *)
   ]
 
-let eps = 0.000001
-
-let cfloat x y =
-  abs_float (x -. y) < eps
-
 let clist lx ly =
-  List.for_all2 cfloat lx ly
+  List.for_all2 OUnit.cmp_float lx ly
 
 let tests () =
   let mk_test (n, s) =
@@ -235,15 +230,14 @@ let tests () =
   List.map mk_test testspecs
 
 let parse_example n =
-  let x = Xml.parse_file ("examples/" ^ n) in
-  Bulletml.Parser.parse_xml x
+  Bulletml.Parser.parse_auto ("examples/" ^ n)
 
 let for_all_examples f () =
   let files_a = (Sys.readdir "examples") in
   Array.sort String.compare files_a;
   let files =
     List.filter
-      (fun x -> not (List.mem x ["fragments"; "mini"]))
+      (fun x -> "examples/" ^ x |> Sys.is_directory |> not)
       (Array.to_list files_a)
   in
   List.iter (fun n ->
@@ -316,7 +310,7 @@ let tests_compile () =
   let mk_test_direct (n, a, spec) =
     let f () =
       let got =
-        compile (BulletML (Vertical, [EAction ("top", a)]))
+        compile (BulletML (Some Vertical, [EAction ("top", a)]))
       in
       OUnit.assert_equal ~printer got spec;
     in
@@ -470,15 +464,14 @@ let tests_unit () =
           Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
         in
         let pxy = Bulletml.Printer.print_position in
-        let cxy a b =
-          let (dx, dy) = a -: b in
-          hypot dx dy < eps
+        let cxy (xa, ya) (xb, yb) =
+          OUnit.cmp_float xa xb && OUnit.cmp_float ya yb
         in
         let crt (ra, ta) (rb, tb) =
           (* A bit hackish but we can't rely on from_polar *)
-          cfloat ra rb
+          OUnit.cmp_float ra rb
           &&
-          abs_float (in_rads (sub_angle ta tb)) < eps
+          OUnit.cmp_float (in_rads (sub_angle ta tb)) 0.
         in
         ("polar " ^ pxy xy, `Quick, fun () ->
             OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
@@ -497,9 +490,87 @@ let tests_unit () =
       OUnit.assert_equal (ADeg 0.) (sub_angle (ADeg 45.) (ADeg 45.));
       OUnit.assert_raises ~msg:"replicate (-1)" (Invalid_argument "replicate")
         (fun () -> replicate (-1) true);
+      let fn = "examples/pat/01.pat" in
+      let c = open_in fn in
+      let spec = "    fire ();\n    ^^^^" in
+      OUnit.assert_equal spec (Bulletml.Parser.highlight c 3 4 7);
+      close_in c
     )
   in
   t_angle :: t_polar
+
+let shoot script =
+  let open Bulletml.Syntax in
+  Fire (Direct (None, None, Direct (Bullet (None, None, [Direct script]))))
+
+let tests_syntax () =
+  let open Bulletml.Syntax in
+  let tcs =
+    [(`File "01.pat", `OK (
+         BulletML
+           ( None
+           , [ EAction
+                 ( "top"
+                 , [ Repeat
+                       ( Num 500.
+                       , Direct
+                           [ shoot []
+                           ; Wait (Num 15.)
+                           ])
+                   ]
+                 )
+             ]
+           )
+       ))
+    ; (`File "02.pat", `OK (
+        BulletML
+          ( None
+          , [ EAction
+                ( "top"
+                , [ Repeat
+                      ( Num 500.
+                      , Direct
+                          [ shoot
+                              [ Repeat
+                                  ( Num 10.
+                                  , Direct
+                                      [ Wait (Num 60.)
+                                      ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                                      ; Wait (Num 60.)
+                                      ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
+                                      ])]
+                          ; Wait (Num 15.)
+                          ])
+                  ]
+                )
+            ]
+          )
+      ))
+    ; ( `String "action x ( wait 3; );"
+      , `OK (BulletML ( None , [ EAction ("x", [Wait (Num 3.)])]))
+      )
+    ; ( `String "action x ( wait );"
+      , `Err)
+    ]
+  in
+  let make_tc (w, res) =
+    let f () =
+      let b () =
+        match w with
+        | `File fn -> Bulletml.Parser.parse_auto ("examples/pat/" ^ fn)
+        | `String s -> Bulletml.Parser.parse_pat_string s
+      in
+      match res with
+      | `OK spec -> OUnit.assert_equal spec (b ())
+      | `Err -> OUnit.assert_raises (Failure "parse error") b
+    in
+    let n = match w with
+      | `File fn -> fn
+      | `String s -> s
+    in
+    (n, `Quick, f)
+  in
+  List.map make_tc tcs
 
 let _ =
   Alcotest.run "BulletML"
@@ -509,4 +580,5 @@ let _ =
     ; ("cspec", tests_compile ())
     ; ("interp", tests_interp ())
     ; ("unit", tests_unit ())
+    ; ("psyn", tests_syntax ())
     ]

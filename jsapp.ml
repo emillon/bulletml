@@ -2,8 +2,10 @@ open Bulletml.Syntax
 open Bulletml.Interp
 open Bulletml.Interp_types
 
-let bml = (*{{{*)
-  BulletML (Horizontal, [EAction ("top", [Repeat (Num 20.,Direct ([Fire (Direct ((Some (DirAim (((Num 0. -@ Num 60.) +@ (Rand *@ Num 120.)))), None, Indirect ("hmgLsr", [])))); Repeat (Num 8.,Direct ([Wait (Num 1.); Fire (Direct ((Some (DirSeq (Num 0.)), None, Indirect ("hmgLsr", []))))])); Wait (Num 10.)])); Wait (Num 60.)]); EBullet ("hmgLsr",Bullet (None,Some (SpdAbs (Num 2.)),[Direct ([ChangeSpeed (SpdAbs (Num 0.3),Num 30.); Wait (Num 100.); ChangeSpeed (SpdAbs (Num 5.),Num 100.)]); Direct ([Repeat (Num 12.,Direct ([ChangeDirection (DirAim (Num 0.),(Num 45. -@ (Rank *@ Num 30.))); Wait (Num 5.)]))])]))])
+let stop = ref false
+
+let bml = ref ((*{{{*)
+    BulletML (Some Horizontal, [EAction ("top", [Repeat (Num 20.,Direct ([Fire (Direct ((Some (DirAim (((Num 0. -@ Num 60.) +@ (Rand *@ Num 120.)))), None, Indirect ("hmgLsr", [])))); Repeat (Num 8.,Direct ([Wait (Num 1.); Fire (Direct ((Some (DirSeq (Num 0.)), None, Indirect ("hmgLsr", []))))])); Wait (Num 10.)])); Wait (Num 60.)]); EBullet ("hmgLsr",Bullet (None,Some (SpdAbs (Num 2.)),[Direct ([ChangeSpeed (SpdAbs (Num 0.3),Num 30.); Wait (Num 100.); ChangeSpeed (SpdAbs (Num 5.),Num 100.)]); Direct ([Repeat (Num 12.,Direct ([ChangeDirection (DirAim (Num 0.),(Num 45. -@ (Rank *@ Num 30.))); Wait (Num 5.)]))])]))]))
 (*}}}*)
 
 let screen_w = 400
@@ -18,15 +20,20 @@ let params =
   ; p_ship = !ship_pos
   }
 
-let mouse_handler e =
-  ship_pos := (float e##clientX, float e##clientY);
+let mouse_handler c e =
+  let get_hard z = Js.Optdef.get z (fun () -> assert false) in
+  let px = get_hard (e##pageX) in
+  let py = get_hard (e##pageY) in
+  let x = px - c##offsetLeft in
+  let y = py - c##offsetTop in
+  ship_pos := (float x, float y);
   Js._true
 
 let create_canvas () =
   let c = Dom_html.createCanvas Dom_html.document in
   c##width <- screen_w;
   c##height <- screen_h;
-  c##onmousemove <- Dom_html.handler mouse_handler;
+  c##onmousemove <- Dom_html.handler (mouse_handler c);
   c
 
 let draw_px ~color ctx data i j =
@@ -83,12 +90,47 @@ let draw_ship (ctx, img) =
 let draw_msg ctx msg =
   ctx##fillText (Js.string msg, 0., 10.)
 
+let reload elem =
+  let s = Js.to_string elem##value in
+  bml := Bulletml.Parser.parse_pat_string s;
+  stop := true
+
+let setup_textarea elem =
+  elem##onkeyup <- Dom_html.handler (fun e ->
+      let cb = Js.wrap_callback (fun () -> reload elem) in
+      let _ = Dom_html.window##setTimeout (cb, 10.) in
+      Js._true
+    )
+
+let iter_nl f nl =
+  let n = nl##length in
+  for i = 0 to n - 1 do
+    Js.Opt.iter (nl##item(i)) f
+  done
+
+let setup_demos ta =
+  let demos = Dom_html.document##querySelectorAll(Js.string".demo") in
+  iter_nl (fun e ->
+      e##onclick <- Dom_html.handler (fun _ ->
+          let cont = e##innerHTML in
+          ta##innerHTML <- cont;
+          reload ta;
+          Js._true
+        )
+    ) demos
+
 let _ =
   let open Lwt in
   let canvas = create_canvas () in
-  Dom.appendChild Dom_html.document##body canvas;
-  let (global_env, obj0, _top) = prepare bml params () in
-  let stop = ref false in
+  let doc = Dom_html.document in
+  let textarea = Dom_html.createTextarea doc in
+  Js.Opt.iter (doc##querySelector(Js.string"#shmup")) (fun e ->
+      Dom.appendChild e canvas;
+      Dom.appendChild e textarea;
+    );
+  setup_textarea textarea;
+  setup_demos textarea;
+  let (global_env, obj0, _top) = prepare (!bml) params () in
   canvas##onclick <- Dom_html.handler (fun e -> stop := true ; Js._true);
   let rec go frame obj () =
     let env =
@@ -106,7 +148,8 @@ let _ =
     draw_msg ctx (string_of_int perf ^ " bullets");
     let k = if !stop then begin
         stop := false;
-        go 1 obj0
+        let (_, o, _)  = prepare (!bml) params () in
+        go 1 o
       end else
         go (frame + 1) (animate env obj)
     in

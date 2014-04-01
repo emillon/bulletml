@@ -96,8 +96,7 @@ let _ =
     | Some f -> f
     | None -> (print_endline usage;exit 1)
   in
-  let x = Xml.parse_file fname in
-  let bml = Bulletml.Parser.parse_xml x in
+  let bml = Bulletml.Parser.parse_auto fname in
   if !Options.parse_only then begin
     print_endline (Bulletml.Printer.print_bulletml bml);
     exit 0

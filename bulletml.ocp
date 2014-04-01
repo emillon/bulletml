@@ -4,6 +4,8 @@ begin library "bulletml"
   dirname = ["bulletml"]
   files = [
     pack Bulletml [
+      "parsepat.mly"
+      "lexpat.mll"
       "syntax.ml" "interp_types.ml" "printer.ml" "parser.ml" "interp.ml"
     ]
   ]
@@ -59,6 +61,8 @@ begin library "bulletml_cov"
   syntax = "bisect_pp"
   files = [
     pack Bulletml [
+      "parsepat.mly" (syntax="camlp4o")
+      "lexpat.mll" (syntax="camlp4o")
       "syntax.ml" "interp_types.ml" "printer.ml" "parser.ml" "interp.ml"
     ]
   ]

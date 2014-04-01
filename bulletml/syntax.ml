@@ -48,8 +48,7 @@ and bullet = Bullet of direction option * speed option * action ind list
 
 and fire = direction option * speed option * bullet ind
 
-type hv =
-  | NoDir
+type orientation =
   | Horizontal
   | Vertical
 
@@ -58,7 +57,7 @@ type elem =
   | EAction of string * action
   | EFire of string * fire
 
-type t = BulletML of hv * elem list
+type t = BulletML of orientation option * elem list
 
 let ( +@ ) = fun x y -> Op (Add, x, y)
 let ( -@ ) = fun x y -> Op (Sub, x, y)

@@ -4,6 +4,10 @@ LIBDIR:=bulletml
 SRC:=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.ml)
 MLI=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.mli)
 
+# remove from SRC files that are already there as a .mli
+ML_OF_MLI=$(patsubst %.mli,%.ml,$(MLI))
+SRC:=$(filter-out $(ML_OF_MLI),$(SRC))
+
 build:
 	ocp-build build bulletml bulletml_tests bulletml_run app
 

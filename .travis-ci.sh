@@ -44,7 +44,7 @@ make all
 sudo make install
 cd ..
 
-ocp-build -init
+ocp-build -init bulletml
 make check
 make js
 make doc
