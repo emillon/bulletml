@@ -27,7 +27,7 @@ let testspecs =
           ])
        ]) (*}}}*)
   ; ("[Dodonpachi]_hibachi.xml"), `Bulletml ( (* {{{ *)
-      BulletML (NoDir,
+      BulletML (None,
                 [ EAction ("allWay",
                            [ Fire
                                ( Direct
@@ -85,7 +85,7 @@ let testspecs =
                 ]))
   (* }}} *)
   ; ("[MDA]_circular_sun.xml", `Bulletml ( (* {{{ *)
-      BulletML (Vertical,
+      BulletML (Some Vertical,
                 [ EAction ("top",
                            [ ChangeSpeed (SpdAbs (Num 0.75), Num 1.)
                            ; ChangeDirection (DirAbs (Num 90.), Num 1.)
@@ -119,7 +119,7 @@ let testspecs =
     )
   (* }}} *)
   ; ("[1943]_rolling_fire.xml", `Bulletml ( (* {{{ *)
-      BulletML (Vertical,
+      BulletML (Some Vertical,
                 [ EAction ("top",
                            [ Fire (Direct (None, None, Indirect ("roll", [])))
                            ])
@@ -138,7 +138,7 @@ let testspecs =
                )))
   (* }}} *)
   ; ("[Dodonpachi]_kitiku_1.xml", `Bulletml ( (* {{{ *)
-      BulletML (NoDir,
+      BulletML (None,
                 [ EBullet ("fast",
                            Bullet (None, Some (SpdAbs (Num 10.)), [ Direct (
                                [ Wait (Num 6.)
@@ -310,7 +310,7 @@ let tests_compile () =
   let mk_test_direct (n, a, spec) =
     let f () =
       let got =
-        compile (BulletML (Vertical, [EAction ("top", a)]))
+        compile (BulletML (Some Vertical, [EAction ("top", a)]))
       in
       OUnit.assert_equal ~printer got spec;
     in
@@ -508,7 +508,7 @@ let tests_syntax () =
   let tcs =
     [(`File "01.pat", `OK (
          BulletML
-           ( NoDir
+           ( None
            , [ EAction
                  ( "top"
                  , [ Repeat
@@ -524,7 +524,7 @@ let tests_syntax () =
        ))
     ; (`File "02.pat", `OK (
         BulletML
-          ( NoDir
+          ( None
           , [ EAction
                 ( "top"
                 , [ Repeat
@@ -547,7 +547,7 @@ let tests_syntax () =
           )
       ))
     ; ( `String "action x ( wait 3; );"
-      , `OK (BulletML ( NoDir , [ EAction ("x", [Wait (Num 3.)])]))
+      , `OK (BulletML ( None , [ EAction ("x", [Wait (Num 3.)])]))
       )
     ; ( `String "action x ( wait );"
       , `Err)

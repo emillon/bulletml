@@ -223,11 +223,11 @@ let parse_xml = function
   | Xml.Element ("bulletml", attrs, ns) ->
     let elems = parse_elems ns in
     let dir = begin match attrs with
-      | [] -> NoDir
-      | [("TYPE", "none")] -> NoDir
-      | [("XMLNS", _);("TYPE", "none")] -> NoDir
-      | [("XMLNS", _);("TYPE", "vertical")] -> Vertical
-      | [("XMLNS", _);("TYPE", "horizontal")] -> Horizontal
+      | [] -> None
+      | [("TYPE", "none")] -> None
+      | [("XMLNS", _);("TYPE", "none")] -> None
+      | [("XMLNS", _);("TYPE", "vertical")] -> Some Vertical
+      | [("XMLNS", _);("TYPE", "horizontal")] -> Some Horizontal
       | x -> failwith ("parse_xml: attrs = " ^ print_attrs attrs ^ ")")
     end in
     BulletML (dir, elems)

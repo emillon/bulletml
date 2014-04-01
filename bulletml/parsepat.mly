@@ -16,7 +16,7 @@ open Syntax
 %type<Syntax.t> prog
 %%
 
-prog: elem_list EOF { BulletML (NoDir, $1) }
+prog: elem_list EOF { BulletML (None, $1) }
 
 elem_list:
 | { [] }

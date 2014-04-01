@@ -10,8 +10,7 @@ let print_option prn = function
   | Some x -> "Some ("^prn x^")"
   | None -> "None"
 
-let print_hv = function
-  | NoDir      -> "NoDir"
+let print_orientation = function
   | Horizontal -> "Horizontal"
   | Vertical   -> "Vertical"
 
@@ -83,8 +82,8 @@ let print_elem = function
   | EAction (l, a) -> print_variant "EAction" ["\"" ^ l ^ "\"";print_action a]
   | EFire (l, f) -> print_variant "EFire" ["\"" ^ l ^ "\"";print_fire f]
 
-let print_bulletml (BulletML (hv, elems)) =
-  "BulletML (" ^ print_hv hv ^ ", " ^ print_list print_elem elems ^ ")"
+let print_bulletml (BulletML (oro, elems)) =
+  "BulletML (" ^ print_option print_orientation oro ^ ", " ^ print_list print_elem elems ^ ")"
 
 let print_linear_map prn m =
   Printf.sprintf
