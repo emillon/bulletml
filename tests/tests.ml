@@ -235,8 +235,7 @@ let tests () =
   List.map mk_test testspecs
 
 let parse_example n =
-  let x = Xml.parse_file ("examples/" ^ n) in
-  Bulletml.Parser.parse_xml x
+  Bulletml.Parser.parse_auto ("examples/" ^ n)
 
 let for_all_examples f () =
   let files_a = (Sys.readdir "examples") in
