@@ -1,0 +1,13 @@
+function pcre_compile_stub() {}
+function pcre_config_link_size_stub() {}
+function pcre_config_match_limit_recursion_stub() {}
+function pcre_config_match_limit_stub() {}
+function pcre_config_newline_stub() {}
+function pcre_config_stackrecurse_stub() {}
+function pcre_config_utf8_stub() {}
+function pcre_ocaml_init() {}
+function pcre_set_imp_match_limit_recursion_stub() {}
+function pcre_set_imp_match_limit_stub() {}
+function pcre_study_stub() {}
+function pcre_version_stub() {}
+function caml_ml_output_char() {}

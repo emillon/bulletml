@@ -1,0 +1,31 @@
+canvas {
+    float: left;
+    border: solid 1px gray;
+    border-right: 0;
+}
+textarea {
+    height: 296px;
+    width: 200px;
+    float: left;
+}
+.demo {
+    font-family: monospace;
+    white-space: pre;
+    background-color: #ddd;
+    width: 200px;
+    margin: 10px;
+}
+.demo:hover{
+    cursor: pointer;
+}
+.demo:before {
+    content: "Click to load";
+    font-family: sans-serif;
+    text-align: right;
+    font-size: 10px;
+    float:right;
+}
+
+.demo_container {
+    height: 310px;
+}

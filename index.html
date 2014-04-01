@@ -8,8 +8,10 @@
 
   <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
   <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <link rel="stylesheet" href="stylesheets/demo.css"/>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
   <script type="text/javascript" src="javascripts/script.js"></script>
+  <script type="text/javascript" src="javascripts/stubs.js"></script>
 
   <title>Bulletml</title>
   <meta name="description" content="OCaml bindings for bulletml">
@@ -53,7 +55,33 @@ animated gifs:
 <a href="http://i.imgur.com/X9ogXAX.gif">3</a>.
 The pattern tracks your mouse. Click to reload the pattern.
 
-<iframe src="demo.html" width="450" height="350"></iframe>
+<div class="demo_container">
+<div id="shmup"></div>
+</div>
+
+<div class="demo">
+action top (
+  repeat 500 (
+    fire ();
+    wait 15;
+  );
+);
+</div>
+<div class="demo">
+action top (
+  repeat 500 (
+    fire (
+        repeat 10 (
+            wait 60;
+            speed 0;
+            wait 60;
+            speed 1;
+        );
+    );
+    wait 10;
+  );
+);
+</div>
 
 <p>For more information, please see
 <a href="http://github.com/emillon/bulletml">this repository</a>,
@@ -87,5 +115,6 @@ or the generated <a href="docs">API documentation</a>.</p>
   </div>
 
   
+  <script type="text/javascript" src="javascripts/demo.js"></script>
 </body>
 </html>
