@@ -12,6 +12,7 @@ rule token = parse
 | "fire" { FIRE }
 | "repeat" { REPEAT }
 | "wait" { WAIT }
+| "speed" { SPEED }
 | ['0'-'9']+ as i { NUM (float_of_string i) }
 | ['a'-'z']+ as s { IDENT s }
 | eof { EOF }

@@ -499,6 +499,10 @@ let tests_unit () =
   in
   t_angle :: t_polar
 
+let shoot script =
+  let open Bulletml.Syntax in
+  Fire (Direct (None, None, Direct (Bullet (None, None, [Direct script]))))
+
 let tests_syntax () =
   let open Bulletml.Syntax in
   let tcs =
@@ -510,7 +514,7 @@ let tests_syntax () =
                  , [ Repeat
                        ( Num 500.
                        , Direct
-                           [ Fire (Direct (None, None, Direct bulletDefault))
+                           [ shoot []
                            ; Wait (Num 15.)
                            ])
                    ]
@@ -518,6 +522,30 @@ let tests_syntax () =
              ]
            )
        ))
+    ; (`File "02.pat", `OK (
+        BulletML
+          ( NoDir
+          , [ EAction
+                ( "top"
+                , [ Repeat
+                      ( Num 500.
+                      , Direct
+                          [ shoot
+                              [ Repeat
+                                  ( Num 10.
+                                  , Direct
+                                      [ Wait (Num 60.)
+                                      ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                                      ; Wait (Num 60.)
+                                      ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
+                                      ])]
+                          ; Wait (Num 15.)
+                          ])
+                  ]
+                )
+            ]
+          )
+      ))
     ; ( `String "action x ( wait 3; );"
       , `OK (BulletML ( NoDir , [ EAction ("x", [Wait (Num 3.)])]))
       )

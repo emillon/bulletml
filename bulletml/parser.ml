@@ -269,7 +269,7 @@ let set_lexbuf_name lexbuf name =
 let parse_pat ?(fname = "<no name>") chan =
   let lexbuf = Lexing.from_channel chan in
   set_lexbuf_name lexbuf fname;
-  parse_pat_lexbuf lexbuf
+  parse_pat_lexbuf ~chan lexbuf
 
 let parse_pat_string str =
   let lexbuf = Lexing.from_string str in

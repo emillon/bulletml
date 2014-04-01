@@ -10,6 +10,7 @@ open Syntax
 %token SEMICOLON
 %token FIRE
 %token WAIT
+%token SPEED
 
 %start prog
 %type<Syntax.t> prog
@@ -30,8 +31,9 @@ action:
 
 subaction:
 | REPEAT expr LPAREN action RPAREN { Repeat ($2, Direct $4) }
-| FIRE LPAREN RPAREN { Fire (Direct (None, None, Direct (Bullet (None, None, [])))) }
+| FIRE LPAREN action RPAREN { Fire (Direct (None, None, Direct (Bullet (None, None, [Direct $3])))) }
 | WAIT expr { Wait $2 }
+| SPEED expr { ChangeSpeed (SpdAbs $2, Num 1.) }
 
 expr:
 | NUM { Num $1 }
