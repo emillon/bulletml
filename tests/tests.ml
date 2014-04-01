@@ -504,7 +504,7 @@ let tests_unit () =
 let tests_syntax () =
   let open Bulletml.Syntax in
   let tcs =
-    [("01.pat",
+    [(`File "01.pat",
       BulletML
         ( NoDir
         , [ EAction
@@ -520,12 +520,23 @@ let tests_syntax () =
           ]
         )
      )
+    ; ( `String "action x ( wait 3; );"
+      , BulletML ( NoDir , [ EAction ("x", [Wait (Num 3.)])])
+      )
     ]
   in
-  let make_tc (n, spec) =
+  let make_tc (w, spec) =
     let f () =
-      let b = Bulletml.Parser.parse_auto ("examples/pat/" ^ n) in
+      let b =
+        match w with
+        | `File fn -> Bulletml.Parser.parse_auto ("examples/pat/" ^ fn)
+        | `String s -> Bulletml.Parser.parse_pat_string s
+      in
       OUnit.assert_equal spec b
+    in
+    let n = match w with
+      | `File fn -> fn
+      | `String s -> s
     in
     (n, `Quick, f)
   in
