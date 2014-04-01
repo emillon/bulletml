@@ -200,13 +200,8 @@ let testspecs =
   (* }}} *)
   ]
 
-let eps = 0.000001
-
-let cfloat x y =
-  abs_float (x -. y) < eps
-
 let clist lx ly =
-  List.for_all2 cfloat lx ly
+  List.for_all2 OUnit.cmp_float lx ly
 
 let tests () =
   let mk_test (n, s) =
@@ -469,15 +464,14 @@ let tests_unit () =
           Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
         in
         let pxy = Bulletml.Printer.print_position in
-        let cxy a b =
-          let (dx, dy) = a -: b in
-          hypot dx dy < eps
+        let cxy (xa, ya) (xb, yb) =
+          OUnit.cmp_float xa xb && OUnit.cmp_float ya yb
         in
         let crt (ra, ta) (rb, tb) =
           (* A bit hackish but we can't rely on from_polar *)
-          cfloat ra rb
+          OUnit.cmp_float ra rb
           &&
-          abs_float (in_rads (sub_angle ta tb)) < eps
+          OUnit.cmp_float (in_rads (sub_angle ta tb)) 0.
         in
         ("polar " ^ pxy xy, `Quick, fun () ->
             OUnit.assert_equal ~cmp:crt ~printer:prt rt (polar xy);
