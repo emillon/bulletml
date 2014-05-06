@@ -30,7 +30,7 @@ js: build
 	ocamlfind ocamlc *.mli -package bulletml,js_of_ocaml.syntax -syntax camlp4o -c -i  $< > $@ || (rm $@; exit 1)
 
 
-install: bulletml uninstall
+install: lib uninstall
 	ocp-build install bulletml
 	cp _obuild/bulletml/*.cmi `ocamlfind query bulletml`
 
