@@ -8,6 +8,11 @@ MLI=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -
 ML_OF_MLI=$(patsubst %.mli,%.ml,$(MLI))
 SRC:=$(filter-out $(ML_OF_MLI),$(SRC))
 
+lib:_obuild/bulletml
+
+_obuild/bulletml:
+	ocp-build bulletml
+
 build:
 	ocp-build build bulletml bulletml_tests bulletml_run app
 
@@ -25,9 +30,10 @@ js: build
 	ocamlfind ocamlc *.mli -package bulletml,js_of_ocaml.syntax -syntax camlp4o -c -i  $< > $@ || (rm $@; exit 1)
 
 
-install: build uninstall
+install: bulletml uninstall
 	ocp-build install bulletml
 	cp _obuild/bulletml/*.cmi `ocamlfind query bulletml`
+
 
 uninstall:
 	ocp-build uninstall bulletml
