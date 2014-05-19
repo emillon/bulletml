@@ -32,7 +32,7 @@ ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml
 
 echo "0092a42114e7937ad06d1f19b6345c41a84196ad  bisect-coveralls.tar.gz" > bisect.SHA1SUMS
 wget \
-    http://bisect.sagotch.fr/ \
+    http://sagotch.fr/download/bisect-coveralls.tar.gz \
     https://raw.github.com/sagotch/ocveralls/9069356076e886ad0913fbc8550330f45d3cc664/ocveralls.sh
 sha1sum -c bisect.SHA1SUMS
 tar -xvf bisect-coveralls.tar.gz
