@@ -45,6 +45,9 @@ type color = Blue | Purple
 let hooks =
   [ "changecolor", fun _ -> Purple ]
 
+let int_pos (x, y) =
+  (int_of_float x, int_of_float y)
+
 let draw_bullet window (bulletb, bulletp) b =
   let (px, py) = int_pos b.pos in
   let src = match b.state with

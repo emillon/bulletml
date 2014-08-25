@@ -37,7 +37,9 @@ case, this hook sets the state of bullets to `Purple`:
 And the drawing code uses the state to determine the correct sprite.
 
     let draw_bullet window (bulleto, bulletp) b =
-      let (px, py) = int_pos b.pos in
+      let (pxf, pxy) = b.pos in
+      let px = int_of_float pxf in
+      let py = int_of_float pyf in
       let src = match b.state with
       | Blue -> bulleto
       | Purple -> bulletp

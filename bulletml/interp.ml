@@ -50,9 +50,6 @@ let polar (x, y) =
 let from_polar (r, t) =
   unit_vec t *% r
 
-let int_pos (x, y) =
-  (int_of_float x, int_of_float y)
-
 let eval_op = function
   | Add -> ( +. )
   | Mul -> ( *. )

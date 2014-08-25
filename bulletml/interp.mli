@@ -40,11 +40,6 @@ val replicate : int -> 'a -> 'a list
 val build_prog : 'a env -> opcode list -> subaction -> opcode list
 
 (**
-   Convert a (float) {!Interp_types.position} to a pair of ints.
-*)
-val int_pos : position -> (int * int)
-
-(**
    Given a program and a position, build an {!Interp_types.obj} with default
    values.
 *)
