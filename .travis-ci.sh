@@ -26,7 +26,7 @@ eval `opam config env`
 opam install ocp-build
 opam install ${OPAM_DEPENDS}
 
-opam install ocp-indent
+opam install ocp-indent.1.4.1
 ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml
 [ -z "$(git diff)" ]
 
