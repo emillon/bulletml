@@ -94,6 +94,7 @@ type 'a env =
   ; bullets : bullet table (** Definitions of {!Syntax.bullet}s *)
   ; fires : fire table (** Definitions of {!Syntax.fire}s *)
   ; hooks : 'a hook table (** Hooks for bullets *)
+  ; rank : float (** Difficulty (0=easy, 1=hard) *)
   }
 
 (**
@@ -104,4 +105,5 @@ type init_params =
   ; p_enemy : position (** Where is the enemy. The one that shoots *)
   ; p_screen_w : int (** Screen width in pixels *)
   ; p_screen_h : int (** Screen height in pixels *)
+  ; p_rank : float (** Difficulty (0=easy, 1=hard) *)
   }

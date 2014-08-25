@@ -57,12 +57,12 @@ let eval_op = function
   | Div -> ( /. )
   | Mod -> fun x y -> float (int_of_float x mod int_of_float y)
 
-let rec eval = function
+let rec eval st = function
   | Num f -> f
-  | Op (op, x, y) -> eval_op op (eval x) (eval y)
+  | Op (op, x, y) -> eval_op op (eval st x) (eval st y)
   | Rand -> Random.float 1.0
   | Param _ -> failwith "Param"
-  | Rank -> 0.5
+  | Rank -> st.rank
 
 let rec subst_expr p = function
   | (Num _ | Rand | Rank) as e -> e
@@ -125,19 +125,19 @@ let number_params l =
       (!i, p)
     ) l
 
-let ind_call env sub = function
+let ind_call st env sub = function
   | Direct x -> (x, None)
   | Indirect (n, params) ->
     let a = List.assoc n env in
     let params_ev = List.map (
-        fun e -> Num (eval e)
+        fun e -> Num (eval st e)
       ) params in
     let p = number_params params_ev in
     (sub p a, Some n)
 
-let eval_ai st = ind_call st.actions subst_action
-let eval_bi st = ind_call st.bullets subst_bullet
-let eval_fi st = ind_call st.fires subst_fire
+let eval_ai st = ind_call st st.actions subst_action
+let eval_bi st = ind_call st st.bullets subst_bullet
+let eval_fi st = ind_call st st.fires subst_fire
 
 let interp_map st m =
   let frames_done = float (st.frame - m.frame_start) in
@@ -212,15 +212,15 @@ let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
 
 let eval_dir st self = function
-  | DirAbs e -> ADeg (eval e)
-  | DirAim e -> add_angle (ADeg (eval e)) (dir_to_ship st self)
-  | DirSeq e -> add_angle (ADeg (eval e)) (dir_to_prev self)
-  | DirRel e -> add_angle (ADeg (eval e)) self.dir
+  | DirAbs e -> ADeg (eval st e)
+  | DirAim e -> add_angle (ADeg (eval st e)) (dir_to_ship st self)
+  | DirSeq e -> add_angle (ADeg (eval st e)) (dir_to_prev self)
+  | DirRel e -> add_angle (ADeg (eval st e)) self.dir
 
-let eval_speed self = function
-  | SpdAbs e -> eval e
-  | SpdRel e -> eval e +. self.speed
-  | SpdSeq e -> eval e +. self.prev_speed
+let eval_speed st self = function
+  | SpdAbs e -> eval st e
+  | SpdRel e -> eval st e +. self.speed
+  | SpdSeq e -> eval st e +. self.prev_speed
 
 let oneof x y z =
   match x with
@@ -241,10 +241,10 @@ let apply_hook st obj = function
 let rec next_prog st self :'a obj = match self.prog with
   | [] -> self
   | OpRepeatE (n_e, a)::k ->
-    let n = int_of_float (eval n_e) in
+    let n = int_of_float (eval st n_e) in
     next_prog st { self with prog = repeat_prog st n a k }
   | OpWaitE n_e::k ->
-    let n = int_of_float (eval n_e) in
+    let n = int_of_float (eval st n_e) in
     next_prog st { self with prog = OpWaitN n::k }
   | OpWaitN 0::k -> next_prog st { self with prog = k }
   | OpWaitN 1::k -> { self with prog = k }
@@ -254,7 +254,7 @@ let rec next_prog st self :'a obj = match self.prog with
     let dir = oneof dir_b dir_f (DirAim (Num 0.)) in
     let spd = oneof spd_b spd_f (SpdAbs (Num 1.)) in
     let d = eval_dir st self dir in
-    let s = eval_speed self spd in
+    let s = eval_speed st self spd in
     let sas: action = List.map (fun ai -> Action ai) ais in
     let ops: opcode list = seq_prog st sas [] in
     let o_base =
@@ -281,8 +281,8 @@ let rec next_prog st self :'a obj = match self.prog with
     ; prev_speed = ps
     }
   | OpSpdE (sp_e, t_e)::k ->
-    let sp = eval_speed self sp_e in
-    let t = int_of_float (eval t_e) in
+    let sp = eval_speed st self sp_e in
+    let t = int_of_float (eval st t_e) in
     let m =
       { frame_start = st.frame - 1
       ; frame_end = st.frame + t - 1
@@ -304,7 +304,7 @@ let rec next_prog st self :'a obj = match self.prog with
       { self with dir = new_dir }
   | OpDirE (d_e, t_e)::k ->
     let dir = eval_dir st self d_e in
-    let t = int_of_float (eval t_e) in
+    let t = int_of_float (eval st t_e) in
     let m =
       { frame_start = st.frame - 1
       ; frame_end = st.frame + t - 1
@@ -315,9 +315,9 @@ let rec next_prog st self :'a obj = match self.prog with
     next_prog st { self with prog = OpDirN m::k }
   | OpVanish::_ -> next_prog st { self with prog = [] ; vanished = true }
   | OpAccelE (h_e, v_e, t_e)::k ->
-    let h = eval h_e in
-    let v = eval v_e in
-    let t = eval t_e in
+    let h = eval st h_e in
+    let v = eval st v_e in
+    let t = eval st t_e in
     next_prog st { self with prog = OpAccelN (h, v, int_of_float t)::k }
   | OpAccelN (h, v, t)::k when t <= 0 ->
     next_prog st { self with prog = k }
@@ -331,7 +331,7 @@ let rec next_prog st self :'a obj = match self.prog with
     }
   | OpCall (n, params)::k ->
     let act_templ = List.assoc n st.actions in
-    let params_ev = List.map (fun e -> Num (eval e)) params in
+    let params_ev = List.map (fun e -> Num (eval st e)) params in
     let p = number_params params_ev in
     let act = subst_action p act_templ in
     next_prog st { self with prog = seq_prog st act k }
@@ -389,6 +389,7 @@ let prepare bml params s =
     ; bullets = benv
     ; fires = fenv
     ; hooks = []
+    ; rank = params.p_rank
     }
   in
   let k = build_prog global_env [] (Action (Direct act)) in

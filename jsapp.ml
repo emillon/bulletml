@@ -18,6 +18,7 @@ let params =
   ; p_screen_h = screen_h
   ; p_enemy = enemy_pos
   ; p_ship = !ship_pos
+  ; p_rank = 0.5
   }
 
 let mouse_handler c e =

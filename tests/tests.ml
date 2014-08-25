@@ -252,6 +252,7 @@ let compile b =
     ; p_enemy = (100., 300.)
     ; p_screen_w = 200
     ; p_screen_h = 200
+    ; p_rank = 0.5
     }
   in
   let (env, obj, top) = Bulletml.Interp.prepare b params () in
@@ -350,6 +351,7 @@ let tests_interp () =
     ; bullets = []
     ; fires = []
     ; hooks = []
+    ; rank = 0.5
     }
   in
   let make_tc (name, before, after) =

@@ -85,12 +85,14 @@ module Options = struct
   let parse_only = ref false
   let fname = ref None
   let limit_fps = ref None
+  let rank = ref 0.5
 end
 
 let _ =
   let args =
     [ ("-p", Arg.Set Options.parse_only, "parse and print only")
     ; ("-f", Arg.String (fun s -> Options.limit_fps := Some (float_of_string s)), "limit FPS")
+    ; ("-r", Arg.Set_float Options.rank, "rank (difficulty)")
     ]
   in
   let usage = "Use the source, Luke" in
@@ -109,6 +111,7 @@ let _ =
     ; p_ship = !ship_pos
     ; p_screen_w = screen_w
     ; p_screen_h = screen_h
+    ; p_rank = !Options.rank
     }
   in
   Sdl.init ~auto_clean:true [`VIDEO;`NOPARACHUTE];
