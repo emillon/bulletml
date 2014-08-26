@@ -62,6 +62,16 @@ type opcode =
   | OpAccelN of (float * float * int) (** Accelerate (evaluated form): [h, v, term] *)
   | OpVanish (** Let the bullet disappear *)
   | OpCall of string * expr list (** Call an indirect action with parameters *)
+  | OpEnterScope
+  | OpLeaveScope
+
+(**
+   Scopes are created and destroyed at every action.
+*)
+type scope =
+  { prev_dir : angle (** Used for interpreting [DirSeq e] *)
+  ; prev_speed : float (** Used for interpreting [SpdSeq e] *)
+  }
 
 (**
    A movable (and drawable) entity.
@@ -72,8 +82,7 @@ type 'a obj =
   ; dir : angle (** Top is 0, clockwise. Strange, I know *)
   ; children : 'a obj list (** {!obj}s created by this one *)
   ; pos : position (** Where to draw it *)
-  ; prev_dir : angle (** Used for interpreting [DirSeq e] *)
-  ; prev_speed : float (** Used for interpreting [SpdSeq e] *)
+  ; scopes : scope list (** Local "variables" *)
   ; vanished : bool (** If true, don't draw this bullet *)
   ; state : 'a (** Private state *)
   }

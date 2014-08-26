@@ -103,6 +103,8 @@ let print_opcode = function
   | OpAccelN (h, v, t) -> print_variant "OpAccelN" [string_of_float h;string_of_float v;string_of_int t]
   | OpVanish -> "OpVanish"
   | OpCall (n, es) -> print_variant "OpCall" [n;print_list print_expr es]
+  | OpEnterScope -> "OpEnterScope"
+  | OpLeaveScope -> "OpLeaveScope"
 
 let print_position (x, y) =
   Printf.sprintf "(%.2f, %.2f)" x y
