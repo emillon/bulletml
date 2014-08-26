@@ -168,9 +168,9 @@ let rec build_prog st next = function
     OpAccelE (default ho, default vo, e)::next
   | Vanish -> OpVanish :: next
   | Action (Direct a) ->
-    seq_prog st a next
+    OpEnterScope::seq_prog st a next@[OpLeaveScope]
   | Action (Indirect (n, exprs)) ->
-    OpCall (n, exprs)::next
+    OpEnterScope::OpCall (n, exprs)::next@[OpLeaveScope]
 
 and seq_prog st act next =
   List.fold_right
@@ -195,8 +195,9 @@ let initial_obj k pos s =
   ; dir = ARad 0.0
   ; children = []
   ; pos = pos
-  ; prev_dir = ARad 0.0
-  ; prev_speed = 0.0
+  ; scopes = [{ prev_dir = ARad 0.0
+              ; prev_speed = 0.0
+              }]
   ; vanished = false
   ; state = s
   }
@@ -206,7 +207,8 @@ let dir_to_ship st obj =
   ARad (atan2 vx vy)
 
 let dir_to_prev obj =
-  obj.prev_dir
+  let scope = List.hd obj.scopes in
+  scope.prev_dir
 
 let repeat_prog st n act next =
   seq_prog st (List.concat (replicate n act)) next
@@ -220,7 +222,9 @@ let eval_dir st self = function
 let eval_speed st self = function
   | SpdAbs e -> eval st e
   | SpdRel e -> eval st e +. self.speed
-  | SpdSeq e -> eval st e +. self.prev_speed
+  | SpdSeq e ->
+    let scope = List.hd self.scopes in
+    eval st e +. scope.prev_speed
 
 let oneof x y z =
   match x with
@@ -266,19 +270,22 @@ let rec next_prog st self :'a obj = match self.prog with
       }
     in
     let o = apply_hook st o_base name_o in
+    let scope = List.hd self.scopes in
     let pd = match dir with
       | DirSeq _ -> d
-      | _ -> self.prev_dir
+      | _ -> scope.prev_dir
     in
     let ps = match spd with
       | SpdSeq _ -> s
-      | _ -> self.prev_speed
+      | _ -> scope.prev_speed
     in
+    let other_scopes = List.tl self.scopes in
     { self with
       prog = k
     ; children = o::self.children
-    ; prev_dir = pd
-    ; prev_speed = ps
+    ; scopes = { prev_dir = pd
+               ; prev_speed = ps
+               }::other_scopes
     }
   | OpSpdE (sp_e, t_e)::k ->
     let sp = eval_speed st self sp_e in
@@ -335,6 +342,21 @@ let rec next_prog st self :'a obj = match self.prog with
     let p = number_params params_ev in
     let act = subst_action p act_templ in
     next_prog st { self with prog = seq_prog st act k }
+  | OpEnterScope::k ->
+    let new_scope =
+      { prev_dir = ADeg 0.0
+      ; prev_speed = 0.0
+      }
+    in
+    { self with
+      prog = k
+    ; scopes = new_scope::self.scopes
+    }
+  | OpLeaveScope::k ->
+    { self with
+      prog = k
+    ; scopes = List.tl self.scopes
+    }
 
 (**
  * Detect if a bullet should be deleted.

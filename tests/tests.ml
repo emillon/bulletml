@@ -262,9 +262,14 @@ let compile b =
 let compspecs =
   let open Bulletml.Syntax in
   let open Bulletml.Interp_types in
-  [ ("[1943]_rolling_fire.xml", [OpFire ((None, None, Indirect ("roll", [])))])
+  [ ("[1943]_rolling_fire.xml",
+     [ OpEnterScope
+     ; OpFire ((None, None, Indirect ("roll", [])))
+     ; OpLeaveScope
+     ])
   ; ("[Bulletsmorph]_aba_4.xml",
-     [ OpFire (None, Some (SpdAbs (Num 0.1)), Indirect ("cross", []))
+     [ OpEnterScope
+     ; OpFire (None, Some (SpdAbs (Num 0.1)), Indirect ("cross", []))
      ; OpWaitE (Num 5.)
      ; OpRepeatE
          ( Num 40. +@ (Num 60.) *@ Rank
@@ -278,9 +283,11 @@ let compspecs =
            ]
          )
      ; OpWaitE (Num 60.)
+     ; OpLeaveScope
      ])
   ; ("[OtakuTwo]_self-2020.xml",
-     [ OpDirE (DirAbs (Num 0.), Num 1.)
+     [ OpEnterScope
+     ; OpDirE (DirAbs (Num 0.), Num 1.)
      ; OpWaitE (Num 1.)
      ; OpSpdE (SpdAbs (Num 5.), Num 1.)
      ; OpWaitE (Num 15.)
@@ -291,8 +298,15 @@ let compspecs =
                   ; Wait (Num 30.)
                   ])
      ; OpWaitE (Num 450.)
+     ; OpLeaveScope
      ])
-  ; ("[ESP_RADE]_round_5_boss_gara_5.xml", [OpCall ("gara5", [])])
+  ; ("[ESP_RADE]_round_5_boss_gara_5.xml",
+     [ OpEnterScope
+     ; OpEnterScope
+     ; OpCall ("gara5", [])
+     ; OpLeaveScope
+     ; OpLeaveScope
+     ])
   ]
 
 let tests_compile () =
@@ -325,7 +339,10 @@ let tests_compile () =
        [OpAccelE(Num 0., Num 0., Num 1.)])
     ]
   in
-  List.map mk_test compspecs @ List.map mk_test_direct compspecs_dir
+  let enclose_scope (n, sas, ops) =
+    (n, sas, OpEnterScope :: ops @ [OpLeaveScope])
+  in
+  List.map mk_test compspecs @ List.map mk_test_direct (List.map enclose_scope compspecs_dir)
 
 let parse_all =
   for_all_examples (fun _n _b -> ())
