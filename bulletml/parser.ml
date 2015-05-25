@@ -6,6 +6,7 @@ let parse_label = function
 
 let parse_expr s :expr =
   let open MParser in
+  let open MParser_RE in
   let app op x y = Op (op, x, y) in
   let infix sym f assoc = Infix  (Tokens.skip_symbol sym >> return (app f), assoc) in
   let prefix sym f      = Prefix (Tokens.skip_symbol sym >> return f) in
