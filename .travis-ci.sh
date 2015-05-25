@@ -26,6 +26,7 @@ opam init
 eval `opam config env`
 opam install ocp-build
 opam install ${OPAM_DEPENDS}
+opam install bisect
 
 opam install ocp-indent.1.5
 ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml
