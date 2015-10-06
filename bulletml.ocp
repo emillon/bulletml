@@ -15,7 +15,7 @@ end
 begin program "bulletml_tests"
   dirname = ["tests"]
   files = ["tests.ml"]
-  requires = ["bulletml" "alcotest"]
+  requires = ["bulletml" "alcotest" "ounit"]
 end
 
 begin program "bulletml_run"
