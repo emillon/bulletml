@@ -2,6 +2,6 @@ language: c
 script: bash -ex .travis-ci.sh
 env:
   global:
-    - OPAM_DEPENDS="mparser alcotest xml-light ocamlsdl js_of_ocaml"
+    - OPAM_DEPENDS="re mparser alcotest xml-light ocamlsdl js_of_ocaml"
   matrix:
     - OCAML_VERSION=4.01.0 OPAM_VERSION=1.2.1
