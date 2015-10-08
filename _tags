@@ -1,0 +1,8 @@
+<bulletml/*>: for-pack(Bulletml)
+true: package(xml-light)
+true: package(mparser.re)
+<tests/*>: package(alcotest, oUnit)
+<run.*>: package(sdl, sdl.sdlimage, sdl.sdlttf)
+"jsapp.ml": syntax(camlp4o), package(js_of_ocaml.syntax)
+"jsapp.ml": package(lwt)
+<jsapp.*>: package(js_of_ocaml)

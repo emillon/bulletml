@@ -1,9 +1,10 @@
 *.cmo
 *.cmi
 ocp-build.*
-_obuild
+_build
 _tests
 oUnit-anon.cache
 docs/
 *.cmp
 coverage/
+tests.native
