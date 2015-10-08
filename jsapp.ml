@@ -56,6 +56,9 @@ let clear (ctx, img) =
     done
   done
 
+let in_bounds x y =
+  0 <= x && x < screen_w && 0 <= y && y < screen_h
+
 let draw_bullet ?(color=(0xfa, 0x69, 0x00)) ctx img x y =
   let data = img##.data in
   let i0 = int_of_float x in
@@ -71,7 +74,12 @@ let draw_bullet ?(color=(0xfa, 0x69, 0x00)) ctx img x y =
     ;  3,  0 ;  3,  1 ;  3,  2 ;  3, -1
     ]
   in
-  List.iter (fun (i, j) -> draw_px ~color ctx data (i0 + i) (j0 + j)) pix
+  List.iter (fun (i, j) ->
+    let x = i0 + i in
+    let y = j0 + j in
+    if in_bounds x y then
+      draw_px ~color ctx data x y
+  ) pix
 
 let draw (ctx, img) root =
   let objs =
