@@ -2,17 +2,17 @@
 let testspecs =
   let open Bulletml.Syntax in
   [ ("fragments/01.xml", `Bullet ( (*{{{*)
-       Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
-           Direct [Accel (None, Some (Num 3.), Num 120.)]
-         ]
-         ))) (*}}}*)
+        Bullet (Some (DirAim (Num 270.)), Some (SpdAbs (Num 2.)), [
+            Direct [Accel (None, Some (Num 3.), Num 120.)]
+          ]
+          ))) (*}}}*)
   ; ("fragments/02.xml", `Action (*{{{*)
        [ ChangeSpeed (SpdAbs (Num 0.), Num 60.)
        ; Wait (Num 60.)
        ; Fire (Direct (None, None, Direct bulletDefault))
        ; Fire (Direct (Some (DirAbs (
-           Num 330. +@ Rand *@ Num 25.
-         )), None, Indirect ("downAccel", [])))
+             Num 330. +@ Rand *@ Num 25.
+           )), None, Indirect ("downAccel", [])))
        ; Vanish
        ]) (*}}}*)
   ; ("fragments/03.xml", `Fire (*{{{*)
@@ -20,11 +20,11 @@ let testspecs =
     ) (*}}}*)
   ; ("fragments/04.xml", `Action (*{{{*)
        [ Repeat (Num 100., Direct [
-            Fire (Direct (Some (DirAbs (
-                Num 220. +@ Rand *@ Num 100.
-              )), None, Indirect ("backBurst", [])))
-          ; Wait (Num 6.)
-          ])
+             Fire (Direct (Some (DirAbs (
+                 Num 220. +@ Rand *@ Num 100.
+               )), None, Indirect ("backBurst", [])))
+           ; Wait (Num 6.)
+           ])
        ]) (*}}}*)
   ; ("[Dodonpachi]_hibachi.xml"), `Bulletml ( (* {{{ *)
       BulletML (None,
@@ -85,119 +85,119 @@ let testspecs =
                 ]))
   (* }}} *)
   ; ("[MDA]_circular_sun.xml", `Bulletml ( (* {{{ *)
-      BulletML (Some Vertical,
-                [ EAction ("top",
-                           [ ChangeSpeed (SpdAbs (Num 0.75), Num 1.)
-                           ; ChangeDirection (DirAbs (Num 90.), Num 1.)
-                           ; Wait (Num 1.)
-                           ; ChangeDirection (DirSeq (Num 0.7), Num 514.)
-                           ; Wait (Num 2.)
-                           ; Repeat (Num 32., (Direct
-                                                 [ Action (Indirect ("shoot", []))
-                                                 ; Wait (Num 16.)
+        BulletML (Some Vertical,
+                  [ EAction ("top",
+                             [ ChangeSpeed (SpdAbs (Num 0.75), Num 1.)
+                             ; ChangeDirection (DirAbs (Num 90.), Num 1.)
+                             ; Wait (Num 1.)
+                             ; ChangeDirection (DirSeq (Num 0.7), Num 514.)
+                             ; Wait (Num 2.)
+                             ; Repeat (Num 32., (Direct
+                                                   [ Action (Indirect ("shoot", []))
+                                                   ; Wait (Num 16.)
+                                                   ]))
+                             ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                             ; Wait (Num 120.)
+                             ])
+                  ; EAction ("shoot",
+                             [ Repeat (Num 1. +@ Num 63. *@ Rank, Direct
+                                         [ Fire (Direct
+                                                   ( Some (DirSeq (Num 360. /@ (Num 1. +@ Num 63. *@ Rank)))
+                                                   , Some (SpdAbs (Num 1.28 +@ Num 0.08 *@ Rand))
+                                                   , Indirect ("curve", [])
+                                                   ))])
+                             ])
+                  ; EBullet ("curve",
+                             Bullet (None, None, [ Direct
+                                                     [ ChangeDirection (DirSeq (Num 1.25 -@ Num 1.6 *@ Rand), Num 360.)
+                                                     ; Wait (Num 360.)
+                                                     ; Vanish
+                                                     ]
                                                  ]))
-                           ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
-                           ; Wait (Num 120.)
-                           ])
-                ; EAction ("shoot",
-                           [ Repeat (Num 1. +@ Num 63. *@ Rank, Direct
-                                       [ Fire (Direct
-                                                 ( Some (DirSeq (Num 360. /@ (Num 1. +@ Num 63. *@ Rank)))
-                                                 , Some (SpdAbs (Num 1.28 +@ Num 0.08 *@ Rand))
-                                                 , Indirect ("curve", [])
-                                                 ))])
-                           ])
-                ; EBullet ("curve",
-                           Bullet (None, None, [ Direct
-                                                   [ ChangeDirection (DirSeq (Num 1.25 -@ Num 1.6 *@ Rand), Num 360.)
-                                                   ; Wait (Num 360.)
-                                                   ; Vanish
-                                                   ]
-                                               ]))
-                ])
-    )
+                  ])
+      )
     )
   (* }}} *)
   ; ("[1943]_rolling_fire.xml", `Bulletml ( (* {{{ *)
-      BulletML (Some Vertical,
-                [ EAction ("top",
-                           [ Fire (Direct (None, None, Indirect ("roll", [])))
-                           ])
-                ; EBullet ("roll",
-                           Bullet (None , None, [ Direct
-                                                    [ Wait (Num 40. +@ Rand *@ Num 20.)
-                                                    ; ChangeDirection (DirRel
-                                                                         (~@ (Num 90.)), Num 4.)
-                                                    ; ChangeSpeed (SpdAbs (Num 3.), Num 4.)
-                                                    ; Wait (Num 4.)
-                                                    ; ChangeDirection (DirSeq (Num 15.), Num 9999.)
-                                                    ; Wait (Num 80. +@ Rand *@ Num 40.)
-                                                    ; Vanish
-                                                    ]]))
-                ]
-               )))
+        BulletML (Some Vertical,
+                  [ EAction ("top",
+                             [ Fire (Direct (None, None, Indirect ("roll", [])))
+                             ])
+                  ; EBullet ("roll",
+                             Bullet (None , None, [ Direct
+                                                      [ Wait (Num 40. +@ Rand *@ Num 20.)
+                                                      ; ChangeDirection (DirRel
+                                                                           (~@ (Num 90.)), Num 4.)
+                                                      ; ChangeSpeed (SpdAbs (Num 3.), Num 4.)
+                                                      ; Wait (Num 4.)
+                                                      ; ChangeDirection (DirSeq (Num 15.), Num 9999.)
+                                                      ; Wait (Num 80. +@ Rand *@ Num 40.)
+                                                      ; Vanish
+                                                      ]]))
+                  ]
+                 )))
   (* }}} *)
   ; ("[Dodonpachi]_kitiku_1.xml", `Bulletml ( (* {{{ *)
-      BulletML (None,
-                [ EBullet ("fast",
-                           Bullet (None, Some (SpdAbs (Num 10.)), [ Direct (
-                               [ Wait (Num 6.)
-                               ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
-                               ; Wait (Num 20.)
-                               ; Repeat ((Num 10. +@ Rank *@ Num 18.), Direct (
-                                   [ Fire (Direct (( Some (DirSeq (((~@ (Num 11.)) -@ Rand *@ Num 2.)))
-                                                   , Some (SpdAbs (Num 1.5))
-                                                   , Direct bulletDefault)))
-                                   ; Action (Indirect ("add3", []))
-                                   ; Repeat (Num 4., Direct (
-                                       [ Fire (Direct (( Some (DirSeq (Num 0.))
-                                                       , Some (SpdSeq ((Num 0.1 +@ (Rank *@ Num 0.2))))
+        BulletML (None,
+                  [ EBullet ("fast",
+                             Bullet (None, Some (SpdAbs (Num 10.)), [ Direct (
+                                 [ Wait (Num 6.)
+                                 ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                                 ; Wait (Num 20.)
+                                 ; Repeat ((Num 10. +@ Rank *@ Num 18.), Direct (
+                                       [ Fire (Direct (( Some (DirSeq (((~@ (Num 11.)) -@ Rand *@ Num 2.)))
+                                                       , Some (SpdAbs (Num 1.5))
                                                        , Direct bulletDefault)))
                                        ; Action (Indirect ("add3", []))
+                                       ; Repeat (Num 4., Direct (
+                                             [ Fire (Direct (( Some (DirSeq (Num 0.))
+                                                             , Some (SpdSeq ((Num 0.1 +@ (Rank *@ Num 0.2))))
+                                                             , Direct bulletDefault)))
+                                             ; Action (Indirect ("add3", []))
+                                             ]))
+                                       ; Wait ((Num 336. /@ (Num 10. +@ Rank *@ Num 18.)))]))
+                                 ; Vanish
+                                 ])]))
+                  ; EAction ("add3",
+                             [ Repeat (Num 3., Direct ([Fire (Direct (( Some (DirSeq (Num 90.))
+                                                                      , Some (SpdSeq (Num 0.))
+                                                                      , Direct bulletDefault)))]))
+                             ])
+                  ; EFire ("slowColorChange",
+                           ( Some (DirAbs ((Num 180. +@ Num 45. *@ Param 1)))
+                           , Some (SpdAbs (Num 7.))
+                           , Direct (Bullet (None, None, [Direct (
+                                 [ Wait (Num 6.)
+                                 ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                                 ; Repeat ((Num 50. +@ Rank *@ Num 50.), Direct (
+                                       [ Fire (Direct (( Some (DirSeq (((Num 8. -@ Rank *@ Num 4.) *@ Param 1)))
+                                                       , Some (SpdAbs (Num 1.2))
+                                                       , Direct bulletDefault)))
+                                       ; Action (Indirect ("add3", []))
+                                       ; Wait (((Num 8. -@ Rank *@ Num 4.) +@ Rand))
                                        ]))
-                                   ; Wait ((Num 336. /@ (Num 10. +@ Rank *@ Num 18.)))]))
-                               ; Vanish
-                               ])]))
-                ; EAction ("add3",
-                           [ Repeat (Num 3., Direct ([Fire (Direct (( Some (DirSeq (Num 90.))
-                                                                    , Some (SpdSeq (Num 0.))
-                                                                    , Direct bulletDefault)))]))
-                           ])
-                ; EFire ("slowColorChange",
-                         ( Some (DirAbs ((Num 180. +@ Num 45. *@ Param 1)))
-                         , Some (SpdAbs (Num 7.))
-                         , Direct (Bullet (None, None, [Direct (
-                             [ Wait (Num 6.)
-                             ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
-                             ; Repeat ((Num 50. +@ Rank *@ Num 50.), Direct (
-                                 [ Fire (Direct (( Some (DirSeq (((Num 8. -@ Rank *@ Num 4.) *@ Param 1)))
-                                                 , Some (SpdAbs (Num 1.2))
-                                                 , Direct bulletDefault)))
-                                 ; Action (Indirect ("add3", []))
-                                 ; Wait (((Num 8. -@ Rank *@ Num 4.) +@ Rand))
-                                 ]))
-                             ; Vanish
-                             ])]))))
-                ; EFire ("slow",
-                         ( None
-                         , None
-                         , Direct (Bullet (None, None, [Direct (
-                             [ Fire (Indirect ("slowColorChange", [Param 1]))
-                             ; Vanish
-                             ])]))))
-                ; EAction ("top",
-                           [ Fire (Direct ((Some (DirAbs (~@ (Num 85.))), None, Indirect ("fast", []))))
-                           ; Wait (Num 1.)
-                           ; Fire (Direct ((Some (DirAbs (Num 85.)), None, Indirect ("fast", []))))
-                           ; Wait (Num 1.)
-                           ; Fire (Indirect ("slow", [Num (1.)]))
-                           ; Wait (Num 1.)
-                           ; Fire (Indirect ("slow", [~@ (Num 1.)]))
-                           ; Wait (Num 430.)
-                           ])
-                ])
-    ))
-  (* }}} *)
+                                 ; Vanish
+                                 ])]))))
+                  ; EFire ("slow",
+                           ( None
+                           , None
+                           , Direct (Bullet (None, None, [Direct (
+                                 [ Fire (Indirect ("slowColorChange", [Param 1]))
+                                 ; Vanish
+                                 ])]))))
+                  ; EAction ("top",
+                             [ Fire (Direct ((Some (DirAbs (~@ (Num 85.))), None, Indirect ("fast", []))))
+                             ; Wait (Num 1.)
+                             ; Fire (Direct ((Some (DirAbs (Num 85.)), None, Indirect ("fast", []))))
+                             ; Wait (Num 1.)
+                             ; Fire (Indirect ("slow", [Num (1.)]))
+                             ; Wait (Num 1.)
+                             ; Fire (Indirect ("slow", [~@ (Num 1.)]))
+                             ; Wait (Num 430.)
+                             ])
+                  ])
+      ))
+    (* }}} *)
   ]
 
 let clist lx ly =
@@ -542,29 +542,29 @@ let tests_syntax () =
            )
        ))
     ; (`File "02.pat", `OK (
-        BulletML
-          ( None
-          , [ EAction
-                ( "top"
-                , [ Repeat
-                      ( Num 500.
-                      , Direct
-                          [ shoot
-                              [ Repeat
-                                  ( Num 10.
-                                  , Direct
-                                      [ Wait (Num 60.)
-                                      ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
-                                      ; Wait (Num 60.)
-                                      ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
-                                      ])]
-                          ; Wait (Num 15.)
-                          ])
-                  ]
-                )
-            ]
-          )
-      ))
+          BulletML
+            ( None
+            , [ EAction
+                  ( "top"
+                  , [ Repeat
+                        ( Num 500.
+                        , Direct
+                            [ shoot
+                                [ Repeat
+                                    ( Num 10.
+                                    , Direct
+                                        [ Wait (Num 60.)
+                                        ; ChangeSpeed (SpdAbs (Num 0.), Num 1.)
+                                        ; Wait (Num 60.)
+                                        ; ChangeSpeed (SpdAbs (Num 1.), Num 1.)
+                                        ])]
+                            ; Wait (Num 15.)
+                            ])
+                    ]
+                  )
+              ]
+            )
+        ))
     ; ( `String "action x ( wait 3; );"
       , `OK (BulletML ( None , [ EAction ("x", [Wait (Num 3.)])]))
       )

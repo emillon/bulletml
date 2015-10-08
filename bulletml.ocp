@@ -9,13 +9,13 @@ begin library "bulletml"
       "syntax.ml" "interp_types.ml" "printer.ml" "parser.ml" "interp.ml"
     ]
   ]
-  requires = ["mparser" "xml-light"]
+  requires = ["mparser.re" "xml-light"]
 end
 
 begin program "bulletml_tests"
   dirname = ["tests"]
   files = ["tests.ml"]
-  requires = ["bulletml" "alcotest"]
+  requires = ["bulletml" "alcotest" "oUnit"]
 end
 
 begin program "bulletml_run"
@@ -37,16 +37,6 @@ begin
   begin syntax "js_of_ocaml.camlp4-syntax"
     requires = [ "js_of_ocaml.camlp4-syntax.objects" "camlp4o" ]
   end
-
-  begin objects "bisect_pp.objects"
-    dirname = [ "%{bisect_SRC_DIR}%" ]
-    files = [ "bisect_pp.ml" ]
-    requires = [ "str" ]
-  end
-
-  begin syntax "bisect_pp"
-    requires = [ "bisect_pp.objects" "camlp4o" ]
-  end
 end
 
 begin program "app"
@@ -54,24 +44,4 @@ begin program "app"
   files = ["jsapp.ml"]
   syntax = "js_of_ocaml.camlp4-syntax"
   requires = ["bulletml" "js_of_ocaml" "js_of_ocaml.camlp4-syntax"]
-end
-
-begin library "bulletml_cov"
-  dirname = ["bulletml"]
-  syntax = "bisect_pp"
-  files = [
-    pack Bulletml [
-      "parsepat.mly" (syntax="camlp4o")
-      "lexpat.mll" (syntax="camlp4o")
-      "syntax.ml" "interp_types.ml" "printer.ml" "parser.ml" "interp.ml"
-    ]
-  ]
-  requires = ["mparser" "xml-light" "bisect" "bisect_pp"]
-end
-
-begin program "bulletml_tests_cov"
-  dirname = ["tests"]
-  syntax = "bisect_pp"
-  files = ["tests.ml"]
-  requires = ["bulletml_cov" "alcotest" "bisect" "bisect_pp"]
 end
