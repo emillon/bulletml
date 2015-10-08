@@ -36,7 +36,7 @@ install: lib uninstall
 
 
 uninstall:
-	ocp-build uninstall bulletml
+	ocp-build uninstall
 	ocamlfind remove bulletml
 
 
