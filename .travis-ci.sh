@@ -24,14 +24,12 @@ opam --git-version
 
 opam init
 eval `opam config env`
-opam install ocp-build
 opam install ${OPAM_DEPENDS}
 
 opam install ocp-indent.1.5
 ocp-indent -i *.ml bulletml/*.ml bulletml/*.mli tests/*.ml
 [ -z "$(git diff)" ]
 
-ocp-build -init bulletml
 make check
 make js
 make doc
