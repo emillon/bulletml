@@ -4,4 +4,4 @@ env:
   global:
     - OPAM_DEPENDS="ounit re mparser alcotest xml-light ocamlsdl js_of_ocaml ounit"
   matrix:
-    - OCAML_VERSION=4.01.0 OPAM_VERSION=1.2.1
+    - OCAML_VERSION=4.02.2 OPAM_VERSION=1.2.1

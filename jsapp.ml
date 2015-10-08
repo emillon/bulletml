@@ -23,18 +23,18 @@ let params =
 
 let mouse_handler c e =
   let get_hard z = Js.Optdef.get z (fun () -> assert false) in
-  let px = get_hard (e##pageX) in
-  let py = get_hard (e##pageY) in
-  let x = px - c##offsetLeft in
-  let y = py - c##offsetTop in
+  let px = get_hard (e##.pageX) in
+  let py = get_hard (e##.pageY) in
+  let x = px - c##.offsetLeft in
+  let y = py - c##.offsetTop in
   ship_pos := (float x, float y);
   Js._true
 
 let create_canvas () =
   let c = Dom_html.createCanvas Dom_html.document in
-  c##width <- screen_w;
-  c##height <- screen_h;
-  c##onmousemove <- Dom_html.handler (mouse_handler c);
+  c##.width := screen_w;
+  c##.height := screen_h;
+  c##.onmousemove := Dom_html.handler (mouse_handler c);
   c
 
 let draw_px ~color ctx data i j =
@@ -48,7 +48,7 @@ let draw_px ~color ctx data i j =
 
 (* A clearRect would be better but it does not work *)
 let clear (ctx, img) =
-  let data = img##data in
+  let data = img##.data in
   let color = (0xff, 0xff, 0xff) in
   for i = 0 to screen_w do
     for j = 0 to screen_h do
@@ -57,7 +57,7 @@ let clear (ctx, img) =
   done
 
 let draw_bullet ?(color=(0xfa, 0x69, 0x00)) ctx img x y =
-  let data = img##data in
+  let data = img##.data in
   let i0 = int_of_float x in
   let j0 = int_of_float y in
   let pix =
@@ -89,22 +89,22 @@ let draw_ship (ctx, img) =
   draw_bullet ~color ctx img x y
 
 let draw_msg ctx msg =
-  ctx##fillText (Js.string msg, 0., 10.)
+  ctx##fillText (Js.string msg) 0. 10.
 
 let reload elem =
-  let s = Js.to_string elem##value in
+  let s = Js.to_string elem##.value in
   bml := Bulletml.Parser.parse_pat_string s;
   stop := true
 
 let setup_textarea elem =
-  elem##onkeyup <- Dom_html.handler (fun e ->
+  elem##.onkeyup := Dom_html.handler (fun e ->
       let cb = Js.wrap_callback (fun () -> reload elem) in
-      let _ = Dom_html.window##setTimeout (cb, 10.) in
+      let _ = Dom_html.window##setTimeout cb 10. in
       Js._true
     )
 
 let iter_nl f nl =
-  let n = nl##length in
+  let n = nl##.length in
   for i = 0 to n - 1 do
     Js.Opt.iter (nl##item(i)) f
   done
@@ -112,9 +112,9 @@ let iter_nl f nl =
 let setup_demos ta =
   let demos = Dom_html.document##querySelectorAll(Js.string".demo") in
   iter_nl (fun e ->
-      e##onclick <- Dom_html.handler (fun _ ->
-          let cont = e##innerHTML in
-          ta##innerHTML <- cont;
+      e##.onclick := Dom_html.handler (fun _ ->
+          let cont = e##.innerHTML in
+          ta##.innerHTML := cont;
           reload ta;
           Js._true
         )
@@ -132,7 +132,7 @@ let _ =
   setup_textarea textarea;
   setup_demos textarea;
   let (global_env, obj0, _top) = prepare (!bml) params () in
-  canvas##onclick <- Dom_html.handler (fun e -> stop := true ; Js._true);
+  canvas##.onclick := Dom_html.handler (fun e -> stop := true ; Js._true);
   let rec go frame obj () =
     let env =
       { global_env with
@@ -141,11 +141,11 @@ let _ =
       }
     in
     let ctx = canvas##getContext (Dom_html._2d_) in
-    let img = ctx##getImageData (0., 0., float screen_w, float screen_h) in
+    let img = ctx##getImageData 0. 0. (float screen_w) (float screen_h) in
     clear (ctx, img);
     let perf = draw (ctx, img) obj in
     draw_ship (ctx, img);
-    ctx##putImageData (img, 0., 0.);
+    ctx##putImageData img 0. 0.;
     draw_msg ctx (string_of_int perf ^ " bullets");
     let k = if !stop then begin
         stop := false;
