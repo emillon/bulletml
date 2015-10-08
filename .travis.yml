@@ -1,7 +1,10 @@
 language: c
-script: bash -ex .travis-ci.sh
+sudo: required
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
+script:
+  - bash -ex .travis-opam.sh
+  - eval `opam config env`; make js
+  - eval `opam config env`; make doc
+  - eval `opam config env`; bash -ex .ci-indent.sh
 env:
-  global:
-    - OPAM_DEPENDS="ounit re mparser alcotest xml-light ocamlsdl js_of_ocaml ounit"
-  matrix:
-    - OCAML_VERSION=4.02.3 OPAM_VERSION=1.2.2
+  - OCAML_VERSION=4.02 PACKAGE=bulletml
