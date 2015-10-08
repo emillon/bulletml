@@ -75,11 +75,11 @@ let draw_bullet ?(color=(0xfa, 0x69, 0x00)) ctx img x y =
     ]
   in
   List.iter (fun (i, j) ->
-    let x = i0 + i in
-    let y = j0 + j in
-    if in_bounds x y then
-      draw_px ~color ctx data x y
-  ) pix
+      let x = i0 + i in
+      let y = j0 + j in
+      if in_bounds x y then
+        draw_px ~color ctx data x y
+    ) pix
 
 let draw (ctx, img) root =
   let objs =
