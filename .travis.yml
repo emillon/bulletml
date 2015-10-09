@@ -1,10 +1,18 @@
 language: c
-sudo: required
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
+sudo: false
+addons:
+  apt:
+    packages:
+    - ocaml-nox
+    - libpcre3-dev
+    - libsdl1.2-dev
+    - m4
+    - pkg-config
+cache:
+  directories:
+    - $HOME/opam-install
+    - $HOME/.opam
 script:
-  - bash -ex .travis-opam.sh
-  - eval `opam config env`; make js
-  - eval `opam config env`; make doc
-  - eval `opam config env`; bash -ex .ci-indent.sh
+  - bash -ex .travis-ci.sh
 env:
-  - OCAML_VERSION=4.02 PACKAGE=bulletml
+  - OCAML_VERSION=4.02 OCAML_FULL_VERSION=4.02.3 PACKAGE=bulletml
