@@ -12,6 +12,7 @@ remove: [make "uninstall"]
 depends: [
   "ocamlfind" {build}
   "ounit" {test}
+  "base64" {>= "2.0.0"} (* see ocsigen/js_of_ocaml#358 *)
   "re"
   "mparser"
   "alcotest"
