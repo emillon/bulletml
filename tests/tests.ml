@@ -507,8 +507,8 @@ let tests_unit () =
       OUnit.assert_equal (ARad 2.) (add_angle (ARad 1.) (ARad 1.));
       OUnit.assert_equal (ARad pi) (add_angle (ARad (pi/.2.)) (ADeg 90.));
       OUnit.assert_equal (ADeg 0.) (sub_angle (ADeg 45.) (ADeg 45.));
-      OUnit.assert_raises ~msg:"replicate (-1)" (Invalid_argument "replicate")
-        (fun () -> replicate (-1) true);
+      OUnit.assert_raises ~msg:"replicate_list (-1)" (Invalid_argument "replicate_list")
+        (fun () -> replicate_list (-1) [true]);
       let fn = "examples/pat/01.pat" in
       let c = open_in fn in
       let spec = "    fire ();\n    ^^^^" in

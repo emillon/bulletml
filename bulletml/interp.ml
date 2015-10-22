@@ -144,11 +144,15 @@ let interp_map st m =
   let frames_total = float (m.frame_end - m.frame_start) in
   m.val_start +. frames_done *. (m.val_end -. m.val_start) /. frames_total
 
-let rec replicate n x =
-  match n with
-  | _ when n < 0 -> invalid_arg "replicate"
-  | 0 -> []
-  | _ -> x ::  replicate (n-1) x
+let replicate_list n l =
+  print_endline (string_of_int n);
+  let rec go n acc =
+    match n with
+    | _ when n < 0 -> invalid_arg "replicate_list"
+    | 0 -> acc
+    | _ -> go (n-1) (l @ acc)
+  in
+  go n []
 
 let rec build_prog st next = function
   | Repeat (e_n, ai) ->
@@ -173,10 +177,7 @@ let rec build_prog st next = function
     OpEnterScope::OpCall (n, exprs)::next@[OpLeaveScope]
 
 and seq_prog st act next =
-  List.fold_right
-    (fun a k -> build_prog st k a)
-    act
-    next
+  List.fold_left (build_prog st) next (List.rev act)
 
 let read_prog (BulletML (hv, ts)) =
   let ae = ref [] in
@@ -211,7 +212,7 @@ let dir_to_prev obj =
   scope.prev_dir
 
 let repeat_prog st n act next =
-  seq_prog st (List.concat (replicate n act)) next
+  seq_prog st (replicate_list n act) next
 
 let eval_dir st self = function
   | DirAbs e -> ADeg (eval st e)
