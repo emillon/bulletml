@@ -20,5 +20,6 @@ depends: [
   "ocamlsdl"
   "js_of_ocaml" {>= "2.6"}
   "ounit"
+  "ppx_deriving"
 ]
 available: [ocaml-version >= "4.02.2"]
