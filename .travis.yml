@@ -1,19 +1,7 @@
 language: c
-sudo: false
-addons:
-  apt:
-    packages:
-    - ocaml-nox
-    - libpcre3-dev
-    - libsdl1.2-dev
-    - m4
-    - pkg-config
-    - libncurses5-dev
-cache:
-  directories:
-    - $HOME/opam-install
-    - $HOME/.opam
+sudo: required
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
 script:
   - bash -ex .travis-ci.sh
 env:
-  - OCAML_VERSION=4.02 OCAML_FULL_VERSION=4.02.3 PACKAGE=bulletml
+  - OCAML_VERSION=4.02 PACKAGE=bulletml
