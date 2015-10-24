@@ -33,7 +33,8 @@ uninstall:
 
 doc :  install
 	mkdir -p tmp
-	for i in $$(basename -a bulletml/*.ml); do \
+	for f in bulletml/*.ml; do \
+	i=$$(basename "$$f"); \
 	echo $$i; \
 	echo "open Bulletml" > tmp/$$i; \
 	cat bulletml/$$i >> tmp/$$i; \

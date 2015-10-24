@@ -24,6 +24,7 @@ type 'a linear_map =
   ; val_start : 'a
   ; val_end : 'a
   }
+  [@@deriving show]
 
 (**
    Well-typed angle.
@@ -64,6 +65,7 @@ type opcode =
   | OpCall of string * expr list (** Call an indirect action with parameters *)
   | OpEnterScope
   | OpLeaveScope
+  [@@deriving show]
 
 (**
    Scopes are created and destroyed at every action.

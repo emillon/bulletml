@@ -222,7 +222,7 @@ let tests () =
         OUnit.assert_equal fspec f
       | `Bulletml bspec, _ ->
         let b = Bulletml.Parser.parse_xml x in
-        OUnit.assert_equal ~printer:Bulletml.Printer.print_bulletml bspec b
+        OUnit.assert_equal ~printer:Bulletml.Syntax.show bspec b
       | _ -> assert false
     in
     (n, `Quick, run_test)
@@ -312,7 +312,7 @@ let compspecs =
 let tests_compile () =
   let open Bulletml.Syntax in
   let open Bulletml.Interp_types in
-  let printer ops = Bulletml.Printer.print_list Bulletml.Printer.print_opcode ops in
+  let printer = [%derive.show: Bulletml.Interp_types.opcode list] in
   let mk_test (n, spec) =
     let f () =
       let got =
@@ -375,7 +375,7 @@ let tests_interp () =
     let f () =
       let o = initial_obj before (0., 0.) () in
       let o2 = animate env o in
-      let printer = Bulletml.Printer.print_list Bulletml.Printer.print_opcode in
+      let printer = [%derive.show: Bulletml.Interp_types.opcode list] in
       OUnit.assert_equal ~printer after o2.prog
     in
     (name, `Quick, f)
@@ -402,7 +402,7 @@ let tests_interp () =
     let o6 = animate { env with frame = 6 } o5 in
     [o0;o1;o2;o3;o4;o5;o6]
   in
-  let printer = Bulletml.Printer.print_list string_of_float in
+  let printer = [%derive.show: float list] in
   let t1 = ("ChangeSpd", `Quick, fun () ->
       let os = get_frames [OpSpdE (SpdAbs (Num 5.), Num 5.)] in
       OUnit.assert_equal ~printer
@@ -429,8 +429,7 @@ let tests_interp () =
     ) in
   let t_accel h v exp =
     let os = get_frames [OpAccelE (Num h, Num v, Num 5.)] in
-    let print_speed_vec = Bulletml.Printer.print_position in (* works too *)
-    let printer = Bulletml.Printer.print_list print_speed_vec in
+    let printer = [%derive.show: (float * float) list] in
     let speed_vec o =
       Bulletml.Interp.from_polar (o.speed, o.dir)
     in
@@ -461,7 +460,7 @@ let tests_interp () =
         ]
     ) in
   let make_eval_tc (e, r) =
-    make_tc (Bulletml.Printer.print_expr e, [OpWaitE e], [OpWaitN (r-1)])
+    make_tc (Bulletml.Syntax.show_expr e, [OpWaitE e], [OpWaitN (r-1)])
   in
   let ev_tests =
     [ (Num 3., 3)
@@ -482,7 +481,7 @@ let tests_unit () =
         let prt (r, t) =
           Printf.sprintf "(%.2f:%.2f°)" r (in_degs t)
         in
-        let pxy = Bulletml.Printer.print_position in
+        let pxy = [%derive.show: float * float] in
         let cxy (xa, ya) (xb, yb) =
           OUnit.cmp_float xa xb && OUnit.cmp_float ya yb
         in

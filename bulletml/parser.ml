@@ -46,8 +46,11 @@ let parse_expr s :expr =
   | Failed (msg, _) ->
     failwith ("Parse error: " ^ msg)
 
+let print_list prn l =
+  "["^ String.concat "; " (List.map prn l) ^ "]"
+
 let print_attrs attrs =
-  Printer.print_list (fun (x, y) -> x^"="^y) attrs
+  print_list (fun (x, y) -> x^"="^y) attrs
 
 let fail_parse msg = function
   | Xml.Element (s, attrs, _) ->
