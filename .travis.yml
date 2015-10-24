@@ -8,6 +8,7 @@ addons:
     - libsdl1.2-dev
     - m4
     - pkg-config
+    - libncurses5-dev
 cache:
   directories:
     - $HOME/opam-install
