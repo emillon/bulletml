@@ -278,9 +278,12 @@ let parse_pat_string str =
   parse_pat_lexbuf lexbuf
 
 let extension fname =
-  let dot = String.rindex fname '.' in
-  let len = String.length fname in
-  String.sub fname (dot + 1) (len - dot - 1)
+  try
+    let dot = String.rindex fname '.' in
+    let len = String.length fname in
+    Some (String.sub fname (dot + 1) (len - dot - 1))
+  with Not_found ->
+    None
 
 let with_open_in fname f =
   let c = open_in fname in
@@ -290,6 +293,6 @@ let with_open_in fname f =
 
 let parse_auto fname =
   match extension fname with
-  | "xml"   -> parse_xml (Xml.parse_file fname)
-  | "pat" -> with_open_in fname (parse_pat ~fname)
-  | _     -> invalid_arg "unknown extension"
+  | Some "xml" -> parse_xml (Xml.parse_file fname)
+  | Some "pat" -> with_open_in fname (parse_pat ~fname)
+  | _ -> invalid_arg "unknown extension"
