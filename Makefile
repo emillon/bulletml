@@ -1,22 +1,19 @@
 .PHONY: build check js build-cov cov
 TESTEXEC=_build/tests/tests.native
 LIBDIR:=bulletml
-SRC:=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.ml)
-MLI=$(shell cd $(LIBDIR); ocamlfind ocamldep -sort -package js_of_ocaml.syntax -syntax camlp4o *.mli)
 
-# remove from SRC files that are already there as a .mli
-ML_OF_MLI=$(patsubst %.mli,%.ml,$(MLI))
-SRC:=$(filter-out $(ML_OF_MLI),$(SRC))
+BASE_OBJ=bulletml.cmi bulletml.cmxa bulletml.cma bulletml.a
+OBJ:=$(addprefix _build/,$(BASE_OBJ))
 
-OBJ=bulletml.cmi bulletml.cmxa bulletml.cma bulletml.a
-OBJ:=$(addprefix _build/,$(OBJ))
+OCAMLBUILD=ocamlbuild -use-ocamlfind -plugin-tag "package(js_of_ocaml.ocamlbuild)"
 
 _build/%:
-	ocamlbuild -use-ocamlfind -plugin-tag "package(js_of_ocaml.ocamlbuild)" $*
+	$(OCAMLBUILD) $*
 
-build: _build/bulletml.cma _build/bulletml.cmxa
+build:
+	$(OCAMLBUILD) $(BASE_OBJ)
 
-clean : 
+clean:
 	ocamlbuild -clean
 
 check: $(TESTEXEC)
@@ -24,7 +21,7 @@ check: $(TESTEXEC)
 
 js: _build/jsapp.js
 
-%.mli:bulletml/%.ml 
+%.mli:bulletml/%.ml
 	cp bulletml/$@ . 2>/dev/null ||  \
 	ocamlfind ocamlc *.mli -package bulletml,js_of_ocaml.syntax -syntax camlp4o -c -i  $< > $@ || (rm $@; exit 1)
 
@@ -36,19 +33,13 @@ uninstall:
 
 doc :  install
 	mkdir -p tmp
-	for i in $(SRC); do \
+	for i in $$(basename -a bulletml/*.ml); do \
 	echo $$i; \
 	echo "open Bulletml" > tmp/$$i; \
 	cat bulletml/$$i >> tmp/$$i; \
-	done
-	for i in $(MLI); do \
-	echo $$i; \
-	echo "open Bulletml" > tmp/$$i; \
-	cat bulletml/$$i >> tmp/$$i; \
-	cd tmp && ocamlfind ocamlc -package bulletml -c $$i && cd .. ;\
 	done
 	mkdir -p docs
-	ocamlfind ocamldoc -thread -I tmp -html -package bulletml -d docs tmp/*.mli tmp/*.ml 
+	ocamlfind ocamldoc -thread -I tmp -html -package bulletml -d docs tmp/*.ml
 	rm -rf tmp
 
 build-cov:
