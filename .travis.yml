@@ -5,3 +5,5 @@ script:
   - bash -ex .travis-ci.sh
 env:
   - OCAML_VERSION=4.02 PACKAGE=bulletml
+  - OCAML_VERSION=4.03 PACKAGE=bulletml
+  - OCAML_VERSION=latest PACKAGE=bulletml
