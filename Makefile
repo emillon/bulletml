@@ -3,7 +3,9 @@ TESTEXEC=_build/tests/tests.native
 LIBDIR:=bulletml
 
 BASE_OBJ=bulletml.cmi bulletml.cmxa bulletml.cma bulletml.a
-OBJ:=$(addprefix _build/,$(BASE_OBJ))
+OTHER_OBJ=bulletml.cmt bulletml/parser.mli bulletml/interp.mli
+ALL_OBJ=$(BASE_OBJ) $(OTHER_OBJ)
+OBJ:=$(addprefix _build/,$(ALL_OBJ))
 
 OCAMLBUILD=ocamlbuild -use-ocamlfind -plugin-tag "package(js_of_ocaml.ocamlbuild)"
 
