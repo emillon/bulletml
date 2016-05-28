@@ -10,3 +10,4 @@ true: package(mparser.re)
 "bulletml/interp_types.ml": package(ppx_deriving.std)
 "tests/tests.ml": package(ppx_deriving.std)
 true: package(ppx_deriving)
+".c9": -traverse
