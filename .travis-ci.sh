@@ -8,7 +8,10 @@ function build_js () {
 }
 
 case $ocaml_version in
-    4.02.2)
+    4.02.3)
+        build_js
+        ;;
+    4.03.0)
         build_js
         ;;
     *)
