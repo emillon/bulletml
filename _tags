@@ -1,3 +1,4 @@
+true: bin_annot
 <bulletml/*>: for-pack(Bulletml)
 true: package(xml-light)
 true: package(mparser.re)
