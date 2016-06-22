@@ -21,7 +21,8 @@ clean:
 check: $(TESTEXEC)
 	./$(TESTEXEC)
 
-js: _build/jsapp.js
+js: _build/jsapp.cmo
+	js_of_ocaml $<
 
 %.mli:bulletml/%.ml
 	cp bulletml/$@ . 2>/dev/null ||  \
