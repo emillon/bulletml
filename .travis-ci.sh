@@ -3,7 +3,7 @@ eval $(opam config env)
 ocaml_version=$(opam config var ocaml-version)
 
 function build_js () {
-    opam install js_of_ocaml
+    opam install -y js_of_ocaml
     make js
 }
 
