@@ -7,7 +7,7 @@ OTHER_OBJ=bulletml.cmt bulletml/parser.mli bulletml/interp.mli
 ALL_OBJ=$(BASE_OBJ) $(OTHER_OBJ)
 OBJ:=$(addprefix _build/,$(ALL_OBJ))
 
-OCAMLBUILD=ocamlbuild -use-ocamlfind -plugin-tag "package(js_of_ocaml.ocamlbuild)"
+OCAMLBUILD=ocamlbuild -use-ocamlfind
 
 _build/%:
 	$(OCAMLBUILD) $*
@@ -21,7 +21,8 @@ clean:
 check: $(TESTEXEC)
 	./$(TESTEXEC)
 
-js: _build/jsapp.js
+js: _build/jsapp.cmo
+	js_of_ocaml $<
 
 %.mli:bulletml/%.ml
 	cp bulletml/$@ . 2>/dev/null ||  \
