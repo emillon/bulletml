@@ -1,4 +1,4 @@
-version = "0.2.0"
+version = "0.2.0+dev"
 description = "Manipulate shmup patterns"
 archive(byte) = "bulletml.cma"
 archive(native) = "bulletml.cmxa"
