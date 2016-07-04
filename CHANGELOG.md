@@ -1,4 +1,6 @@
-## unreleased
+## v0.2.0
+
+*2016-07-04*
 
 - install .cmt and .mli files (#45)
 - remove dependency on SDL (#31)
