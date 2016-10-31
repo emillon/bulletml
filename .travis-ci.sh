@@ -14,6 +14,9 @@ case $ocaml_version in
     4.03.0)
         build_js
         ;;
+    4.04.0)
+        build_js
+        ;;
     *)
         echo "Unknown ocaml version: $ocaml_version"
         exit 1
